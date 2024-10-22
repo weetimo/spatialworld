@@ -45,6 +45,7 @@ const TabsComponent: React.FC<TabsProps> = ({ tabs }) => {
           },
           '& .Mui-selected': {
             backgroundColor: '#e0e0e0',
+            color: 'black'
           }
         }}
       >
@@ -53,7 +54,7 @@ const TabsComponent: React.FC<TabsProps> = ({ tabs }) => {
         ))}
       </Tabs>
 
-      <Box sx={{ padding: '16px', border: '1px solid #ddd', flexGrow: 1, overflowY: 'auto' }}>
+      <Box sx={{ padding: '1rem', flexGrow: 1, overflowY: 'auto' }}>
         {tabs[selectedTab].content}
       </Box>
     </Box>

@@ -23,7 +23,7 @@ const CarouseLComponent: React.FC<{ images?: string[] }> = ({ images }) => {
           },
         }}
         indicatorContainerProps={{
-          style: { margin: '1.8rem 0', textAlign: 'center' },
+          style: { margin: '1rem 0', textAlign: 'center' },
         }}
         indicatorIconButtonProps={{
           style: { margin: '0 0.2rem', color: 'gray' },

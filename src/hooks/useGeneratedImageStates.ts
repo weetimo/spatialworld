@@ -3,17 +3,17 @@ import { useState } from 'react'
 const useGeneratedImageStates = (initialImages: string[]) => {
   const [images, setImages] = useState<string[]>(initialImages)
 
-  const addImage = (newImage: string) => {
+  const addImage = (newImage: string): void => {
     setImages((prevImages) => [...prevImages, newImage])
   }
 
-  const editImage = (index: number, updatedImage: string) => {
+  const editImage = (index: number, updatedImage: string): void => {
     setImages((prevImages) =>
       prevImages.map((img, i) => (i === index ? updatedImage : img))
     )
   }
 
-  const removeImage = (index: number) => {
+  const removeImage = (index: number): void => {
     setImages((prevImages) => prevImages.filter((_, i) => i !== index))
   }
 
