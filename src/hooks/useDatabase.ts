@@ -1,7 +1,7 @@
 import { ref, set, get, update, remove } from 'firebase/database'
 import { database } from '../config/firebase'
 
-export const useDatabase = () => {
+const useDatabase = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const createData = async (path: string, data: any) => {
     try {
@@ -48,3 +48,5 @@ export const useDatabase = () => {
 
   return { createData, readData, updateData, deleteData }
 }
+
+export default useDatabase
