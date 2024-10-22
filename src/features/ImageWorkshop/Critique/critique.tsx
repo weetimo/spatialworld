@@ -3,7 +3,7 @@ import { Box, Typography } from '@mui/material'
 
 const Critique: React.FC<{ critique?: string }> = ({ critique }) => {
   const renderCritique = (critiqueText?: string) => {
-    if (!critiqueText) return null
+    if (!critiqueText) return 'No critique available, please click on the "Tools" tab to start editing.'
 
     return critiqueText.split('||').map((section, index) => {
       const [boldText, regularText] = section.split(':')

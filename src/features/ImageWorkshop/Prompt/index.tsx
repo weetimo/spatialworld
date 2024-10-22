@@ -5,11 +5,10 @@ import EditHistory from '../EditHistory'
 
 export interface History {
   history: { image: string; prompt: string}
-  disabled?: boolean
 }
 
-const Prompt: React.FC<History> = ({ history, disabled }) => {
-  const [prompt, setPrompt] = useState(history.prompt)
+const Prompt: React.FC<History> = ({ history }) => {
+  const [prompt, setPrompt] = useState('')
 
   const handleCopyPrompt = (): void => {
     navigator.clipboard.writeText(prompt)
@@ -48,7 +47,6 @@ const Prompt: React.FC<History> = ({ history, disabled }) => {
             placeholder="Input here"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            disabled={disabled}
             style={{
               width: '100%',
               border: 'none',
@@ -70,7 +68,7 @@ const Prompt: React.FC<History> = ({ history, disabled }) => {
             alignItems: 'center',
             mt: '8px',
             padding: '0 8px',
-            display: disabled ? 'none' : 'flex'
+            display: 'flex'
           }}
         >
           <Box sx={{ display: 'flex', gap: '8px' }}>

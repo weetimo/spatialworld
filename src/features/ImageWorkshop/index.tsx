@@ -29,7 +29,7 @@ const ImageWorkshop: React.FC = () => {
   }
 
   const tabs = [
-    { label: 'Input', content: <Prompt history={sampleHistory2} disabled={sampleHistory2?.prompt?.trim() !== ''} /> },
+    { label: 'Input', content: <Prompt history={sampleHistory} /> },
     { label: 'Tools', content: <Tools /> }
   ]
 
