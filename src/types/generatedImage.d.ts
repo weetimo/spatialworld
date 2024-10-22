@@ -4,4 +4,5 @@ export interface GeneratedImage {
   engagementId: string
   imageUrl: string
   votes: number
+  voters: string[] // userIds
 }

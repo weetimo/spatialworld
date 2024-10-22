@@ -1,5 +1,5 @@
 import React from 'react'
-import { ImageWorkshop } from './features'
+import { ImageFeed, ImageWorkshop } from './features'
 
 function App() {
   return (
