@@ -27,7 +27,7 @@ const TabsComponent: React.FC<TabsProps> = ({ tabs }) => {
       <Box
         sx={{
           position: 'sticky',
-          backgroundColor: '#f2e5d9',
+          backgroundColor: '#EDEDED',
           maxWidth: '350px',
           borderRadius: '0.5rem',
           display: 'flex',
@@ -62,8 +62,8 @@ const TabsComponent: React.FC<TabsProps> = ({ tabs }) => {
               '&:focus-visible': { outline: 'none' }
             },
             '& .Mui-selected': {
-              backgroundColor: '#d97b4f',
-              color: 'white !important'
+              backgroundColor: '#F1C385',
+              color: 'black !important'
             },
             '& .MuiTab-textColorPrimary': {
               color: 'black'

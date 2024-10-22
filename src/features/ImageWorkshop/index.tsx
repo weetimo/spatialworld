@@ -6,6 +6,7 @@ import Header from './Header'
 import ImageCarousel from './ImageCarousel'
 import Prompt from './Prompt'
 import Critique from './Critique/dialog'
+import Tools from './Tools'
 
 const ImageWorkshop: React.FC = () => {
    // TEMPORARY TEST DATA
@@ -29,7 +30,7 @@ const ImageWorkshop: React.FC = () => {
 
   const tabs = [
     { label: 'Input', content: <Prompt history={sampleHistory2} disabled={sampleHistory2?.prompt?.trim() !== ''} /> },
-    { label: 'Tools', content: <div>Tools Content</div> }
+    { label: 'Tools', content: <Tools /> }
   ]
 
   return (
