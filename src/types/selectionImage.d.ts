@@ -1,7 +1,6 @@
-export interface GeneratedImage {
+export interface SelectionImage {
   id: string
   description: string
   engagementId: string
   imageUrl: string
-  votes: number
 }
