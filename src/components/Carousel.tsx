@@ -19,11 +19,11 @@ const CarouseLComponent: React.FC<{ images?: string[] }> = ({ images }) => {
         NextIcon={<ArrowForwardIos sx={{ fontSize: '20px' }}  />}
         navButtonsWrapperProps={{
           style: {
-            transform: 'translateY(40%)'
+            transform: 'translateY(43.5%)'
           },
         }}
         indicatorContainerProps={{
-          style: { margin: '1rem 0', textAlign: 'center' },
+          style: { margin: '0.6rem 0', textAlign: 'center' },
         }}
         indicatorIconButtonProps={{
           style: { margin: '0 0.2rem', color: 'gray' },

@@ -74,15 +74,33 @@ const Prompt: React.FC<History> = ({ history, disabled }) => {
           }}
         >
           <Box sx={{ display: 'flex', gap: '8px' }}>
-            <IconButton onClick={handleCopyPrompt}>
+            <IconButton 
+              onClick={handleCopyPrompt}
+              sx={{
+                '&:focus': { outline: 'none' },
+                '&:focus-visible': { outline: 'none' }
+              }}
+            >
               <ContentCopyIcon />
             </IconButton>
-            <IconButton onClick={handleResetPrompt}>
+            <IconButton 
+              onClick={handleResetPrompt}
+              sx={{
+                '&:focus': { outline: 'none' },
+                '&:focus-visible': { outline: 'none' }
+              }}
+            >
               <ResetIcon />
             </IconButton>
           </Box>
 
-          <IconButton onClick={handleProcessPrompt}>
+          <IconButton 
+            onClick={handleProcessPrompt}
+            sx={{
+              '&:focus': { outline: 'none' },
+              '&:focus-visible': { outline: 'none' }
+            }}
+          >
             <SendIcon />
           </IconButton>
         </Box>
