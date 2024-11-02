@@ -1,69 +1,60 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Box, Tab, Tabs } from '@mui/material'
 
 interface TabsProps {
   tabs: { label: string; content: React.ReactNode }[]
+  selectedTab: number
+  onTabChange: (index: number) => void
 }
 
-const TabsComponent: React.FC<TabsProps> = ({ tabs }) => {
-  const [selectedTab, setSelectedTab] = useState(0)
-
+const TabsComponent: React.FC<TabsProps> = ({ tabs, selectedTab, onTabChange }) => {
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setSelectedTab(newValue)
+    onTabChange(newValue)
   }
 
   return (
     <Box
       sx={{
-        margin: '-1.6rem auto',
-        padding: '1rem',
         display: 'flex',
         flexDirection: 'column',
         flexGrow: 1,
-        height: '45vh',
-        overflow: 'hidden',
+        overflow: 'hidden'
       }}
     >
       <Box
         sx={{
           position: 'sticky',
-          backgroundColor: '#EDEDED',
-          maxWidth: '350px',
-          borderRadius: '0.5rem',
+          backgroundColor: '#F6FAFF', 
+          borderRadius: '25px',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          width: '100%',
-          margin: '0 auto'
+          width: '100%'
         }}
       >
         <Tabs
           value={selectedTab}
           onChange={handleTabChange}
           TabIndicatorProps={{
-            style: { display: 'none' },
+            style: { display: 'none' }
           }}
           sx={{
             width: '100%',
             display: 'flex',
             justifyContent: 'space-between',
             '& .MuiTab-root': {
-              borderRadius: '0.5rem',
+              borderRadius: '25px',
               textTransform: 'none',
               color: 'black',
-              margin: '0.5rem',
               flexGrow: 1,
               flexBasis: 0,
               minWidth: 'auto',
-              minHeight: '32px',
-              padding: '6px 16px',
-              fontWeight: 'bold',
               '&:focus': { outline: 'none' },
               '&:focus-visible': { outline: 'none' }
             },
             '& .Mui-selected': {
-              backgroundColor: '#F1C385',
-              color: 'black !important'
+              backgroundColor: '#007bff',
+              color: 'white !important'
             },
             '& .MuiTab-textColorPrimary': {
               color: 'black'
@@ -81,11 +72,8 @@ const TabsComponent: React.FC<TabsProps> = ({ tabs }) => {
 
       <Box
         sx={{
-          padding: '1rem',
-          flexGrow: 1,
           overflowY: 'auto',
-          maxHeight: 'calc(100vh - 140px)',
-          mt: '1rem'
+          maxHeight: 'calc(100vh - 140px)'
         }}
       >
         {tabs[selectedTab].content}

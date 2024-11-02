@@ -27,7 +27,7 @@ app.add_middleware(
 # intialize image segmentation
 # image_segmentation_service = ImageSegmentationService()
 
-client = OpenAI(api_key='sk-cAqEOuDHGqqrN0KGfFV1Z5kkHIMjYo-fR_C6sWdmOHT3BlbkFJwQ3T4FnvfIK0gAdOIVLt48gEyXajBzvd5TubTMoN4A')
+client = OpenAI(api_key='OPENAI_API_KEY')
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -37,9 +37,7 @@ async def validate_and_prepare_image(image: UploadFile, target_size: tuple = Non
         logger.info(f"Validating image: {image.filename}")
         contents = await image.read()
         image.file.seek(0)
-
         img = Image.open(io.BytesIO(contents))
-        
         if img.format != 'PNG':
             buffer = io.BytesIO()
             img.save(buffer, format="PNG")
@@ -77,14 +75,13 @@ async def edit_image(
             prepared_mask = None
 
         response = client.images.edit(
+            model="dall-e-2",  # Using DALL-E-2 model
             image=prepared_image,
             mask=prepared_mask,
             prompt=prompt,
             n=1,
-            size=size,
-            response_format="url"
+            size=size
         )
-
         return JSONResponse({"success": True, "url": response.data[0].url})
 
     except Exception as e:
