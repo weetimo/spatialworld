@@ -5,19 +5,20 @@ import os
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=OPENAI_API_KEY) 
+# client = OpenAI(api_key=OPENAI_API_KEY) 
+client = OpenAI(api_key='sk-cAqEOuDHGqqrN0KGfFV1Z5kkHIMjYo-fR_C6sWdmOHT3BlbkFJwQ3T4FnvfIK0gAdOIVLt48gEyXajBzvd5TubTMoN4A')
 
 llm_prompt = """
-You are an expert at creating detailed, descriptive prompts for Midjourney image generation. 
-Given a user's input, convert it into a highly detailed prompt that Midjourney can use to generate a vivid and accurate image. 
-Follow these guidelines:
-1. Begin with a clear, concise description of the main subject.
-2. Add details about the setting, lighting, mood, and atmosphere.
-3. Specify any particular style, artist influence, or art movement if relevant.
-4. Include technical details like camera angle, depth of field, or specific photography/art techniques.
-5. Use strong, descriptive adjectives and avoid vague terms.
-6. Keep the prompt under 60 words for optimal results.
+You are an expert in crafting detailed prompts for Midjourney's inpainting feature. 
+Transform the user's brief input into a comprehensive prompt by:
+1. Clearly defining the main subject.
+2. Describing the setting, environment, and background elements.
+3. Specifying desired art styles or artist influences.
+4. Including technical details like lighting, mood, and camera angles.
+5. Using vivid and precise language.
+Ensure the prompt is concise yet descriptive and not more than 40 words.
 """
+
 
 def CaptionUpscale(prompt: str):
     print('Received caption!')
