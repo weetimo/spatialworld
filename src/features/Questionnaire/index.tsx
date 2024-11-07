@@ -125,9 +125,9 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({
               layout="vertical"
               align="right"
               verticalAlign="middle"
-              iconSize={15}
+              iconSize={20}
               wrapperStyle={{
-                fontSize: '16px'
+                fontSize: '20px'
               }}
               formatter={(value, entry) => (
                 <span style={{ 
@@ -135,7 +135,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({
                   alignItems: 'center',
                   whiteSpace: 'nowrap',
                   color: '#000000',
-                  fontSize: '16px'
+                  fontSize: '20px'
                 }}>
                   {value} {entry.payload?.value.toFixed(2)}%
                 </span>
