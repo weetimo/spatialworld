@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { garden0, garden1, garden2, garden3 } from '../../assets/sample-photos'
 import { Tabs} from '../../components'
-import { useGeneratedImageStates } from '../../hooks'
+import { useImageOperations } from '../../hooks'
 import Header from './Header'
 import ImageCarousel from './ImageCarousel'
 import Prompt from './Prompt'
@@ -16,7 +16,7 @@ const ImageWorkshop: React.FC = () => {
   const critique = 'Perspective of Elderly: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. || Perspective of Disabled: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. || Perspective of Children: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. || Perspective of Elderly: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
   const critique1 = ''
 
-  const { images } = useGeneratedImageStates(sampleImages)
+  const { images } = useImageOperations(sampleImages)
 
   const [openCritiqueModal, setOpenCritiqueModal] = useState(false)
   
