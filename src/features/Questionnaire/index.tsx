@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, IconButton } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
 
 interface AgeDataPoint {
@@ -54,6 +54,19 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({
 
   return (
     <Box sx={{ padding: '1rem', bgcolor: '#fff' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        <IconButton>
+          <img 
+            src="https://www.sla.gov.sg/qql/slot/u143/Newsroom/Press%20Releases/2019/Grange%20Road/URA%20logo.png"
+            alt="URA Logo"
+            style={{ height: '80px' }}
+          />
+        </IconButton>
+        <Typography variant="h5" sx={{ ml: 2 }}>
+          Public Engagement Dashboard
+        </Typography>
+      </Box>
+
       <Typography variant="h4" sx={{ mb: 3 }}>
         Demographics
       </Typography>
@@ -118,7 +131,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({
                     {value}
                   </Typography>
                   <Typography component="span" sx={{ color: '#666666' }}>
-                    {entry.payload.value.toFixed(2)}%
+                    {entry.payload?.value.toFixed(2)}%
                   </Typography>
                 </Box>
               )}
