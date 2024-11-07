@@ -1,53 +1,71 @@
-import React from 'react'
-import { Box, Typography } from '@mui/material'
-import { History } from '../Prompt'
+import React from 'react';
+import { Box, Typography } from '@mui/material';
+import { History } from '../Prompt';
 
-const EditHistory: React.FC<History> = ({ history }) => {
-  const doesHistoryExist = history.prompt.trim() !== ''
+interface EditHistoryProps {
+  history: History;
+}
+
+const EditHistory: React.FC<EditHistoryProps> = ({ history }) => {
+  const doesHistoryExist = history.prompt.trim() !== '';
 
   return (
     <Box
       sx={{
-        marginTop: '16px',
-        border: '1px solid #858585',
-        borderRadius: '12px',
-        padding: '8px',
+        marginTop: '20px',
+        borderRadius: '20px',
+        padding: '16px',
+        backgroundColor: '#F6FAFF',
       }}
     >
-      <Typography variant="body1" sx={{ mb: 1 }}>
+      <Typography variant="body1" sx={{fontWeight: 'bold' }}>
         Edit History
       </Typography>
 
-      <Typography variant="body1" sx={{ mb: 1, display: doesHistoryExist ? 'none' : 'block', color: '#a7a7a7' }}>
-        No existing history, please click on the &quot;Tools&quot; tab to start editing.
-      </Typography>
-
-      <Box
-        sx={{
-          alignItems: 'center',
-          marginBottom: '12px',
-          padding: '8px',
-          borderRadius: '8px',
-          display: doesHistoryExist ? 'flex' : 'none' 
-        }}
-      >
-        <Box
-          component="img"
-          src={history.image}
-          alt={'Edit History'}
+      {!doesHistoryExist && (
+        <Typography
+          variant="body1"
           sx={{
-            width: '30%',
-            height: 'auto',
-            borderRadius: '8px',
-            marginRight: '16px',
+            mb: 1,
+            color: '#a7a7a7',
           }}
-        />
-        <Typography variant="body1" sx={{ flexGrow: 1 }}>
-          <span style={{ fontWeight: 'bold' }}>Prompt:</span> {history.prompt}
+        >
+          No existing history.
         </Typography>
-      </Box>
-    </Box>
-  )
-}
+      )}
 
-export default EditHistory
+      {doesHistoryExist && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px', // Spacing between image and text
+            marginTop: '12px',
+            backgroundColor: 'white',
+            padding: '12px',
+            borderRadius: '8px',
+            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', // Optional: subtle shadow
+          }}
+        >
+          <Box
+            component="img"
+            src={history.image}
+            alt="Edit History"
+            sx={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '8px',
+              objectFit: 'cover', 
+            }}
+          />
+
+          <Typography variant="body1" sx={{ flexGrow: 1 }}>
+            <span style={{ fontWeight: 'bold' }}>Prompt:</span> {history.prompt}
+          </Typography>
+        </Box>
+      )}
+    </Box>
+  );
+};
+
+export default EditHistory;

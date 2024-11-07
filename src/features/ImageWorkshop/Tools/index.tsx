@@ -9,9 +9,13 @@ import {
   FormatPaint as FormatPaintIcon,
 } from '@mui/icons-material'
 
-const ToolsContent: React.FC = () => {
+interface ToolsContentProps {
+  brushSize: number
+  setBrushSize: React.Dispatch<React.SetStateAction<number>>
+}
+
+const ToolsContent: React.FC<ToolsContentProps> = ({ brushSize, setBrushSize }) => {
   const [activeTool, setActiveTool] = useState<string>('brush')
-  const [brushSize, setBrushSize] = useState(50)
   const [eraserSize, setEraserSize] = useState(50)
 
   const handleUndo = (): void => {
@@ -36,8 +40,8 @@ const ToolsContent: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '2rem',
-        mt: '-0.5rem'
+        gap: '20px',
+        padding: '20px',
       }}
     >
       <Box
@@ -45,69 +49,72 @@ const ToolsContent: React.FC = () => {
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
           gap: '1.2rem',
-          width: '100%'
+          width: '100%',
         }}
       >
         <IconButton
           onClick={handleUndo}
           sx={{
             borderRadius: '0.4rem',
-            backgroundColor: activeTool === 'undo' ? '#F1C385' : '#EDEDED',
+            backgroundColor: activeTool === 'undo' ?  '#007bff' : '#EDEDED',
+            color: activeTool === 'undo' ? '#fff' : 'inherit', 
             width: '4rem',
             height: '3.5rem',
             '&:focus': { outline: 'none' },
-            '&:focus-visible': { outline: 'none' },
             '&:hover': {
-              backgroundColor: activeTool === 'undo' ? '#F1C385' : '#D3D3D3',
-            }
+              backgroundColor: activeTool === 'undo' ?  '#007bff' : '#D3D3D3',
+            },
           }}
         >
           <UndoIcon />
         </IconButton>
+
         <IconButton
           onClick={handleRedo}
           sx={{
             borderRadius: '0.4rem',
-            backgroundColor: activeTool === 'redo' ? '#F1C385' : '#EDEDED',
+            backgroundColor: activeTool === 'redo' ?  '#007bff' : '#EDEDED',
+            color: activeTool === 'redo' ? '#fff' : 'inherit', 
             width: '4rem',
             height: '3.5rem',
             '&:focus': { outline: 'none' },
-            '&:focus-visible': { outline: 'none' },
             '&:hover': {
-              backgroundColor: activeTool === 'redo' ? '#F1C385' : '#D3D3D3',
-            }
+              backgroundColor: activeTool === 'redo' ?  '#007bff' : '#D3D3D3',
+            },
           }}
         >
           <RedoIcon />
         </IconButton>
+
         <IconButton
           onClick={handleRestart}
           sx={{
             borderRadius: '8px',
-            backgroundColor: activeTool === 'restart' ? '#F1C385' : '#EDEDED',
+            backgroundColor: activeTool === 'restart' ?  '#007bff' : '#EDEDED',
+            color: activeTool === 'restart' ? '#fff' : 'inherit', 
             width: '4rem',
             height: '3.5rem',
             '&:focus': { outline: 'none' },
-            '&:focus-visible': { outline: 'none' },
             '&:hover': {
-              backgroundColor: activeTool === 'restart' ? '#F1C385' : '#D3D3D3',
-            }
+              backgroundColor: activeTool === 'restart' ?  '#007bff' : '#D3D3D3',
+            },
           }}
         >
           <LoopIcon />
         </IconButton>
+
         <IconButton
           onClick={handleZoomIn}
           sx={{
             borderRadius: '8px',
-            backgroundColor: activeTool === 'zoomin' ? '#F1C385' : '#EDEDED',
+            backgroundColor: activeTool === 'zoomin' ?  '#007bff' : '#EDEDED',
+            color: activeTool === 'zoomin' ? '#fff' : 'inherit', 
             width: '4rem',
             height: '3.5rem',
             '&:focus': { outline: 'none' },
-            '&:focus-visible': { outline: 'none' },
             '&:hover': {
-              backgroundColor: activeTool === 'zoomin' ? '#F1C385' : '#D3D3D3',
-            }
+              backgroundColor: activeTool === 'zoomin' ?  '#007bff' : '#D3D3D3',
+            },
           }}
         >
           <ZoomInIcon />
@@ -119,35 +126,36 @@ const ToolsContent: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          width: '100%'
+          width: '100%',
         }}
       >
         <IconButton
           onClick={() => setActiveTool('brush')}
           sx={{
-            backgroundColor: activeTool === 'brush' ? '#F1C385' : '#EDEDED',
+            backgroundColor: activeTool === 'brush' ? '#007bff' : '#EDEDED',
+            color: activeTool === 'brush' ? '#fff' : 'inherit', // White icon when active
             borderRadius: '8px',
             width: '4rem',
             height: '3.5rem',
             '&:focus': { outline: 'none' },
-            '&:focus-visible': { outline: 'none' },
             '&:hover': {
-              backgroundColor: activeTool === 'brush' ? '#F1C385' : '#D3D3D3',
-            }
+              backgroundColor: activeTool === 'brush' ? '#007bff' : '#D3D3D3',
+            },
           }}
         >
           <BrushIcon />
         </IconButton>
+
         <Slider
           value={brushSize}
           onChange={(_, value) => {
-            setBrushSize(value as number);
+            setBrushSize(value as number)
             setActiveTool('brush')
           }}
           aria-label="Brush Size"
           sx={{
             flexGrow: 1,
-            color: activeTool === 'brush' ? '#F1C385' : '#EDEDED'
+            color: activeTool === 'brush' ? '#007bff' : '#EDEDED',
           }}
         />
       </Box>
@@ -158,34 +166,35 @@ const ToolsContent: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          width: '100%'
+          width: '100%',
         }}
       >
         <IconButton
           sx={{
-            backgroundColor: activeTool === 'eraser' ? '#F1C385' : '#EDEDED',
+            backgroundColor: activeTool === 'eraser' ? '#007bff' : '#EDEDED',
+            color: activeTool === 'eraser' ? '#fff' : 'inherit', // White icon when active
             borderRadius: '8px',
             width: '4rem',
             height: '3.5rem',
             '&:focus': { outline: 'none' },
-            '&:focus-visible': { outline: 'none' },
             '&:hover': {
-              backgroundColor: activeTool === 'eraser' ? '#F1C385' : '#D3D3D3',
-            }
+              backgroundColor: activeTool === 'eraser' ? '#007bff' : '#D3D3D3',
+            },
           }}
         >
           <FormatPaintIcon />
         </IconButton>
+
         <Slider
           value={eraserSize}
           onChange={(_, value) => {
-            setEraserSize(value as number);
+            setEraserSize(value as number)
             setActiveTool('eraser')
           }}
           aria-label="Eraser Size"
           sx={{
             flexGrow: 1,
-            color: activeTool === 'eraser' ? '#F1C385' : '#EDEDED'
+            color: activeTool === 'eraser' ? '#007bff' : '#EDEDED',
           }}
         />
       </Box>
