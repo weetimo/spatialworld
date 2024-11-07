@@ -1,3 +1,3 @@
-export { EngagementType } from './engagementType'
-export { Hobby } from './hobby'
+export { Gender } from './gender'
+export { QuestionnaireType } from './questionnaireType'
 export { UserRole } from './userRole'

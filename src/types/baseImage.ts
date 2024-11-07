@@ -1,6 +1,6 @@
-export interface SelectionImage {
+export interface BaseImage {
   id: string
-  description: string
+  context: string
   engagementId: string
   imageUrl: string
 }

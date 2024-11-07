@@ -11,11 +11,11 @@ module.exports = [
     languageOptions: {
       parser: typescriptParser,
       ecmaVersion: 2020,
-      sourceType: 'module',
+      sourceType: 'module'
     },
     plugins: {
       '@typescript-eslint': typescriptEslintPlugin,
-      prettier: prettierPlugin,
+      prettier: prettierPlugin
     },
     rules: {
       '@typescript-eslint/camelcase': ['off', { properties: 'never' }],
@@ -24,7 +24,7 @@ module.exports = [
       '@typescript-eslint/no-var-requires': ['off'],
       '@typescript-eslint/no-explicit-any': ['off'],
       camelcase: 'off',
-      'comma-dangle': 2,
+      'comma-dangle': ['error', 'never'],
       'no-extra-semi': 2,
       'no-irregular-whitespace': 2,
       'no-lonely-if': 2,
@@ -40,7 +40,8 @@ module.exports = [
       'prettier/prettier': [
         'error',
         {
-          endOfLine: 'auto'
+          endOfLine: 'auto',
+          semi: false
         }
       ]
     }

@@ -1,9 +1,7 @@
-export { EngagementType } from '../enums'
-
 export interface Engagement {
   id: string
-  fusedImageUrl: string
-  type: EngagementType
+  communityImageUrl: string
+  title: string
   userIds: string[]
   date: string
 }

@@ -1,8 +1,10 @@
 export interface GeneratedImage {
   id: string
-  description: string
+  originalPrompt: string
   engagementId: string
   imageUrl: string
-  votes: number
   voters: string[] // userIds
+  upscaledPrompt: string
+  userId: string
+  createdAt: string
 }
