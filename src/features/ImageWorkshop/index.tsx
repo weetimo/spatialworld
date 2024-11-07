@@ -5,7 +5,7 @@ import { garden0, garden1, garden2, garden3 } from '../../assets/sample-photos';
 import Header from './Header';
 import ImageCarousel from './InpaintingCarousel';
 import { Tabs } from '../../components';
-import Prompt from './Prompt';
+import Prompt from './PromptInput';
 import Tools from './Tools';
 import Critique from './Critique/dialog';
 import { Box, Button, Dialog, DialogContent, Typography } from '@mui/material';
@@ -132,8 +132,8 @@ const ImageWorkshop: React.FC = () => {
   // ========================
 
   // Handle sending the prompt to generate an image
-  const handleSend = async () => {
-    console.log('handleSend invoked'); // Debugging
+  const handleProcessPrompt = async () => {
+    console.log('handleProcessPrompt invoked'); // Debugging
     setLoading(true); // Start loading
     if (maskedImageData && promptText) {
       try {
@@ -216,11 +216,11 @@ const ImageWorkshop: React.FC = () => {
       label: 'Input',
       content: (
         <Prompt
-          history={{ image: garden0, prompt: '' }}
+          previousPrompt={'This is a test previous prompt.'}
           promptText={promptText}
           setPromptText={setPromptText}
           isImageEdited={isImageEdited}
-          handleSend={handleSend}
+          handleProcessPrompt={handleProcessPrompt}
           loading={loading} // Pass loading prop
         />
       )
