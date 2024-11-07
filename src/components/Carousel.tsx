@@ -1,18 +1,11 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { Box } from '@mui/material'
 import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material'
 import Carousel from 'react-material-ui-carousel'
 
-const CarouseLComponent: React.FC<{ images?: string[] }> = ({ images }) => {
+const CarouselComponent: React.FC<{ images?: string[] }> = ({ images }) => {
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        maxWidth: '100%',
-        height: 'auto',
-        padding: '1rem'
-      }}
-    >
+    <Box sx={styles.container}>
       <Carousel
         navButtonsAlwaysVisible
         PrevIcon={<ArrowBackIos sx={{ fontSize: '20px' }}  />}
@@ -40,12 +33,7 @@ const CarouseLComponent: React.FC<{ images?: string[] }> = ({ images }) => {
             component="img"
             src={image}
             alt={`Slide ${index + 1}`}
-            sx={{
-              width: '100%',
-              height: 'auto',
-              objectFit: 'cover',
-              borderRadius: '10px',
-            }}
+            sx={styles.image}
           />
         ))}
       </Carousel>
@@ -53,4 +41,33 @@ const CarouseLComponent: React.FC<{ images?: string[] }> = ({ images }) => {
   )
 }
 
-export default CarouseLComponent
+const styles = {
+  container: {
+    position: 'relative',
+    maxWidth: '100%',
+    height: 'auto',
+    padding: '1rem',
+  },
+  navButtons: {
+    transform: 'translateY(43.5%)',
+  },
+  indicatorContainer: {
+    margin: '0.6rem 0',
+    textAlign: 'center',
+  },
+  indicatorIcon: {
+    margin: '0 0.2rem',
+    color: 'gray',
+  },
+  activeIndicator: {
+    color: 'black',
+  },
+  image: {
+    width: '100%',
+    height: 'auto',
+    objectFit: 'cover',
+    borderRadius: '10px',
+  }
+}
+
+export default memo(CarouselComponent)

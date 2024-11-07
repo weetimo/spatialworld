@@ -1,2 +1,2 @@
 export { default as useDatabase } from './useDatabase'
-export { default as useGeneratedImageStates } from './useGeneratedImageStates'
+export { default as useImageOperations } from './useImageOperations'
