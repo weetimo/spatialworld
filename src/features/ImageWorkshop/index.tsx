@@ -44,7 +44,7 @@ const ImageWorkshop: React.FC = () => {
   const [loading, setLoading] = useState(false); // Loading state
   const [editMode, setEditMode] = useState<boolean>(false);
 
-  const [openCritiqueModal, setOpenCritiqueModal] = useState(false);
+  const [openCritiqueModal, setOpenCritiqueModal] = useState(true);
   const [isGeneratedModalOpen, setIsGeneratedModalOpen] = useState<boolean>(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [criticText, setCriticText] = useState<string>(
@@ -358,15 +358,16 @@ const ImageWorkshop: React.FC = () => {
         </Dialog>
       </Box>
 
-      {/* Critique Modal (Commented Out) */}
-      {/* <Critique
+      {/* Cleaned Code */}
+      <Critique
         open={openCritiqueModal}
         onClose={handleCloseCritiqueModal}
-        critique='Sample critique text'
-      /> */}
+        generatedImageUrl={garden0} // SAMPLE DATA
+        critique={[ { character: 'Elderly', feedback: 'FEEDBACK'}, { character: 'Children', feedback: 'FEEDBACK' } ]} // SAMPLE DATA
+      />
     </Box>
-  );
-};
+  )
+}
 
 
 export default ImageWorkshop;

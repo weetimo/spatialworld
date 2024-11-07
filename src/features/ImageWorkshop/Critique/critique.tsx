@@ -1,37 +1,48 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { Box, Typography } from '@mui/material'
+import { CritiqueProp } from './dialog'
 
-const Critique: React.FC<{ critique?: string }> = ({ critique }) => {
-  const renderCritique = (critiqueText?: string) => {
-    if (!critiqueText) return 'No critique available, please click on the "Tools" tab to start editing.'
+const NO_CRITIQUE_MESSAGE = 'No critique available, please click on the "Tools" tab to start editing.'
 
-    return critiqueText.split('||').map((section, index) => {
-      const [boldText, regularText] = section.split(':')
-      
+const Critique: React.FC<{ critique: CritiqueProp[] }> = memo(({ critique }) => {
+  const renderCritique = (critiqueArr: CritiqueProp[]) => {
+    if (critiqueArr?.length === 0) return NO_CRITIQUE_MESSAGE
+
+    return critiqueArr.map((item, index) => {      
       return (
-        <Box key={index} sx={{ mb: '2rem' }}>
-          <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-            {boldText.trim()}
+        <Box key={index} sx={styles.section}>
+          <Typography variant="body1" sx={styles.boldText}>
+            {item.character}
           </Typography>
-          <Typography variant="body2">{regularText?.trim()}</Typography>
+          <Typography variant="body2">
+            {item.feedback}
+          </Typography>
         </Box>
       )
     })
   }
 
   return (
-    <Box
-      sx={{
-        padding: '0.2rem',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        height: '100%'
-      }}
-    >
+    <Box sx={styles.container}>
       {renderCritique(critique)}
     </Box>
   )
+})
+
+const styles = {
+  container: {
+    padding: '0.6rem',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    height: '100%'
+  },
+  section: {
+    marginBottom: '2rem'
+  },
+  boldText: {
+    fontWeight: 'bold'
+  }
 }
 
 export default Critique
