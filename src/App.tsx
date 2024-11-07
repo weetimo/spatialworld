@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { ImageFeed, ImageWorkshop } from './features'
+
+import { ImageFeed, ImageWorkshop, Admin, Questionnaire } from './features'
+
 
 function App() {
   return (
@@ -7,6 +9,8 @@ function App() {
       <Routes>
         <Route path="/" element={<ImageWorkshop />} />
         <Route path="/feed" element={<ImageFeed />} />
+        <Route path="/admin" element={<Admin />} /> 
+        <Route path="/questionnaire" element={<Questionnaire />} />
       </Routes>
     </Router>
   )
