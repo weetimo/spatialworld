@@ -6,7 +6,7 @@ import Header from './Header';
 import ImageCarousel from './InpaintingCarousel';
 import { Tabs } from '../../components';
 import Prompt from './PromptInput';
-import Tools from './Tools';
+import InpaintingTools from './InpaintingTools';
 import Critique from './Critique/dialog';
 import { Box, Button, Dialog, DialogContent, Typography } from '@mui/material';
 
@@ -44,7 +44,7 @@ const ImageWorkshop: React.FC = () => {
   const [loading, setLoading] = useState(false); // Loading state
   const [editMode, setEditMode] = useState<boolean>(false);
 
-  const [openCritiqueModal, setOpenCritiqueModal] = useState(true);
+  const [openCritiqueModal, setOpenCritiqueModal] = useState(false);
   const [isGeneratedModalOpen, setIsGeneratedModalOpen] = useState<boolean>(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [criticText, setCriticText] = useState<string>(
@@ -227,7 +227,7 @@ const ImageWorkshop: React.FC = () => {
     },
     {
       label: 'Tools',
-      content: <Tools brushSize={brushSize} setBrushSize={setBrushSize} />
+      content: <InpaintingTools brushSize={brushSize} setBrushSize={setBrushSize} />
     }
   ];
 
