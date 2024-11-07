@@ -125,15 +125,20 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({
               layout="vertical"
               align="right"
               verticalAlign="middle"
+              iconSize={15}
+              wrapperStyle={{
+                fontSize: '16px'
+              }}
               formatter={(value, entry) => (
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1 }}>
-                  <Typography component="span" sx={{ color: '#000000' }}>
-                    {value}
-                  </Typography>
-                  <Typography component="span" sx={{ color: '#666666' }}>
-                    {entry.payload?.value.toFixed(2)}%
-                  </Typography>
-                </Box>
+                <span style={{ 
+                  display: 'inline-flex', 
+                  alignItems: 'center',
+                  whiteSpace: 'nowrap',
+                  color: '#000000',
+                  fontSize: '16px'
+                }}>
+                  {value} {entry.payload?.value.toFixed(2)}%
+                </span>
               )}
             />
             <Tooltip contentStyle={{ color: '#000000' }} />
