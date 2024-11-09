@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { garden0, garden1, garden2, garden3 } from '../../assets/sample-photos';
-import Header from './Header';
+import InfoCritiqueButton from './Critique/infoButton';
 import ImageCarousel from './InpaintingCarousel';
 import { Tabs } from '../../components';
 import Prompt from './PromptInput';
@@ -207,6 +207,14 @@ const ImageWorkshop: React.FC = () => {
   // Handle closing the critique modal
   const handleCloseCritiqueModal = () => setOpenCritiqueModal(false);
 
+  const handleRedoInpainting = () => {
+    // Add your redo inpainting logic here
+  }
+
+  const handleUndoInpainting = () => {
+    // Add your undo inpainting logic here
+  }
+
   // ========================
   // Tabs Configuration
   // ========================
@@ -227,7 +235,7 @@ const ImageWorkshop: React.FC = () => {
     },
     {
       label: 'Tools',
-      content: <InpaintingTools brushSize={brushSize} setBrushSize={setBrushSize} />
+      content: <InpaintingTools brushSize={brushSize} setBrushSize={setBrushSize} handleRedo={handleRedoInpainting} handleUndo={handleUndoInpainting} />
     }
   ];
 
@@ -252,13 +260,18 @@ const ImageWorkshop: React.FC = () => {
           width: '100%'
         }}
       >
-        {/* Header Component (Commented Out) */}
-        {/* 
-        <Header
+        {/* Cleaned Code */}
+        <InfoCritiqueButton
           onInfoClick={handleOpenCritiqueModal}
-          critique='Sample critique text'
+          critique={[ { character: 'Elderly', feedback: 'FEEDBACK'}, { character: 'Children', feedback: 'FEEDBACK' } ]} // SAMPLE DATA
         /> 
-        */}
+
+        <Critique
+          open={openCritiqueModal}
+          onClose={handleCloseCritiqueModal}
+          generatedImageUrl={garden0} // SAMPLE DATA
+          critique={[ { character: 'Elderly', feedback: 'FEEDBACK'}, { character: 'Children', feedback: 'FEEDBACK' } ]} // SAMPLE DATA
+        />
 
         {/* Image Carousel */}
         <ImageCarousel
@@ -357,14 +370,6 @@ const ImageWorkshop: React.FC = () => {
           </DialogContent>
         </Dialog>
       </Box>
-
-      {/* Cleaned Code */}
-      <Critique
-        open={openCritiqueModal}
-        onClose={handleCloseCritiqueModal}
-        generatedImageUrl={garden0} // SAMPLE DATA
-        critique={[ { character: 'Elderly', feedback: 'FEEDBACK'}, { character: 'Children', feedback: 'FEEDBACK' } ]} // SAMPLE DATA
-      />
     </Box>
   )
 }

@@ -1,11 +1,11 @@
 import React, { memo } from 'react'
 import { Box, Typography } from '@mui/material'
-import { CritiqueProp } from './dialog'
+import { CritiqueProps } from './dialog'
 
 const NO_CRITIQUE_MESSAGE = 'No critique available, please click on the "Tools" tab to start editing.'
 
-const Critique: React.FC<{ critique: CritiqueProp[] }> = memo(({ critique }) => {
-  const renderCritique = (critiqueArr: CritiqueProp[]) => {
+const Critique: React.FC<{ critique: CritiqueProps[] }> = memo(({ critique }) => {
+  const renderCritique = (critiqueArr: CritiqueProps[]) => {
     if (critiqueArr?.length === 0) return NO_CRITIQUE_MESSAGE
 
     return critiqueArr.map((item, index) => {      

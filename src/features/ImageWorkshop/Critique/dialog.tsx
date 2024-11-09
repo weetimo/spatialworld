@@ -5,11 +5,11 @@ import Critique from './critique'
 interface CritiqueDialogProps {
   open: boolean
   onClose: () => void
-  critique: CritiqueProp[]
+  critique: CritiqueProps[]
   generatedImageUrl: string
 }
 
-export interface CritiqueProp {
+export interface CritiqueProps {
   character?: string
   feedback?: string
 }

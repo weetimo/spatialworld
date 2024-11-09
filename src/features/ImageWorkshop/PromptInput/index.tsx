@@ -5,7 +5,7 @@ import PreviousGeneration from '../PreviousGeneration'
 import starIcon from '../../../assets/icons/ai.png'
 import activeStarIcon from '../../../assets/icons/ai-white.png'
 
-interface PromptProps {
+interface PromptInputProps {
   promptText: string
   setPromptText: React.Dispatch<React.SetStateAction<string>>
   handleProcessPrompt: () => void
@@ -15,7 +15,7 @@ interface PromptProps {
   isImageEdited: boolean
 }
 
-const PromptInput: React.FC<PromptProps> = ({
+const PromptInput: React.FC<PromptInputProps> = ({
   promptText,
   setPromptText,
   handleProcessPrompt,

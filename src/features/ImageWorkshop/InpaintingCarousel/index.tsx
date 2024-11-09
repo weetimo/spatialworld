@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect, memo, forwardRef, useImperativeHandle } from 'react'; 
-import { Box, IconButton, Tooltip, Divider, Dialog, DialogContent, Slide } from '@mui/material'; 
-import { ArrowForward as ArrowForward, ArrowBack as ArrowBack, Edit, CopyAllRounded, Download, Close, Undo as UndoIcon } from '@mui/icons-material'; 
-import { TransitionProps } from '@mui/material/transitions'; 
-import { keyframes } from '@mui/system';
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react'  
+import { Box, IconButton, Tooltip, Divider, Dialog, DialogContent, Slide } from '@mui/material'  
+import { ArrowForward as ArrowForward, ArrowBack as ArrowBack, Edit, Download, Close } from '@mui/icons-material'  
+import { TransitionProps } from '@mui/material/transitions'  
+import { keyframes } from '@mui/system' 
 
 // ========================
 // Type Definitions
@@ -48,13 +48,13 @@ const Transition = React.forwardRef(function Transition(
 
 const pulse = keyframes`
   0% {
-    filter: blur(0px);
+    filter: blur(0px) 
   }
   50% {
-    filter: blur(5px);
+    filter: blur(5px) 
   }
   100% {
-    filter: blur(0px);
+    filter: blur(0px) 
   }
 `
 
@@ -489,21 +489,10 @@ const ImageCarousel = forwardRef<ImageCarouselRef, ImageCarouselProps>(
                 orientation='vertical'
                 sx={{ bgcolor: 'rgba(255, 255, 255, 0.5)', height: '24px' }}
               />
-              <Tooltip title='Copy'>
-                <IconButton
-                  sx={{ color: '#fff', height: '30px', width: '30px' }}
-                  onClick={saveEditedImage}
-                >
-                  <CopyAllRounded />
-                </IconButton>
-              </Tooltip>
-              <Divider
-                orientation='vertical'
-                sx={{ bgcolor: 'rgba(255, 255, 255, 0.5)', height: '24px' }}
-              />
               <Tooltip title='Download'>
                 <IconButton
                   sx={{ color: '#fff', height: '30px', width: '30px' }}
+                  onClick={saveEditedImage}
                 >
                   <Download />
                 </IconButton>
