@@ -1,3 +1,5 @@
+export { default as FeedDetail } from './ImageFeed/detail'
+export { default as ImageFeed } from './ImageFeed/feed'
 export { default as ImageWorkshop } from './ImageWorkshop'
 export { default as StartImageWorkshop } from './StartImageWorkshop'
 export { default as UserParticulars } from './UserParticulars'

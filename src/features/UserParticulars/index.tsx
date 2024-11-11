@@ -12,6 +12,7 @@ const UserParticulars: React.FC = () => {
   const navigate = useNavigate()
 
   const [user, setUser] = useState({
+    name: '',
     email: '',
     gender: '',
     ageGroup: '',
@@ -35,6 +36,14 @@ const UserParticulars: React.FC = () => {
         Your personal information helps us better serve you!
       </Typography>
 
+      <TextField
+        label="Name"
+        variant="outlined"
+        fullWidth
+        value={user.name}
+        onChange={handleChange('name')}
+        sx={styles.input}
+      />
       <TextField
         label="Email Address"
         variant="outlined"

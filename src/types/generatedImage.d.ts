@@ -1,3 +1,5 @@
+import { User } from './user'
+
 export interface GeneratedImage {
   id: string
   critique: string
@@ -5,7 +7,9 @@ export interface GeneratedImage {
   imageUrl: string
   originalPrompt: string
   voters: string[] // userIds
+  viewers: string[] // userIds
   upscaledPrompt: string
   userId: string
+  user: User
   createdAt: string
 }

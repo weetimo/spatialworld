@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Box, IconButton, TextareaAutosize, Button, Snackbar, Alert } from '@mui/material'
 import { ContentCopy as ContentCopyIcon, Loop as ResetIcon } from '@mui/icons-material'
 import PreviousGeneration from '../PreviousGeneration'
@@ -24,15 +25,24 @@ const PromptInput: React.FC<PromptInputProps> = ({
   handleGoToPreviousGeneration,
   isImageEdited
 }) => {
+  const navigate = useNavigate()
+
   const [copySuccessSnackbarOpen, setCopySuccessSnackbarOpen] = useState(false)
+
+  const isActive: boolean = isImageEdited && promptText.length > 0 && !loading
 
   const handleCopyPrompt = (): void => {
     navigator.clipboard.writeText(promptText)
     setCopySuccessSnackbarOpen(true)
   }
+
   const handleCloseSnackbar = (): void => setCopySuccessSnackbarOpen(false)
+
   const handleResetPrompt = (): void => setPromptText('')
-  const isActive: boolean = isImageEdited && promptText.length > 0 && !loading
+  
+  const handleEndJourney = (): void => {
+    navigate('/feed')
+  }
 
   return (
     <Box sx={styles.container}>
@@ -83,7 +93,7 @@ const PromptInput: React.FC<PromptInputProps> = ({
       {previousPrompt && <PreviousGeneration previousPrompt={previousPrompt} handleGoToPreviousGeneration={handleGoToPreviousGeneration} />}
 
       {/* Finish Button */}
-      <Button variant="contained" fullWidth sx={styles.finishButton}>
+      <Button variant="contained" fullWidth sx={styles.finishButton} onClick={handleEndJourney}>
         End Journey
       </Button>
 

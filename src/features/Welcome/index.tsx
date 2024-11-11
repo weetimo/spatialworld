@@ -22,10 +22,11 @@ const steps = [
 ]
 
 const Welcome: React.FC = () => {
-  const [currentStep, setCurrentStep] = useState(0)
   const navigate = useNavigate()
+  
+  const [currentStep, setCurrentStep] = useState(0)
 
-  const handleNext = () => {
+  const handleNext = (): void => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
     } else {
