@@ -5,7 +5,8 @@ import os
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=OPENAI_API_KEY) 
+# client = OpenAI(api_key=OPENAI_API_KEY) 
+client = OpenAI(api_key='sk-cAqEOuDHGqqrN0KGfFV1Z5kkHIMjYo-fR_C6sWdmOHT3BlbkFJwQ3T4FnvfIK0gAdOIVLt48gEyXajBzvd5TubTMoN4A')
 
 llm_prompt = """
 You are an expert in crafting detailed prompts for DALL-E's inpainting feature.

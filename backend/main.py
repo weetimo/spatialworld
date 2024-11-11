@@ -27,7 +27,7 @@ app.add_middleware(
 # intialize image segmentation
 # image_segmentation_service = ImageSegmentationService()
 
-client = OpenAI(api_key='OPENAI_API_KEY')
+client = OpenAI(api_key='sk-cAqEOuDHGqqrN0KGfFV1Z5kkHIMjYo-fR_C6sWdmOHT3BlbkFJwQ3T4FnvfIK0gAdOIVLt48gEyXajBzvd5TubTMoN4A')
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
