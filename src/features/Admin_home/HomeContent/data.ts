@@ -21,3 +21,15 @@ export const regionData = [
     { age: '45-64', male: 18, female: 25 },
     { age: '65+', male: 22, female: 28 }
   ]
+
+  export const wordCloudData = [
+    { text: 'Sustainability', value: 60 },
+    { text: 'Infrastructure', value: 55 },
+    { text: 'Housing', value: 50 },
+    { text: 'Development', value: 50 },
+    { text: 'Space', value: 45 },
+    { text: 'Pedestrian', value: 45 },
+    { text: 'Green', value: 40 },
+    { text: 'Accessibility', value: 40 },
+    { text: 'Public', value: 35 }
+  ]

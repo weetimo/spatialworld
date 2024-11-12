@@ -33,7 +33,12 @@ import {
 } from 'recharts'
 import ReactWordcloud from 'react-d3-cloud'
 
-import { regionData, demographicsData, participantsData } from './data'
+import {
+  regionData,
+  demographicsData,
+  participantsData,
+  wordCloudData
+} from './data'
 import { exportToCSV } from './utils'
 import baseImage from './images/base_inpaint.jpg'
 import heatmapImage from './images/heatmap_inpaint.jpg'
@@ -41,17 +46,6 @@ import communityImage from './images/community_image.jpg'
 // import wordCloudImage from './images/word_cloud.jpg'
 
 const HomeContent = () => {
-  const wordCloudData = [
-    { text: 'Sustainability', value: 60 },
-    { text: 'Infrastructure', value: 55 },
-    { text: 'Housing', value: 50 },
-    { text: 'Development', value: 50 },
-    { text: 'Space', value: 45 },
-    { text: 'Pedestrian', value: 45 },
-    { text: 'Green', value: 40 },
-    { text: 'Accessibility', value: 40 },
-    { text: 'Public', value: 35 }
-  ]
   const [openWordCloudSettings, setOpenWordCloudSettings] = useState(false)
   const [wordCloudGender, setWordCloudGender] = useState('male')
   const [wordCloudAge, setWordCloudAge] = useState([20, 35])
