@@ -24,7 +24,7 @@ const UserParticulars: React.FC = () => {
   }
 
   const handleNext = (): void => {
-    navigate('/start-workshop')
+    navigate('/user-preferences')
   }
 
   return (

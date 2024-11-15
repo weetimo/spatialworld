@@ -1,7 +1,8 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, Button, Typography } from '@mui/material'
-import { robot } from '../../assets/graphics'
+import { Avatar, Chip, Box, Button, Typography } from '@mui/material'
+import { Character } from '../../types'
+import { alex, eleanor, ethan, kumar, maya } from '../../assets/avatars'
 
 const StartWorkshop: React.FC = () => {
   const navigate = useNavigate()
@@ -10,33 +11,88 @@ const StartWorkshop: React.FC = () => {
     navigate('/image-workshop')
   }
 
+  const characters: Character[] = [
+    {
+      id: 1,
+      name: 'Mrs. Eleanor Tan',
+      age: 72,
+      description: 'Retired school teacher who enjoys gardening and community activities',
+      tags: ['Accessibility', 'Proximity to Healthcare', 'Social Spaces', 'Safety'],
+      avatar: eleanor,
+    },
+    {
+      id: 2,
+      name: 'Kumar and Priya',
+      age: 35,
+      description: 'Parents of two young children, working in tech and education',
+      tags: ['Play Areas', 'Educational Facilities', 'Family-Friendly Amenities', 'Safety'],
+      avatar: kumar,
+    },
+    {
+      id: 3,
+      name: 'Alex Wong',
+      age: 28,
+      description: 'Graphic designer who uses a wheelchair',
+      tags: ['Accessibility', 'Supportive Infrastructure', 'Inclusive Design', 'Community Support'],
+      avatar: alex,
+    },
+    {
+      id: 4,
+      name: 'Maya Chen',
+      age: 30,
+      description: 'Environmental scientist passionate about sustainability and green living',
+      tags: ['Green Spaces', 'Public Transportation', 'Sustainability', 'Education & Awareness'],
+      avatar: maya,
+    },
+    {
+      id: 5,
+      name: 'Ethan Lim',
+      age: 22,
+      description: 'Final-year computer science student balancing studies and part-time work',
+      tags: ['Modern Amenities', 'Social Spaces', 'Sporting Facilities', 'Work-Study Balance'],
+      avatar: ethan,
+    }
+  ]  
+
   return (
     <Box sx={styles.container}>
-      {/* Image */}
-      <Box
-        component="img"
-        src={robot}
-        alt="Creative Robot"
-        sx={styles.image}
-      />
+      {/* Header Section */}
+      <Box sx={styles.header}>
+        <Typography variant="h4" sx={styles.headerTitle}>
+          Meet the Characters!
+        </Typography>
+        <Typography variant="body1" sx={styles.headerSubtitle}>
+          Discover these unique characters, each bringing diverse experiences and insights into your creations.
+        </Typography>
+      </Box>
 
-      {/* Title */}
-      <Typography variant="h4" sx={styles.title}>
-        Time to create your image
-      </Typography>
+      {/* Character List */}
+      {characters.map((character) => (
+        <Box key={character.id} sx={styles.characterContainer}>
+          {/* Avatar */}
+          <Avatar src={character.avatar} alt={character.name} sx={styles.avatar} />
 
-      {/* Subtitle */}
-      <Typography variant="body1" sx={styles.subtitle}>
-        We’ve gathered your input. Now let’s bring your vision to life.
-      </Typography>
+          {/* Text Content */}
+          <Box sx={styles.textContent}>
+            <Typography variant="h6" sx={styles.characterName}>
+              {character.name}
+            </Typography>
+            <Typography variant="body2" sx={styles.description}>
+              {character.description}
+            </Typography>
 
-      {/* Button */}
-      <Button
-        variant="contained"
-        onClick={handleStartWorkshop}
-        sx={styles.startButton}
-        fullWidth
-      >
+            {/* Tags */}
+            <Box sx={styles.tagsContainer}>
+              {character.tags.map((tag, index) => (
+                <Chip key={index} label={tag} sx={styles.tag} />
+              ))}
+            </Box>
+          </Box>
+        </Box>
+      ))}
+
+      {/* Start Workshop Button */}
+      <Button variant="contained" onClick={handleStartWorkshop} sx={styles.button}>
         Start Image Workshop
       </Button>
     </Box>
@@ -45,43 +101,74 @@ const StartWorkshop: React.FC = () => {
 
 const styles = {
   container: {
+    padding: '1.5rem',
+    maxWidth: '600px',
+    margin: 'auto',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: '2rem 1.5rem',
-    maxWidth: '400px',
-    margin: '0 auto',
-    minHeight: '100vh',
-    boxSizing: 'border-box',
-    textAlign: 'center'
   },
-  image: {
-    width: '70%',
-    maxWidth: '250px',
+  header: {
+    textAlign: 'center',
     marginBottom: '2rem',
   },
-  title: {
+  headerTitle: {
     fontWeight: 'bold',
-    fontSize: '1.5rem',
-    marginBottom: '0.5rem',
-    color: '#333',
+    fontSize: '1.75rem',
   },
-  subtitle: {
+  headerSubtitle: {
     color: '#666',
     fontSize: '1rem',
-    lineHeight: '1.6',
-    marginBottom: '3rem',
-    marginTop: '1rem'
+    marginTop: '0.5rem',
   },
-  startButton: {
+  characterContainer: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    marginBottom: '1.5rem',
+    padding: '1rem',
+    borderRadius: '12px',
+    width: '100%',
+  },
+  avatar: {
+    width: '120px',
+    height: '120px',
+    marginRight: '1rem',
+    borderRadius: '8px',
+  },
+  textContent: {
+    flex: 1,
+  },
+  characterName: {
+    fontWeight: 'bold',
+    fontSize: '1.2rem',
+    color: '#333',
+    marginBottom: '0.5rem',
+  },
+  description: {
+    color: '#666',
+    fontSize: '0.95rem',
+    lineHeight: '1.5',
+    marginBottom: '0.75rem',
+  },
+  tagsContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '0.5rem',
+  },
+  tag: {
+    backgroundColor: '#e0f0ff',
+    color: '#000',
+    fontSize: '0.8rem',
+  },
+  button: {
     backgroundColor: '#007bff',
     color: '#fff',
     textTransform: 'none',
-    padding: '0.8rem 1.5rem',
-    borderRadius: '0.6rem',
+    padding: '0.75rem 1.5rem',
+    borderRadius: '20px',
     fontSize: '1rem',
     fontWeight: 'bold',
+    marginTop: '2rem',
     '&:hover': {
       backgroundColor: '#005bb5',
     },

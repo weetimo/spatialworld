@@ -1,5 +1,4 @@
 export enum QuestionnaireType {
-  MULTI_CHOICE = 'MULTI_CHOICE',
   MULTI_ANSWERS = 'MULTI_ANSWERS',
   FREE_RESPONSE = 'FREE_RESPONSE'
 }

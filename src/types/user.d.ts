@@ -1,4 +1,4 @@
-import { AgeGroup, Gender, UserRole } from '../enums'
+import { Gender, UserRole } from '../enums'
 
 export interface User {
   id: string
