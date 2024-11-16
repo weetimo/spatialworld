@@ -4,6 +4,7 @@ import { Home, MessageSquare, ImagePlus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import HomeContent from './HomeContent'
 import QnaContent from './QnaContent'
+import ImageContent from './ImageContent'
 
 const Admin_home = () => {
   const [activeTab, setActiveTab] = useState('home')
@@ -156,7 +157,7 @@ const Admin_home = () => {
           >
             {activeTab === 'home' && <HomeContent />}
             {activeTab === 'qa' && <QnaContent />}
-            {activeTab === 'ai' && <div>AI Image Generations Content</div>}
+            {activeTab === 'ai' && <ImageContent />}
           </Box>
         </Box>
       </Box>
