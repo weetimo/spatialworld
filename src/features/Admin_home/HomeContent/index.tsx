@@ -276,89 +276,106 @@ const HomeContent = () => {
 
   return (
     <Box>
-      {/* Demographics Section */}
-      <Typography
-        variant='h6'
-        sx={{ mb: 2, fontWeight: 500, fontSize: '1.1rem', color: '#6B7280' }}
-      >
-        Demographics
-      </Typography>
-      <Typography
-        variant='h6'
-        sx={{ mb: 2, fontWeight: 700, fontSize: '1.4rem' }}
-      >
-        Age & Gender
-      </Typography>
-      <Box
-        sx={{
-          height: '400px',
-          backgroundColor: 'white',
-          p: 2,
-          borderRadius: '8px'
-          // boxShadow: '0 2px 3px rgba(0,0,0,0.1)'
-        }}
-      >
-        <ResponsiveContainer width='100%' height='100%'>
-          <BarChart
-            layout='vertical'
-            data={demographicsData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+      {/* Participants Section */}
+      {/* Participants Section */}
+      <Box sx={{ mt: 6 }}>
+        <Typography
+          variant='h6'
+          sx={{
+            mb: 2,
+            fontWeight: 500,
+            fontSize: '1.1rem',
+            color: '#6B7280'
+          }}
+        >
+          Participants
+        </Typography>
+        <Typography
+          variant='h6'
+          sx={{ mb: 2, fontWeight: 700, fontSize: '1.4rem' }}
+        >
+          Participants List
+        </Typography>
+        <Box
+          sx={{
+            backgroundColor: 'white',
+            p: 2,
+            borderRadius: '8px',
+            height: '400px'
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              mb: 3
+            }}
           >
-            <XAxis type='number' />
-            <YAxis dataKey='age' type='category' />
-            <Tooltip
-              cursor={false}
-              content={({ payload }) => {
-                if (!payload || !payload.length) return null
-
-                const colors = {
-                  Male: '#ef4444',
-                  Female: '#f97316'
-                }
-
-                return (
-                  <div
-                    style={{
-                      backgroundColor: 'white',
-                      padding: '8px',
-                      border: '1px solid #ccc',
-                      borderRadius: '4px'
-                    }}
-                  >
-                    {payload.map((item) => (
-                      <div
-                        key={item.name}
-                        style={{
-                          color: colors[item.name as keyof typeof colors]
+            <Button
+              onClick={() => exportToCSV(participantsData)}
+              startIcon={<Download size={18} />}
+              variant='outlined'
+              sx={{ borderRadius: '8px' }}
+            >
+              Export to CSV
+            </Button>
+          </Box>
+          <TableContainer
+            component={Paper}
+            sx={{
+              boxShadow: '0 2px 3px rgba(0,0,0,0.1)',
+              borderRadius: '8px',
+              height: 'calc(100% - 60px)',
+              overflow: 'auto'
+            }}
+          >
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Gender</TableCell>
+                  <TableCell>Age Group</TableCell>
+                  <TableCell>Postal Code</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {participantsData.map((participant) => (
+                  <TableRow key={participant.id}>
+                    <TableCell>{participant.name}</TableCell>
+                    <TableCell>{participant.email}</TableCell>
+                    <TableCell>
+                      <Box
+                        sx={{
+                          display: 'inline-block',
+                          px: 2,
+                          py: 0.5,
+                          borderRadius: '16px',
+                          backgroundColor:
+                            participant.gender === 'Male'
+                              ? '#e0f2fe'
+                              : '#fce7f3',
+                          color:
+                            participant.gender === 'Male'
+                              ? '#0369a1'
+                              : '#be185d'
                         }}
                       >
-                        {item.name}: {item.value}
-                      </div>
-                    ))}
-                  </div>
-                )
-              }}
-            />
-            <Legend />
-            <Bar
-              dataKey='male'
-              name='Male'
-              fill='#ef4444'
-              stackId='stack'
-              barSize={30}
-            />
-            <Bar
-              dataKey='female'
-              name='Female'
-              fill='#f97316'
-              stackId='stack'
-              barSize={30}
-            />
-          </BarChart>
-        </ResponsiveContainer>
+                        {participant.gender}
+                      </Box>
+                    </TableCell>
+                    <TableCell>{participant.ageGroup}</TableCell>
+                    <TableCell>{participant.postalCode}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
       </Box>
 
       {/* Location and Participants side by side */}
+      {/* Demographics Section moved to side layout */}
       <Box sx={{ display: 'flex', gap: 4, mt: 6 }}>
         {/* Location Section */}
         <Box sx={{ flex: 1 }}>
@@ -436,9 +453,8 @@ const HomeContent = () => {
           </Box>
         </Box>
 
-        {/* Participants List Section */}
+        {/* Demographics Section (moved to side) */}
         <Box sx={{ flex: 1 }}>
-          {/* Headers first */}
           <Typography
             variant='h6'
             sx={{
@@ -448,59 +464,85 @@ const HomeContent = () => {
               color: '#6B7280'
             }}
           >
-            Participants
+            Demographics
           </Typography>
           <Typography
             variant='h6'
             sx={{ mb: 2, fontWeight: 700, fontSize: '1.4rem' }}
           >
-            Participants List
+            Age & Gender
           </Typography>
           <Box
             sx={{
-              display: 'flex',
-              justifyContent: 'flex-end', // Changed to align button to right
-              mb: 3
-            }}
-          >
-            <Button
-              onClick={() => exportToCSV(participantsData)}
-              startIcon={<Download size={18} />}
-              variant='outlined'
-              sx={{ borderRadius: '8px' }}
-            >
-              Export to CSV
-            </Button>
-          </Box>
-
-          <TableContainer
-            component={Paper}
-            sx={{
-              boxShadow: '0 2px 3px rgba(0,0,0,0.1)',
+              height: '300px',
+              backgroundColor: 'white',
+              p: 2,
               borderRadius: '8px',
-              height: '300px', // Match height with pie chart
-              overflow: 'auto'
+              boxShadow: '0 2px 3px rgba(0,0,0,0.1)'
             }}
           >
-            <Table stickyHeader>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Email</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {participantsData.map((participant) => (
-                  <TableRow key={participant.id}>
-                    <TableCell>{participant.name}</TableCell>
-                    <TableCell>{participant.email}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+            <ResponsiveContainer width='100%' height='100%'>
+              <BarChart
+                layout='vertical'
+                data={demographicsData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <XAxis type='number' />
+                <YAxis dataKey='age' type='category' />
+                <Tooltip
+                  cursor={false}
+                  content={({ payload }) => {
+                    if (!payload || !payload.length) return null
+
+                    const colors = {
+                      Male: '#ef4444',
+                      Female: '#f97316'
+                    }
+
+                    return (
+                      <div
+                        style={{
+                          backgroundColor: 'white',
+                          padding: '8px',
+                          border: '1px solid #ccc',
+                          borderRadius: '4px'
+                        }}
+                      >
+                        {payload.map((item) => (
+                          <div
+                            key={item.name}
+                            style={{
+                              color: colors[item.name as keyof typeof colors]
+                            }}
+                          >
+                            {item.name}: {item.value}
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  }}
+                />
+                <Legend />
+                <Bar
+                  dataKey='male'
+                  name='Male'
+                  fill='#ef4444'
+                  stackId='stack'
+                  barSize={30}
+                />
+                <Bar
+                  dataKey='female'
+                  name='Female'
+                  fill='#f97316'
+                  stackId='stack'
+                  barSize={30}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </Box>
         </Box>
       </Box>
+
       {/* New Image Section */}
       <Box sx={{ mt: 6 }}>
         <Typography
@@ -519,7 +561,8 @@ const HomeContent = () => {
         <Box
           sx={{
             position: 'relative',
-            width: '100%',
+            width: '800px', // Add this line to set fixed width
+            margin: '0 auto', // Add this to center the container
             borderRadius: '8px',
             overflow: 'hidden'
           }}
@@ -529,7 +572,8 @@ const HomeContent = () => {
             src={baseImage}
             alt='Base area'
             style={{
-              width: '100%',
+              width: '800px', // Add this line to set fixed width
+              margin: '0 auto', // Add this to center the container
               height: 'auto',
               borderRadius: '8px',
               display: 'block'
@@ -613,7 +657,8 @@ const HomeContent = () => {
         <Box
           sx={{
             position: 'relative',
-            width: '100%',
+            width: '800px', // Add this line to set fixed width
+            margin: '0 auto', // Add this to center the container
             borderRadius: '8px',
             overflow: 'hidden'
           }}
@@ -713,7 +758,6 @@ const HomeContent = () => {
           />
         </Box>
 
-        {/* Word Cloud Container */}
         {/* Word Cloud Container */}
         <Box
           sx={{
