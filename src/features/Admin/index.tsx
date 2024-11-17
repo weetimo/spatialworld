@@ -1,7 +1,8 @@
 import React from 'react'
-import { Box, Typography, TextField, IconButton } from '@mui/material'
+import { Box, Typography, TextField, IconButton, Button } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import SearchIcon from '@mui/icons-material/Search'
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 
 const Admin: React.FC = () => {
   const navigate = useNavigate()
@@ -90,6 +91,27 @@ const Admin: React.FC = () => {
               </Typography>
             </Box>
           </Box>
+          <Button
+            sx={{
+              backgroundColor: '#fff',
+              borderRadius: '8px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              cursor: 'pointer',
+              '&:hover': {
+                boxShadow: '0 4px 8px rgba(0,0,0,0.15)'
+              },
+              height: '100%'
+            }}
+          >
+            <AddCircleOutlineIcon sx={{ fontSize: '40px', color: 'lightgrey' }} />
+            <Typography variant='button' sx={{ color: 'black', mt: 1 }}>
+              Create New Engagement Session
+            </Typography>
+          </Button>
         </Box>
       </Box>
     </>
