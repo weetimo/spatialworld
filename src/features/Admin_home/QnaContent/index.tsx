@@ -1,68 +1,90 @@
-// import React from 'react';
 import {
   BarChart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
+  Tooltip,
   ResponsiveContainer
 } from 'recharts'
-
+import { Paper, Typography, Box, Grid } from '@mui/material'
 import { mockData } from './data'
 
 const QnaContent = () => {
   return (
-    <div className='p-6 max-w-6xl mx-auto space-y-8'>
-      {/* Multiple Choice Questions */}
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {/* Multiple Choice Responses */}
       {mockData.multipleChoice.map((question, index) => (
-        <div key={index} className='bg-white rounded-lg shadow-sm p-6 mb-6'>
-          <h2 className='text-lg font-medium mb-4'>{question.question}</h2>
-          <div className='h-[300px]'>
+        <Paper key={index} elevation={3} sx={{ p: 3 }}>
+          <Typography variant='h6' gutterBottom>
+            {question.question}
+          </Typography>
+          <Box sx={{ height: 400, width: '100%' }}>
             <ResponsiveContainer width='100%' height='100%'>
-              <BarChart data={question.responses}>
-                <CartesianGrid strokeDasharray='3 3' vertical={false} />
+              <BarChart
+                data={question.responses}
+                margin={{
+                  top: 20,
+                  right: 30,
+                  left: 20,
+                  bottom: 60
+                }}
+              >
+                <CartesianGrid strokeDasharray='3 3' />
                 <XAxis
                   dataKey='answer'
-                  tick={{ fill: '#666', fontSize: 12 }}
-                  interval={0}
-                  width={80}
-                  tickFormatter={(value) => {
-                    return value.length > 15
-                      ? `${value.substring(0, 15)}...`
-                      : value
-                  }}
+                  angle={-0}
+                  textAnchor='middle'
+                  height={60}
                 />
-                <YAxis tick={{ fill: '#666' }} />
-                <Bar
-                  dataKey='count'
-                  fill='#4F46E5'
-                  radius={[4, 4, 0, 0]}
-                  label={{
-                    position: 'top',
-                    fill: '#666',
-                    fontSize: 12
-                  }}
-                />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey='count' fill='#4f46e5' />
               </BarChart>
             </ResponsiveContainer>
-          </div>
-        </div>
+          </Box>
+        </Paper>
       ))}
 
-      {/* Open Ended Question */}
-      <div className='bg-white rounded-lg shadow-sm p-6'>
-        <h2 className='text-lg font-medium mb-4'>
-          {mockData.openEnded.question}
-        </h2>
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-          {mockData.openEnded.responses.map((response, index) => (
-            <div key={index} className='bg-gray-50 p-4 rounded-lg'>
-              {response}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+      {/* Open Ended Responses */}
+      {/* Changed from single object to map through array of open ended questions */}
+      {mockData.openEnded.map((openEndedQuestion, questionIndex) => (
+        <Box key={questionIndex} sx={{ p: 3 }}>
+          <Typography
+            variant='h6'
+            sx={{
+              fontWeight: 500,
+              color: '#000',
+              mb: 2,
+              fontSize: '1.1rem'
+            }}
+          >
+            {openEndedQuestion.question}
+          </Typography>
+          <Grid container spacing={2}>
+            {openEndedQuestion.responses.map((response, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index}>
+                <Box
+                  sx={{
+                    backgroundColor: '#f9fafb',
+                    borderRadius: '8px',
+                    padding: '24px',
+                    height: '120px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    fontSize: '0.875rem',
+                    color: '#000',
+                    lineHeight: 1.5
+                  }}
+                >
+                  {response}
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      ))}
+    </Box>
   )
 }
 
