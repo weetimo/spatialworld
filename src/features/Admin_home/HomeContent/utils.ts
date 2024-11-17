@@ -1,13 +1,37 @@
-export const exportToCSV = (participantsData: any[]) => {
-    const headers = ['Name', 'Email']
-    const csvData = participantsData
-      .map((p) => `${p.name},${p.email}`)
-      .join('\n')
-    const csvContent = `${headers.join(',')}\n${csvData}`
-    const blob = new Blob([csvContent], { type: 'text/csv' })
-    const url = window.URL.createObjectURL(blob)
+  export const exportToCSV = (data: any[]) => {
+    // Define headers for all fields
+    const headers = [
+      'ID',
+      'Name',
+      'Email',
+      'Gender',
+      'Age Group',
+      'Postal Code'
+    ]
+
+    // Convert data to CSV format
+    const csvContent = [
+      // Add headers as first row
+      headers.join(','),
+      // Map data to rows
+      ...data.map(row => [
+        row.id,
+        row.name,
+        row.email,
+        row.gender,
+        row.ageGroup,
+        row.postalCode
+      ].join(','))
+    ].join('\n')
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement('a')
-    link.href = url
-    link.download = 'participants.csv'
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', 'participants_data.csv')
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
     link.click()
+    document.body.removeChild(link)
   }
