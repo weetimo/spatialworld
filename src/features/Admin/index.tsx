@@ -286,12 +286,14 @@ const Admin: React.FC = () => {
           <Button 
             variant="contained"
             onClick={handleContextDone}
+            disabled={images.length === 0}
             sx={{
               borderRadius: '20px',
               px: 6,
               py: 1,
               textTransform: 'none',
-              mt: 4
+              mt: 4,
+              opacity: images.length === 0 ? 0.5 : 1
             }}
           >
             Next
