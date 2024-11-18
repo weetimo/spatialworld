@@ -276,6 +276,36 @@ const HomeContent = () => {
 
   return (
     <Box>
+      {/* Title and Subtitle Section */}
+      <Box sx={{ marginBottom: 4 }}>
+        <Typography
+          variant='h1'
+          sx={{
+            fontSize: {
+              xs: '1.5rem',
+              md: '2rem'
+            },
+            fontWeight: 700,
+            color: 'text.primary',
+            marginBottom: 1
+          }}
+        >
+          Engagement Session Overview
+        </Typography>
+        <Typography
+          align='justify'
+          sx={{
+            color: 'text.secondary',
+            fontSize: {
+              xs: '0.875rem',
+              md: '1rem'
+            },
+            maxWidth: '60rem'
+          }}
+        >
+          Provides insights and community data from the engagement session.
+        </Typography>
+      </Box>
       {/* Participants Section */}
       <Box sx={{ mt: 6 }}>
         <Typography
@@ -452,7 +482,7 @@ const HomeContent = () => {
           </Box>
         </Box>
 
-        {/* Demographics Section (moved to side) */}
+        {/* Demographics Section */}
         <Box sx={{ flex: 1 }}>
           <Typography
             variant='h6'
@@ -471,7 +501,7 @@ const HomeContent = () => {
           >
             Age & Gender
           </Typography>
-          <Box
+          {/* <Box
             sx={{
               height: '300px',
               backgroundColor: 'white',
@@ -479,7 +509,8 @@ const HomeContent = () => {
               borderRadius: '8px',
               boxShadow: '0 2px 3px rgba(0,0,0,0.1)'
             }}
-          >
+          > */}
+          <Box sx={{ height: '300px' }}>
             <ResponsiveContainer width='100%' height='100%'>
               <BarChart
                 layout='vertical'

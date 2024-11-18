@@ -78,6 +78,37 @@ const QnaContent = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {/* Title and Subtitle Section */}
+      <Box sx={{ marginBottom: 4 }}>
+        <Typography
+          variant='h1'
+          sx={{
+            fontSize: {
+              xs: '1.5rem',
+              md: '2rem'
+            },
+            fontWeight: 700,
+            color: 'text.primary',
+            marginBottom: 1
+          }}
+        >
+          Community Survey Responses
+        </Typography>
+        <Typography
+          align='justify'
+          sx={{
+            color: 'text.secondary',
+            fontSize: {
+              xs: '0.875rem',
+              md: '1rem'
+            },
+            maxWidth: '60rem'
+          }}
+        >
+          Provides an overview of responses from participants of the engagement
+          session.
+        </Typography>
+      </Box>
       {/* Multiple Choice Responses */}
       {mockData.multipleChoice.map(
         (question: MultipleChoiceQuestion, index: number) => (
