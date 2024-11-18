@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 import {
   Box,
   Typography,
@@ -10,180 +10,140 @@ import {
   Grid,
   useTheme,
   useMediaQuery
-} from '@mui/material';
+} from '@mui/material'
 import {
   ArrowBack as ArrowBackIcon,
   Favorite as HeartIcon,
   Person as PersonIcon,
   Assignment as AssignmentIcon,
-  History as HistoryIcon,
-} from '@mui/icons-material';
+  History as HistoryIcon
+} from '@mui/icons-material'
 
 const stringToPastelColor = (string) => {
-  let hash = 0;
+  let hash = 0
   for (let i = 0; i < string.length; i++) {
-    hash = string.charCodeAt(i) + ((hash << 5) - hash);
+    hash = string.charCodeAt(i) + ((hash << 5) - hash)
   }
-  const hue = hash % 360;
-  return `hsl(${hue}, 70%, 80%)`;
-};
+  const hue = hash % 360
+  return `hsl(${hue}, 70%, 80%)`
+}
 
 const ImageView = ({ imageData, onBack }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const isTablet = useMediaQuery(theme.breakpoints.down('lg'))
 
-  if (!imageData) return null;
+  if (!imageData) return null
 
   return (
-    <Box sx={{ 
-      p: 2, 
-      minHeight: '100vh',
-      maxWidth: '100vw',
-    }}>
-      <IconButton 
-        onClick={onBack} 
-        sx={{ 
+    <Box
+      sx={{
+        p: 2,
+        minHeight: '100vh',
+        maxWidth: '100vw'
+      }}
+    >
+      <IconButton
+        onClick={onBack}
+        sx={{
           mb: { xs: 1, sm: 2, md: 3 },
           backgroundColor: 'white',
           boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
           '&:hover': {
             backgroundColor: 'white',
             transform: 'translateY(-1px)',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
           }
         }}
       >
         <ArrowBackIcon />
       </IconButton>
 
-      <Box sx={{ 
-        display: 'grid', 
-        gap: { xs: 1, sm: 2, md: 3 }, 
-        gridTemplateColumns: {
-          xs: '1fr',
-          md: '3fr 2fr',
-          lg: '3fr 2fr'
-        },
-        overflow: { md: 'hidden' }
-      }}>
-        <Box sx={{ 
-          display: 'flex',
-          flexDirection: 'column',
+      <Box
+        sx={{
+          marginBottom: 4
+        }}
+      >
+        <Typography
+          variant='h1'
+          sx={{
+            fontSize: {
+              xs: '1.5rem',
+              md: '2rem'
+            },
+            fontWeight: 700,
+            color: 'text.primary',
+            marginBottom: 1
+          }}
+        >
+          Image Details and Insights
+        </Typography>
+        <Typography
+          align='justify'
+          sx={{
+            color: 'text.secondary',
+            fontSize: {
+              xs: '0.875rem',
+              md: '1rem'
+            },
+            maxWidth: '60rem'
+          }}
+        >
+          This page provides a detailed view of each image, enabling developers at URA to dive deeper into the specifics of a selected image. 
+        </Typography>
+      </Box>
+
+      <Box
+        sx={{
+          display: 'grid',
           gap: { xs: 1, sm: 2, md: 3 },
-          height: '100%',
-        }}>
-          <Paper 
-            elevation={0} 
-            sx={{ 
+          gridTemplateColumns: {
+            xs: '1fr',
+            md: '2fr 3fr',
+            lg: '2fr 3fr'
+          },
+          overflow: { md: 'hidden' }
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: { xs: 1, sm: 2, md: 3 },
+            height: '100%'
+          }}
+        >
+          <Paper
+            elevation={0}
+            sx={{
               borderRadius: 4,
               overflow: 'hidden',
               border: '1px solid',
               borderColor: 'divider',
               backgroundColor: 'white',
               flex: { md: '0 0 auto' },
-              height: { xs: '40vh', sm: '45vh', md: '60vh' },
-              minHeight: { md: '500px' },
-              maxHeight: { md: 'calc(100vh - 300px)' },
+              height: { xs: '20vh', sm: '30vh', md: '50vh' },
               transition: 'transform 0.2s',
               '&:hover': {
-                transform: 'scale(1.002)',
+                transform: 'scale(1.002)'
               }
             }}
           >
             <Box
-              component="img"
+              component='img'
               src={imageData.url}
               alt={imageData.prompt}
               sx={{
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover',
+                objectFit: 'cover'
               }}
             />
           </Paper>
 
-          <Paper 
-            elevation={0} 
-            sx={{ 
-              p: { xs: 2, sm: 3, md: 4 },
-              borderRadius: 4,
-              border: '1px solid',
-              borderColor: 'divider',
-              backgroundColor: 'white',
-              flex: { md: '1 1 auto' },
-              overflow: 'auto',
-              minHeight: { md: '200px' }
-            }}
-          >
-            <Box sx={{ 
-              display: 'flex', 
-              flexDirection: { xs: 'column', sm: 'row' },
-              alignItems: { xs: 'flex-start', sm: 'center' },
-              justifyContent: 'space-between', 
-              gap: 2,
-              mb: 3 
-            }}>
-              <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight="600">
-                Image Details
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Chip 
-                  label={imageData.category}
-                  size={isMobile ? "small" : "medium"}
-                  sx={{ 
-                    bgcolor: alpha(stringToPastelColor(imageData.category), 0.2),
-                    fontWeight: 500,
-                  }}
-                />
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: 0.5,
-                  backgroundColor: alpha('#ef4444', 0.1),
-                  padding: { xs: '2px 8px', sm: '4px 12px' },
-                  borderRadius: 4
-                }}>
-                  <HeartIcon fontSize={isMobile ? "small" : "medium"} sx={{ color: '#ef4444' }} />
-                  <Typography sx={{ color: '#ef4444', fontWeight: 500 }}>
-                    {imageData.likes}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-            
-            <Stack spacing={{ xs: 2, sm: 3, md: 4 }}>
-              <Box>
-                <Typography color="text.secondary" variant={isMobile ? "body2" : "body1"} gutterBottom>
-                  User Input
-                </Typography>
-                <Typography variant={isMobile ? "body2" : "body1"}>
-                  {imageData.prompt}
-                </Typography>
-              </Box>
-              <Box>
-                <Typography color="text.secondary" variant={isMobile ? "body2" : "body1"} gutterBottom>
-                  Upscaled Prompt
-                </Typography>
-                <Typography variant={isMobile ? "body2" : "body1"}>
-                  {imageData.upscaledPrompt}
-                </Typography>
-              </Box>
-            </Stack>
-          </Paper>
-        </Box>
-
-        {/* Right Column */}
-        <Box sx={{ 
-          display: 'flex',
-          flexDirection: 'column',
-          gap: { xs: 1, sm: 2, md: 3 },
-          height: '100%',
-          overflow: { md: 'auto' }
-        }}>
-          <Paper 
-            elevation={0} 
-            sx={{ 
+          <Paper
+            elevation={0}
+            sx={{
               p: { xs: 2, sm: 3 },
               borderRadius: 4,
               border: '1px solid',
@@ -194,17 +154,23 @@ const ImageView = ({ imageData, onBack }) => {
           >
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <PersonIcon sx={{ color: 'primary.main', mr: 1 }} />
-              <Typography variant={isMobile ? "subtitle1" : "h6"}>Profile</Typography>
+              <Typography variant={isMobile ? 'subtitle1' : 'h6'}>
+                Profile
+              </Typography>
             </Box>
             <Grid container spacing={{ xs: 1, sm: 2 }}>
               {Object.entries(imageData.userProfile).map(([key, value]) => (
                 <Grid item xs={12} key={key}>
-                  <Typography variant="caption" color="text.secondary" display="block">
+                  <Typography
+                    variant='caption'
+                    color='text.secondary'
+                    display='block'
+                  >
                     {key.charAt(0).toUpperCase() + key.slice(1)}
                   </Typography>
-                  <Typography 
-                    fontWeight="500"
-                    variant={isMobile ? "body2" : "body1"}
+                  <Typography
+                    fontWeight='500'
+                    variant={isMobile ? 'body2' : 'body1'}
                   >
                     {value}
                   </Typography>
@@ -212,10 +178,108 @@ const ImageView = ({ imageData, onBack }) => {
               ))}
             </Grid>
           </Paper>
+        </Box>
 
-          <Paper 
-            elevation={0} 
-            sx={{ 
+        {/* Right Column */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: { xs: 1, sm: 2, md: 3 },
+            height: '100%',
+            overflow: { md: 'auto' }
+          }}
+        >
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 2, sm: 3, md: 4 },
+              borderRadius: 4,
+              border: '1px solid',
+              borderColor: 'divider',
+              backgroundColor: 'white',
+              flex: { md: '1 1 auto' },
+              overflow: 'auto',
+              minHeight: { md: '200px' }
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                alignItems: { xs: 'flex-start', sm: 'center' },
+                justifyContent: 'space-between',
+                gap: 2,
+                mb: 3
+              }}
+            >
+              <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight='600'>
+                Image Details
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Chip
+                  label={imageData.category}
+                  size={isMobile ? 'small' : 'medium'}
+                  sx={{
+                    bgcolor: alpha(
+                      stringToPastelColor(imageData.category),
+                      0.2
+                    ),
+                    fontWeight: 500
+                  }}
+                />
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    backgroundColor: alpha('#ef4444', 0.1),
+                    padding: { xs: '2px 8px', sm: '4px 12px' },
+                    borderRadius: 4
+                  }}
+                >
+                  <HeartIcon
+                    fontSize={isMobile ? 'small' : 'medium'}
+                    sx={{ color: '#ef4444' }}
+                  />
+                  <Typography sx={{ color: '#ef4444', fontWeight: 500 }}>
+                    {imageData.likes}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+
+            <Stack spacing={{ xs: 2, sm: 3, md: 4 }}>
+              <Box>
+                <Typography
+                  color='text.secondary'
+                  variant={isMobile ? 'body2' : 'body1'}
+                  gutterBottom
+                >
+                  User Input
+                </Typography>
+                <Typography variant={isMobile ? 'body2' : 'body1'}>
+                  {imageData.prompt}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography
+                  color='text.secondary'
+                  variant={isMobile ? 'body2' : 'body1'}
+                  gutterBottom
+                >
+                  Upscaled Prompt
+                </Typography>
+                <Typography variant={isMobile ? 'body2' : 'body1'}>
+                  {imageData.upscaledPrompt}
+                </Typography>
+              </Box>
+            </Stack>
+          </Paper>
+
+          <Paper
+            elevation={0}
+            sx={{
               p: { xs: 2, sm: 3 },
               borderRadius: 4,
               border: '1px solid',
@@ -226,53 +290,32 @@ const ImageView = ({ imageData, onBack }) => {
           >
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <AssignmentIcon sx={{ color: 'primary.main', mr: 1 }} />
-              <Typography variant={isMobile ? "subtitle1" : "h6"}>Questionnaire</Typography>
+              <Typography variant={isMobile ? 'subtitle1' : 'h6'}>
+                Questionnaire
+              </Typography>
             </Box>
             <Stack spacing={{ xs: 1, sm: 2 }}>
               {Object.entries(imageData.questionnaire).map(([key, value]) => (
-                <Box key={key} sx={{ 
-                  p: { xs: 1.5, sm: 2 }, 
-                  bgcolor: 'background.default',
-                  borderRadius: 4
-                }}>
-                  <Typography variant="caption" color="text.secondary" display="block">
+                <Box
+                  key={key}
+                  sx={{
+                    p: { xs: 1.5, sm: 2 },
+                    bgcolor: 'background.default',
+                    borderRadius: 4
+                  }}
+                >
+                  <Typography
+                    variant='caption'
+                    color='text.secondary'
+                    display='block'
+                  >
                     {key.charAt(0).toUpperCase() + key.slice(1)}
                   </Typography>
-                  <Typography 
-                    fontWeight="500"
-                    variant={isMobile ? "body2" : "body1"}
+                  <Typography
+                    fontWeight='500'
+                    variant={isMobile ? 'body2' : 'body1'}
                   >
                     {value}
-                  </Typography>
-                </Box>
-              ))}
-            </Stack>
-          </Paper>
-
-          <Paper 
-            elevation={0} 
-            sx={{ 
-              p: { xs: 2, sm: 3 },
-              borderRadius: 4,
-              border: '1px solid',
-              borderColor: 'divider',
-              backgroundColor: 'white',
-              flex: '0 0 auto'
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <HistoryIcon sx={{ color: 'primary.main', mr: 1 }} />
-              <Typography variant={isMobile ? "subtitle1" : "h6"}>Edit History</Typography>
-            </Box>
-            <Stack spacing={2}>
-              {imageData.editHistory.map((edit, index) => (
-                <Box key={index} sx={{ 
-                  p: { xs: 1.5, sm: 2 }, 
-                  bgcolor: 'background.default',
-                  borderRadius: 4
-                }}>
-                  <Typography variant={isMobile ? "body2" : "body1"}>
-                    Add edit history
                   </Typography>
                 </Box>
               ))}
@@ -281,7 +324,7 @@ const ImageView = ({ imageData, onBack }) => {
         </Box>
       </Box>
     </Box>
-  );
-};
+  )
+}
 
-export default ImageView;
+export default ImageView

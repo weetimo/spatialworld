@@ -133,7 +133,7 @@ const Admin_home = () => {
           minWidth: 0
         }}
       >
-        {/* Header */}
+        {/* Header
         <Box
           sx={{
             padding: '1rem 2rem',
@@ -142,7 +142,7 @@ const Admin_home = () => {
           }}
         >
           <Typography variant='h5'>Public Engagement Dashboard</Typography>
-        </Box>
+        </Box> */}
 
         {/* Scrollable Content Area */}
         <Box
