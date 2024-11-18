@@ -63,8 +63,8 @@ const ImageContent = () => {
     () =>
       new Fuse(mockImages, {
         keys: ['prompt'],
-        threshold: 0.4,
-        minMatchCharLength: 2,
+        threshold: 0.6,
+        minMatchCharLength: 1,
         shouldSort: true
       }),
     []
@@ -93,6 +93,40 @@ const ImageContent = () => {
 
   return (
     <Box sx={{ p: 2 }}>
+      <Box
+        sx={{
+          marginBottom: 4
+        }}
+      >
+        <Typography
+          variant='h1'
+          sx={{
+            fontSize: {
+              xs: '1.5rem',
+              md: '2rem'
+            },
+            fontWeight: 700,
+            color: 'text.primary',
+            marginBottom: 1
+          }}
+        >
+          Urban Development Image Gallery
+        </Typography>
+        <Typography
+          align='justify'
+          sx={{
+            color: 'text.secondary',
+            fontSize: {
+              xs: '0.875rem',
+              md: '1rem'
+            },
+            maxWidth: '60rem'
+          }}
+        >
+          This page visually categorizes the image generations into themes derived from topic modeling using vision models.
+        </Typography>
+      </Box>
+
       <Box sx={{ mb: 4 }}>
         <TextField
           fullWidth
@@ -233,7 +267,7 @@ const ImageContent = () => {
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 3fr))',
           gap: 3
         }}
       >
