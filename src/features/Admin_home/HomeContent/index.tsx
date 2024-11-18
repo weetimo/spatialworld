@@ -277,7 +277,6 @@ const HomeContent = () => {
   return (
     <Box>
       {/* Participants Section */}
-      {/* Participants Section */}
       <Box sx={{ mt: 6 }}>
         <Typography
           variant='h6'
