@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react'
-import { Box, Typography, TextField, IconButton, Button, Dialog, DialogContent, DialogActions } from '@mui/material'
+import { Box, Typography, TextField, IconButton, Button, Dialog, DialogContent, DialogActions, DialogTitle } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import SearchIcon from '@mui/icons-material/Search'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
@@ -22,6 +22,7 @@ const Admin: React.FC = () => {
   const [caption, setCaption] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showQuestionsScreen, setShowQuestionsScreen] = useState(false)
+  const [showRestartDialog, setShowRestartDialog] = useState(false)
 
   const handleOpenTitleScreen = () => {
     setShowTitleScreen(true)
@@ -68,11 +69,25 @@ const Admin: React.FC = () => {
     setImages(newImages);
   };
 
+  const handleLogoClick = () => {
+    if (showTitleScreen || showContextScreen || showQuestionsScreen) {
+      setShowRestartDialog(true)
+    } else {
+      window.location.reload()
+    }
+  }
+
+  const handleRestartConfirm = () => {
+    setShowRestartDialog(false)
+    window.location.reload()
+  }
+
   if (showTitleScreen) {
     return (
       <Box sx={{ padding: '2rem' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
           <IconButton
+            onClick={handleLogoClick}
             sx={{
               '&:hover': {
                 backgroundColor: 'rgba(0,0,0,0.5)',
@@ -148,6 +163,21 @@ const Admin: React.FC = () => {
             Done
           </Button>
         </Box>
+
+        <Dialog open={showRestartDialog} onClose={() => setShowRestartDialog(false)}>
+          <DialogTitle>Restart Session?</DialogTitle>
+          <DialogContent>
+            <Typography>
+              Your progress will be lost if you restart. Are you sure you want to continue?
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowRestartDialog(false)}>Cancel</Button>
+            <Button onClick={handleRestartConfirm} color="error">
+              Restart
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     )
   }
@@ -157,6 +187,7 @@ const Admin: React.FC = () => {
       <Box sx={{ padding: '2rem' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
           <IconButton
+            onClick={handleLogoClick}
             sx={{
               '&:hover': {
                 backgroundColor: 'rgba(0,0,0,0.5)',
@@ -331,6 +362,21 @@ const Admin: React.FC = () => {
             </Button>
           </DialogActions>
         </Dialog>
+
+        <Dialog open={showRestartDialog} onClose={() => setShowRestartDialog(false)}>
+          <DialogTitle>Restart Session?</DialogTitle>
+          <DialogContent>
+            <Typography>
+              Your progress will be lost if you restart. Are you sure you want to continue?
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowRestartDialog(false)}>Cancel</Button>
+            <Button onClick={handleRestartConfirm} color="error">
+              Restart
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     )
   }
@@ -340,6 +386,7 @@ const Admin: React.FC = () => {
       <Box sx={{ padding: '2rem' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
           <IconButton
+            onClick={handleLogoClick}
             sx={{
               '&:hover': {
                 backgroundColor: 'rgba(0,0,0,0.5)',
@@ -419,6 +466,21 @@ const Admin: React.FC = () => {
             </Button>
           </Box>
         </Box>
+
+        <Dialog open={showRestartDialog} onClose={() => setShowRestartDialog(false)}>
+          <DialogTitle>Restart Session?</DialogTitle>
+          <DialogContent>
+            <Typography>
+              Your progress will be lost if you restart. Are you sure you want to continue?
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowRestartDialog(false)}>Cancel</Button>
+            <Button onClick={handleRestartConfirm} color="error">
+              Restart
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     )
   }
@@ -428,6 +490,7 @@ const Admin: React.FC = () => {
       <Box sx={{ padding: '2rem' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
           <IconButton
+            onClick={handleLogoClick}
             sx={{
               '&:hover': {
                 backgroundColor: 'rgba(0,0,0,0.5)',
@@ -530,6 +593,21 @@ const Admin: React.FC = () => {
             </Typography>
           </Button>
         </Box>
+
+        <Dialog open={showRestartDialog} onClose={() => setShowRestartDialog(false)}>
+          <DialogTitle>Restart Session?</DialogTitle>
+          <DialogContent>
+            <Typography>
+              Your progress will be lost if you restart. Are you sure you want to continue?
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowRestartDialog(false)}>Cancel</Button>
+            <Button onClick={handleRestartConfirm} color="error">
+              Restart
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </>
   )
