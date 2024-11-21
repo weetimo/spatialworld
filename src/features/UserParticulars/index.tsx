@@ -1,29 +1,38 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Box, Button, MenuItem, TextField, Typography } from '@mui/material'
-import { Gender } from '../../enums'
-
-const ageGroups = [
-  'Below 21', '21 - 25', '26 - 30', '31 - 40', 
-  '41 - 50', '51 - 60', '61 - 65', 'Above 65'
-]
+import { ageGroups } from '../../constants'
+import { Gender, UserRole } from '../../enums'
+import { useDatabase, useCurrentUser } from '../../hooks'
 
 const UserParticulars: React.FC = () => {
   const navigate = useNavigate()
+  const { createData } = useDatabase()
+  const { saveUser } = useCurrentUser()
 
   const [user, setUser] = useState({
     name: '',
     email: '',
     gender: '',
     ageGroup: '',
-    postalCode: ''
+    postalCode: '',
+    role: UserRole.USER
   })
 
   const handleChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement | { value: unknown }>): void => {
     setUser({ ...user, [field]: event.target.value })
   }
 
-  const handleNext = (): void => {
+  const handleNext = async (): Promise<void> => {
+    const generateRandomId = (): string => {
+      return Math.random().toString(36).substring(2, 10)
+    }
+    const userId = generateRandomId()
+    const userWithId = { ...user, id: userId }
+
+    await createData(`users/${userId}`, userWithId)
+    saveUser(userWithId)
+
     navigate('/user-preferences')
   }
 
@@ -61,7 +70,7 @@ const UserParticulars: React.FC = () => {
         onChange={handleChange('gender')}
         sx={styles.input}
       >
-        {Object.values(Gender).map((gender) => (
+        {Object.values(Gender).map((gender: Gender) => (
           <MenuItem key={gender} value={gender}>
             {gender}
           </MenuItem>

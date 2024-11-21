@@ -1,46 +1,39 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Box, Typography, Button, TextField, LinearProgress } from '@mui/material'
-import { QuestionnaireType } from '../../enums'
-import { Questionnaire, Answer } from '../../types'
 import CheckIcon from '@mui/icons-material/Check'
+import { QuestionnaireType } from '../../enums'
+import { Answer, Questionnaire } from '../../types'
+import { useDatabase, useCurrentUser } from '../../hooks'
 
 const UserPreferences: React.FC = () => {
-  const questionnaire: Questionnaire = {
-    id: "q1",
-    questions: [
-      {
-        id: "q1-1",
-        question: "What interests you most about the redevelopment?",
-        choices: ["Heritage", "Sustainability", "Urban Resilience", "Technology", "Greenery"],
-        questionnaireId: "q1",
-        type: QuestionnaireType.MULTI_ANSWERS,
-      },
-      {
-        id: "q1-2",
-        question: "Have you visited this SUTD green space or its surrounding areas before?",
-        choices: ["Yes", "No, I don’t have a chance", "I'm not sure", "Where is it?"],
-        questionnaireId: "q1",
-        type: QuestionnaireType.MULTI_ANSWERS,
-      },
-      {
-        id: "q1-3",
-        question: "What are some of the daily issues you face?",
-        questionnaireId: "q1",
-        type: QuestionnaireType.FREE_RESPONSE,
-      },
-    ],
-  }
-
   const navigate = useNavigate()
+  const { createData, readData } = useDatabase()
+  const { currentUser } = useCurrentUser()
 
+  const [questionnaire, setQuestionnaire] = useState<Questionnaire | null>(null)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState<Answer[]>([])
   const [freeResponse, setFreeResponse] = useState('')
 
-  const currentQuestion = questionnaire.questions?.[currentQuestionIndex]
+  useEffect(() => {
+    const fetchQuestionnaire = async () => {
+      try {
+        const data = await readData('questionnaires/q1')
+        setQuestionnaire(data);
+        console.log('Questionnaire loaded successfully:', data)
+      } catch (error) {
+        console.error('Error fetching questionnaire:', error)
+      }
+    }
 
-  const handleSelectChoice = (choice: string) => {
+    fetchQuestionnaire()
+  }, [])
+
+  const currentQuestion = questionnaire?.questions?.[currentQuestionIndex]
+  const isLastQuestion = currentQuestionIndex === (questionnaire?.questions?.length || 0) - 1
+
+  const handleSelectChoice = (choice: string): void => {
     if (currentQuestion) {
       const existingAnswer = answers.find(a => a.questionId === currentQuestion.id)
       if (existingAnswer) {
@@ -54,11 +47,11 @@ const UserPreferences: React.FC = () => {
     }
   }
 
-  const handleFreeResponseChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFreeResponseChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setFreeResponse(event.target.value)
   }
 
-  const handleNext = () => {
+  const handleNext = (): void => {
     if (currentQuestion) {
       if (currentQuestion.type === QuestionnaireType.FREE_RESPONSE) {
         setAnswers([...answers, { questionId: currentQuestion.id, answer: [freeResponse] }])
@@ -68,20 +61,26 @@ const UserPreferences: React.FC = () => {
     }
   }
 
-  const handleSubmit = () => {
-    if (currentQuestion?.type === QuestionnaireType.FREE_RESPONSE && freeResponse) {
-      setAnswers([...answers, { questionId: currentQuestion.id, answer: [freeResponse] }])
-    }
+  const handleSubmit = async (): Promise<void> => {
+    const finalAnswers =
+      currentQuestion?.type === QuestionnaireType.FREE_RESPONSE && freeResponse
+        ? [...answers, { questionId: currentQuestion.id, answer: [freeResponse] }]
+        : answers;
+
+    await createData(`users/${currentUser?.id}/preferences`, {
+      questionnaireId: questionnaire?.id,
+      answers: finalAnswers,
+    })
+    console.log('Preferences saved successfully')
+
     navigate('/start-workshop')
   }
-
-  const isLastQuestion = currentQuestionIndex === (questionnaire.questions?.length || 0) - 1
 
   return (
     <Box sx={styles.container}>
       <LinearProgress
         variant="determinate"
-        value={((currentQuestionIndex + 1) / (questionnaire.questions?.length || 1)) * 100}
+        value={((currentQuestionIndex + 1) / (questionnaire?.questions?.length || 1)) * 100}
         sx={styles.progressBar}
       />
 
@@ -169,10 +168,10 @@ const styles = {
     borderRadius: '12px',
     textAlign: 'left',
     fontSize: '1rem',
-    textTransform: 'none', // Prevents uppercase text for choices
+    textTransform: 'none',
     backgroundColor: '#fff',
     color: '#333',
-    border: '1px solid #ddd', // To remove the shadow effect
+    border: '1px solid #ddd',
     '&:hover': {
       backgroundColor: '#f0f4ff',
     },
@@ -188,7 +187,7 @@ const styles = {
   },
   textField: {
     marginBottom: '1rem',
-    borderRadius: '8px', // Only general styling
+    borderRadius: '8px',
   },
   nextButton: {
     padding: '0.75rem',
@@ -198,7 +197,7 @@ const styles = {
     borderRadius: '8px',
     backgroundColor: '#007bff',
     color: '#fff',
-    textTransform: 'none', // Prevents uppercase text for the Next/Submit button
+    textTransform: 'none',
     '&:hover': {
       backgroundColor: '#005bb5',
     },
