@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { FeedDetail, ImageFeed, ImageWorkshop, StartImageWorkshop, UserParticulars, UserPreferences, Welcome } from './features'
+import { FeedDetail, ImageFeed, ImageWorkshop, StartImageWorkshop, UserParticulars, UserPreferences, Welcome, Admin, Questionnaire, Admin_home } from './features'
+
 
 function App() {
   return (
@@ -13,6 +14,9 @@ function App() {
         <Route path="/image-workshop" element={<ImageWorkshop />} />
         <Route path="/feed" element={<ImageFeed />} />
         <Route path="/feed/:id" element={<FeedDetail />} />
+        <Route path='/admin' element={<Admin />} />
+        <Route path='/questionnaire' element={<Questionnaire />} />
+        <Route path='/admin_home' element={<Admin_home />} />
       </Routes>
     </Router>
   )
