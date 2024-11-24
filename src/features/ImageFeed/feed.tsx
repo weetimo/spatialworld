@@ -1,24 +1,63 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Box, Typography, IconButton, Avatar } from '@mui/material'
 import { Favorite, FavoriteBorder } from '@mui/icons-material'
-import { garden1 } from '../../assets/sample-photos'
+import { useDatabase, useCurrentUser } from '../../hooks'
 
-// TEST DATA
-const posts = [
-  { id: 1, name: 'Wei Ming', image: garden1 },
-  { id: 2, name: 'Caitlin', image: garden1 },
-  { id: 3, name: 'Timothy', image: garden1 },
-  { id: 3, name: 'Timothy', image: garden1 },
-]
+const Feed: React.FC<{ engagementId: string }> = ({ engagementId }) => {
+  const { readData, updateData } = useDatabase()
+  const { currentUser } = useCurrentUser()
 
-const Feed: React.FC = () => {
-  const [likedPosts, setLikedPosts] = useState<number[]>([])
+  const [posts, setPosts] = useState<any[]>([])
+  const [users, setUsers] = useState<{ [userId: string]: string }>({})
 
-  const handleLike = (postId: number): void => {
-    setLikedPosts((prev) =>
-      prev.includes(postId) ? prev.filter((id) => id !== postId) : [...prev, postId]
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const data = await readData(`generations/${engagementId}`)
+        if (data) {
+          const postsArray = Object.entries(data).map(([id, post]) => ({ id, ...post }))
+          setPosts(postsArray)
+
+          const userIds = Array.from(new Set(postsArray.map((post) => post.userId)))
+
+          const usersData: { [userId: string]: string } = {}
+          await Promise.all(
+            userIds.map(async (userId) => {
+              const user = await readData(`users/${userId}`)
+              if (user) usersData[userId] = user.name
+            })
+          )
+          setUsers(usersData)
+        }
+      } catch (error) {
+        console.error('Error fetching posts or user data:', error)
+      }
+    }
+
+    fetchPosts()
+  }, [engagementId])
+
+  const handleLike = async (postId: string, voters: string[]) => {
+    const userId = currentUser?.id
+    if (!userId) return
+
+    const updatedVoters = voters.includes(userId)
+      ? voters.filter((id) => id !== userId)
+      : [...voters, userId]
+
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.userId === postId ? { ...post, voters: updatedVoters } : post
+      )
     )
+
+    try {
+      await updateData(`generations/${engagementId}/${postId}`, { voters: updatedVoters })
+      console.log('Voters updated successfully')
+    } catch (error) {
+      console.error('Error updating voters:', error)
+    }
   }
 
   return (
@@ -29,7 +68,7 @@ const Feed: React.FC = () => {
           Explore Feeds
         </Typography>
         <Typography variant="body2" sx={styles.headerSubtitle}>
-          Explore other residents&apos; thoughts and ideas of redesigning!
+          Explore other residents&apos thoughts and ideas of redesigning!
         </Typography>
       </Box>
 
@@ -39,18 +78,18 @@ const Feed: React.FC = () => {
           <Link to={`/feed/${post.id}`} key={post.id} state={{ post }} style={styles.link}>
             <Box sx={styles.postContainer}>
               <Box sx={styles.userInfo}>
-                <Avatar src={post.name} alt={post.name} sx={styles.avatar} />
+                <Avatar src={post.user?.avatar} alt={users[post.userId] || 'Unknown User'} sx={styles.avatar} />
                 <Typography variant="subtitle1" sx={styles.userName}>
-                  {post.name}
+                  {users[post.userId] || 'Unknown User'}
                 </Typography>
                 <IconButton
                   onClick={(e) => {
                     e.preventDefault()
-                    handleLike(post.id)
+                    handleLike(post.userId, post.voters || [])
                   }}
                   sx={styles.heartButton}
                 >
-                  {likedPosts.includes(post.id) ? (
+                  {post.voters?.includes(currentUser?.id) ? (
                     <Favorite sx={styles.heartIconLiked} />
                   ) : (
                     <FavoriteBorder sx={styles.heartIcon} />
@@ -60,7 +99,7 @@ const Feed: React.FC = () => {
 
               <Box
                 component="img"
-                src={post.image}
+                src={post.imageUrl}
                 alt="Post"
                 sx={styles.postImage}
               />
@@ -146,7 +185,7 @@ const styles = {
     borderRadius: '8px',
     objectFit: 'cover',
     height: '150px',
-    width: '100%'
+    width: '100%',
   },
   link: {
     textDecoration: 'none',

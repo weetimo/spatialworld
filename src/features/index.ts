@@ -1,7 +1,7 @@
 export { default as FeedDetail } from './ImageFeed/detail'
 export { default as ImageFeed } from './ImageFeed/feed'
 export { default as ImageWorkshop } from './ImageWorkshop'
-export { default as StartImageWorkshop } from './StartImageWorkshop'
+export { default as MeetTheCharacters } from './MeetTheCharacters'
 export { default as UserParticulars } from './UserParticulars'
 export { default as UserPreferences } from './UserPreferences'
 export { default as Welcome } from './Welcome'

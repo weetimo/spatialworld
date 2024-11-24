@@ -4,10 +4,10 @@ import { Avatar, Chip, Box, Button, Typography } from '@mui/material'
 import { Character } from '../../types'
 import { alex, eleanor, ethan, kumar, maya } from '../../assets/avatars'
 
-const StartWorkshop: React.FC = () => {
+const MeetTheCharacters: React.FC = () => {
   const navigate = useNavigate()
 
-  const handleStartWorkshop = () => {
+  const handleStartWorkshop = (): void => {
     navigate('/image-workshop')
   }
 
@@ -175,4 +175,4 @@ const styles = {
   },
 }
 
-export default StartWorkshop
+export default MeetTheCharacters

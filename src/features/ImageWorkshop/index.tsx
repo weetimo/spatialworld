@@ -29,14 +29,8 @@ const ImageWorkshop: React.FC = () => {
   // State Management
   // ========================
 
-  const [images, setImages] = useState<Image[]>([
-    { src: garden0, tags: ['Photogenic', 'Fine Dining', 'Plate of Food'] },
-    { src: garden1, tags: ['Scenic', 'Garden', 'Flowers'] },
-    { src: garden2, tags: ['Landscape', 'Sunset', 'Beautiful'] },
-    { src: garden3, tags: ['Architecture', 'Modern', 'Building'] }
-  ]);
+  const [images, setImages] = useState<Image[]>([ { src: garden0, tags: ['Photogenic', 'Fine Dining', 'Plate of Food'] }]);
 
-  const [screenHeight, setScreenHeight] = useState(window.innerHeight);
   const [isImageEdited, setIsImageEdited] = useState(false);
   const [maskedImageData, setMaskedImageData] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -101,18 +95,6 @@ const ImageWorkshop: React.FC = () => {
       setSelectedTab(0);
     }
   }, [editMode]);
-
-  // Handle window resize to update screen height
-  useEffect(() => {
-    const handleResize = () => {
-      setScreenHeight(window.innerHeight);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
 
   // Load images from localStorage on mount
   useEffect(() => {

@@ -73,7 +73,7 @@ const UserPreferences: React.FC = () => {
     })
     console.log('Preferences saved successfully')
 
-    navigate('/start-workshop')
+    navigate('/meet-characters')
   }
 
   return (
