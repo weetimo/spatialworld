@@ -1,22 +1,20 @@
 import React, { useState, useRef } from 'react'
 import { Box, Typography, TextField, IconButton, Button, Dialog, DialogContent, DialogActions, DialogTitle } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
-import SearchIcon from '@mui/icons-material/Search'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
-
-interface ImageData {
-  url: string;
-  caption: string;
-}
+import { v4 as uuid } from 'uuid'
+import { useDatabase } from '../../hooks'
 
 const Admin: React.FC = () => {
   const navigate = useNavigate()
+  const { createData } = useDatabase()
+
   const [showTitleScreen, setShowTitleScreen] = useState(false)
   const [showContextScreen, setShowContextScreen] = useState(false)
   const [title, setTitle] = useState('')
   const [titleError, setTitleError] = useState(false)
-  const [images, setImages] = useState<ImageData[]>([])
+  const [image, setImage] = useState<{ url: string; caption: string } | null>(null)
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
   const [tempImage, setTempImage] = useState<string | null>(null)
   const [caption, setCaption] = useState('')
@@ -57,17 +55,34 @@ const Admin: React.FC = () => {
 
   const handleUploadDone = () => {
     if (tempImage && caption) {
-      setImages([...images, { url: tempImage, caption }])
+      setImage({ url: tempImage, caption });
       setUploadDialogOpen(false)
       setTempImage(null)
       setCaption('')
     }
   }
 
-  const handleDeleteImage = (index: number) => {
-    const newImages = images.filter((_, i) => i !== index);
-    setImages(newImages);
-  };
+  const handleDeleteImage = () => {
+    setImage(null)
+  }
+
+  const handleSaveToFirebase = async () => {
+    const engagementId = uuid()
+
+    const engagementData = {
+      title,
+      imageUrl: image?.url || 'https://res.cloudinary.com/dgfvymgcc/image/upload/v1732469193/garden0_r84x8n.jpg',
+      imageCaption: image?.caption || ''
+    }
+
+    try {
+      await createData(`engagements/${engagementId}`, engagementData);
+      console.log('Engagement saved successfully:', engagementData);
+      navigate('/admin_home')
+    } catch (error) {
+      console.error('Error saving engagement to Firebase:', error);
+    }
+  }
 
   const handleLogoClick = () => {
     if (showTitleScreen || showContextScreen || showQuestionsScreen) {
@@ -230,11 +245,11 @@ const Admin: React.FC = () => {
                 height: '250px',
                 border: '2px dashed #ccc',
                 borderRadius: '8px',
-                display: 'flex',
+                display: image ? 'none' : 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
-                cursor: 'pointer',
+                cursor: 'pointer'
               }}
             >
               <input
@@ -248,83 +263,81 @@ const Admin: React.FC = () => {
               <Typography variant='h6'>Upload Image</Typography>
             </Box>
 
-            {images.map((image, index) => (
+            <Box
+              sx={{
+                width: '400px',
+                height: '250px',
+                position: 'relative',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                display: image ? 'block' : 'none',
+                '&:hover .caption-overlay': {
+                  display: 'flex',
+                }
+              }}
+            >
+              <img
+                src={image?.url}
+                alt={`Upload`}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
               <Box
-                key={index}
+                className="caption-overlay"
                 sx={{
-                  width: '400px',
-                  height: '250px',
-                  position: 'relative',
-                  borderRadius: '8px',
-                  overflow: 'hidden',
-                  '&:hover .caption-overlay': {
-                    display: 'flex',
-                  }
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: 'rgba(0,0,0,0.7)',
+                  color: 'white',
+                  display: 'none',
+                  padding: '1rem',
+                  textAlign: 'left',
+                  height: 'auto',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
                 }}
               >
-                <img
-                  src={image.url}
-                  alt={`Upload ${index + 1}`}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
+                <Typography sx={{ 
+                  ml: 1,
+                  fontSize: '1rem',
+                  flex: 1,
+                }}>
+                  {image?.caption}
+                </Typography>
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteImage();
                   }}
-                />
-                <Box
-                  className="caption-overlay"
                   sx={{
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.7)',
                     color: 'white',
-                    display: 'none',
-                    padding: '1rem',
-                    textAlign: 'left',
-                    height: 'auto',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                    }
                   }}
                 >
-                  <Typography sx={{ 
-                    ml: 1,
-                    fontSize: '1rem',
-                    flex: 1,
-                  }}>
-                    {image.caption}
-                  </Typography>
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteImage(index);
-                    }}
-                    sx={{
-                      color: 'white',
-                      '&:hover': {
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                      }
-                    }}
-                  >
-                    <DeleteOutlineIcon />
-                  </IconButton>
-                </Box>
+                  <DeleteOutlineIcon />
+                </IconButton>
               </Box>
-            ))}
+            </Box>
           </Box>
 
           <Button 
             variant="contained"
             onClick={handleContextDone}
-            disabled={images.length === 0}
+            disabled={!image}
             sx={{
               borderRadius: '20px',
               px: 6,
               py: 1,
               textTransform: 'none',
               mt: 4,
-              opacity: images.length === 0 ? 0.5 : 1
+              opacity: !image ? 0.5 : 1
             }}
           >
             Next
@@ -461,6 +474,7 @@ const Admin: React.FC = () => {
                 py: 1,
                 textTransform: 'none'
               }}
+              onClick={handleSaveToFirebase}
             >
               Next
             </Button>
@@ -509,67 +523,11 @@ const Admin: React.FC = () => {
 
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            backgroundColor: '#fff',
-            borderRadius: '4px',
-            padding: '0.5rem',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            mb: 3
-          }}
-        >
-          <TextField
-            fullWidth
-            variant='standard'
-            placeholder='Search...'
-            InputProps={{
-              disableUnderline: true,
-              sx: { padding: '0 0.5rem' }
-            }}
-          />
-          <IconButton>
-            <SearchIcon />
-          </IconButton>
-        </Box>
-
-        <Box
-          sx={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
             gap: '1rem'
           }}
         >
-          <Box
-            onClick={() => navigate('/Admin_home')}
-            sx={{
-              backgroundColor: '#fff',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-              cursor: 'pointer',
-              '&:hover': {
-                boxShadow: '0 4px 8px rgba(0,0,0,0.15)'
-              }
-            }}
-          >
-            <img
-              src='src/features/Admin_home/HomeContent/images/base_inpaint.jpg'
-              alt='SCTB Green Spaces'
-              style={{
-                width: '100%',
-                height: '200px',
-                objectFit: 'cover'
-              }}
-            />
-            <Box sx={{ p: 2 }}>
-              <Typography variant='subtitle1' fontWeight='bold'>
-                SCTB Green Spaces
-              </Typography>
-              <Typography variant='body2' color='text.secondary'>
-                25 days more to review
-              </Typography>
-            </Box>
-          </Box>
           <Button
             onClick={handleOpenTitleScreen}
             sx={{
