@@ -1,35 +1,34 @@
+import { useState } from 'react'
 import axios from 'axios'
 
 const useCloudinary = () => {
-  const uploadImage = async (imageFile: File): Promise<string> => {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'preset')
+    formData.append('cloud_name', 'dgfvymgcc')
+
     try {
-      const cloudName = 'dgfvymgcc'
-      const uploadPreset = 'preset'
-
-      const formData = new FormData()
-      formData.append('file', imageFile)
-      formData.append('upload_preset', uploadPreset)
-
-      console.log('Uploading to Cloudinary:', {
-        fileName: imageFile.name,
-        preset: uploadPreset,
-        cloudName,
-      })
-
+      setUploading(true);
+      setError(null);
       const response = await axios.post(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        `https://api.cloudinary.com/v1_1/dgfvymgcc/image/upload`,
         formData
-      )
-
-      console.log('Cloudinary Response:', response.data)
+      );
+      setUploading(false);
       return response.data.secure_url
-    } catch (error) {
-      console.error('Error uploading image to Cloudinary:', error)
-      throw error
+    } catch (err) {
+      setUploading(false);
+      setError('Failed to upload image');
+      console.error('Error uploading image to Cloudinary:', err);
+      return null;
     }
-  }
+  };
 
-  return { uploadImage }
-}
+  return { uploadImage, uploading, error };
+};
 
 export default useCloudinary

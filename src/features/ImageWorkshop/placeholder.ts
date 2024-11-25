@@ -17,6 +17,7 @@ const userIds = ['2gbvy1ed', '4qffh7ml', 'y497dgwg'];
       id: uuidv4(),
       critique: critiques,
       engagementId,
+      category: 'what',
       imageUrl,
       originalPrompt: randomString(),
       upscaledPrompt: randomString(),

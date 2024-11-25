@@ -1,14 +1,17 @@
-import React, { useState, useRef } from 'react'
-import { Box, Typography, TextField, IconButton, Button, Dialog, DialogContent, DialogActions, DialogTitle } from '@mui/material'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { Paper, Box, Typography, TextField, IconButton, Button, Dialog, DialogContent, DialogActions, DialogTitle } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import { v4 as uuid } from 'uuid'
-import { useDatabase } from '../../hooks'
+import { useDatabase, useCloudinary } from '../../hooks'
 
 const Admin: React.FC = () => {
   const navigate = useNavigate()
-  const { createData } = useDatabase()
+  const { createData, readData } = useDatabase()
+  const { uploadImage, uploading, error } = useCloudinary()
+
+  const [engagements, setEngagements] = useState<any[]>([])
 
   const [showTitleScreen, setShowTitleScreen] = useState(false)
   const [showContextScreen, setShowContextScreen] = useState(false)
@@ -21,6 +24,29 @@ const Admin: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showQuestionsScreen, setShowQuestionsScreen] = useState(false)
   const [showRestartDialog, setShowRestartDialog] = useState(false)
+
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [modalType, setModalType] = useState<'MULTI_ANSWERS' | 'FREE_RESPONSE' | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState<{ question: string; choices: string[] }>({ question: '', choices: [] });
+  const [questionModalOpen, setQuestionModalOpen] = useState(false);
+
+  const stableReadData = useCallback(readData, [])
+
+  useEffect(() => {
+    const fetchEngagements = async () => {
+      try {
+        const data = await readData('engagements')
+        if (data) {
+          const engagementArray = Object.entries(data).map(([id, value]: [string, any]) => ({ id, ...value }))
+          setEngagements(engagementArray)
+        }
+      } catch (error) {
+        console.error('Error fetching engagements:', error)
+      }
+    }
+
+    fetchEngagements()
+  }, [stableReadData])
 
   const handleOpenTitleScreen = () => {
     setShowTitleScreen(true)
@@ -39,18 +65,6 @@ const Admin: React.FC = () => {
   const handleContextDone = () => {
     setShowContextScreen(false)
     setShowQuestionsScreen(true)
-  }
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setTempImage(reader.result as string)
-        setUploadDialogOpen(true)
-      }
-      reader.readAsDataURL(file)
-    }
   }
 
   const handleUploadDone = () => {
@@ -75,9 +89,18 @@ const Admin: React.FC = () => {
       imageCaption: image?.caption || ''
     }
 
+    const questionnaireData = {
+      id: engagementId,
+      questions,
+    }  
+
     try {
       await createData(`engagements/${engagementId}`, engagementData);
       console.log('Engagement saved successfully:', engagementData);
+
+      await createData(`questionnaires/${engagementId}`, questionnaireData);
+      console.log('Questionnaire saved successfully:', questionnaireData);
+      
       navigate('/admin_home')
     } catch (error) {
       console.error('Error saving engagement to Firebase:', error);
@@ -96,6 +119,50 @@ const Admin: React.FC = () => {
     setShowRestartDialog(false)
     window.location.reload()
   }
+
+  const handleAddQuestion = () => {
+    if (modalType === 'MULTI_ANSWERS' && currentQuestion.question.trim() && currentQuestion.choices.length > 0) {
+      setQuestions((prev) => [
+        ...prev,
+        {
+          id: `q${questions.length + 1}`,
+          type: modalType,
+          question: currentQuestion.question,
+          choices: [...currentQuestion.choices],
+        },
+      ])
+    } else if (modalType === 'FREE_RESPONSE' && currentQuestion.question.trim()) {
+      setQuestions((prev) => [
+        ...prev,
+        {
+          id: `q${questions.length + 1}`,
+          type: modalType,
+          question: currentQuestion.question,
+          choices: [],
+        },
+      ])
+    }
+    setCurrentQuestion({ question: '', choices: [] })
+    setQuestionModalOpen(false)
+  }
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const cloudinaryUrl = await uploadImage(file)
+      if (cloudinaryUrl) {
+        setTempImage(cloudinaryUrl)
+        setUploadDialogOpen(true)
+      } else {
+        console.error('Failed to retrieve Cloudinary URL')
+      }
+    } catch (err) {
+      console.error('Error during image upload:', err)
+    }
+  }
+  
 
   if (showTitleScreen) {
     return (
@@ -416,6 +483,65 @@ const Admin: React.FC = () => {
           <Typography variant='h5'>Public Engagement Dashboard</Typography>
         </Box>
 
+        <Dialog open={questionModalOpen} onClose={() => setQuestionModalOpen(false)}>
+          <DialogContent>
+            <TextField
+              fullWidth
+              label="Question"
+              value={currentQuestion.question}
+              onChange={(e) => setCurrentQuestion((prev) => ({ ...prev, question: e.target.value }))}
+              placeholder="Enter the question"
+              margin="normal"
+            />
+            {modalType === 'MULTI_ANSWERS' && (
+              <>
+                {currentQuestion.choices.map((choice, index) => (
+                  <Box key={index} display="flex" alignItems="center" gap={2} mb={2}>
+                    <TextField
+                      fullWidth
+                      value={choice}
+                      onChange={(e) =>
+                        setCurrentQuestion((prev) => {
+                          const updatedChoices = [...prev.choices];
+                          updatedChoices[index] = e.target.value;
+                          return { ...prev, choices: updatedChoices };
+                        })
+                      }
+                      placeholder={`Choice ${index + 1}`}
+                    />
+                    <Button
+                      onClick={() =>
+                        setCurrentQuestion((prev) => ({
+                          ...prev,
+                          choices: prev.choices.filter((_, i) => i !== index),
+                        }))
+                      }
+                    >
+                      Remove
+                    </Button>
+                  </Box>
+                ))}
+                <Button
+                  onClick={() =>
+                    setCurrentQuestion((prev) => ({
+                      ...prev,
+                      choices: [...prev.choices, ''],
+                    }))
+                  }
+                >
+                  Add Choice
+                </Button>
+              </>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setQuestionModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleAddQuestion} variant="contained">
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+
         <Box sx={{ 
           width: '100%',
           maxWidth: '100%',
@@ -433,6 +559,10 @@ const Admin: React.FC = () => {
             <Button
               variant="outlined"
               startIcon={<AddCircleOutlineIcon />}
+              onClick={() => {
+                setModalType('MULTI_ANSWERS');
+                setQuestionModalOpen(true);
+              }}
               sx={{
                 borderRadius: '20px',
                 py: 2,
@@ -450,6 +580,10 @@ const Admin: React.FC = () => {
             <Button
               variant="outlined"
               startIcon={<AddCircleOutlineIcon />}
+              onClick={() => {
+                setModalType('FREE_RESPONSE');
+                setQuestionModalOpen(true);
+              }}
               sx={{
                 borderRadius: '20px',
                 py: 2,
@@ -465,6 +599,57 @@ const Admin: React.FC = () => {
             </Button>
           </Box>
 
+          <Box mt={4}>
+            {questions.map((q, index) => (
+              <Paper
+                key={index}
+                sx={{
+                  width: '100%',
+                  maxWidth: '100%',
+                  p: 3,
+                  mb: 2,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 2,
+                  backgroundColor: 'white',
+                  margin: '0 auto',
+                  boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+                }}
+              >
+                <Typography variant="h6" mb={2}>
+                  {q.question}
+                </Typography>
+                {q.type === 'MULTI_ANSWERS' && (
+                  <Box>
+                    <Typography variant="body1" fontWeight="bold" mb={1}>
+                      Choices:
+                    </Typography>
+                    <ul>
+                      {q.choices.map((choice, idx) => (
+                        <li key={idx}>
+                          <Typography variant="body2">{choice}</Typography>
+                        </li>
+                      ))}
+                    </ul>
+                  </Box>
+                )}
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={() =>
+                    setQuestions((prev) => prev.filter((_, i) => i !== index))
+                  }
+                  sx={{
+                    mt: 2,
+                    textTransform: 'none',
+                  }}
+                >
+                  Delete Question
+                </Button>
+              </Paper>
+            ))}
+          </Box>
+
           <Box sx={{ position: 'fixed', bottom: '2rem', right: '2rem' }}>
             <Button
               variant="contained"
@@ -474,7 +659,10 @@ const Admin: React.FC = () => {
                 py: 1,
                 textTransform: 'none'
               }}
-              onClick={handleSaveToFirebase}
+              onClick={(event) => {
+                event.preventDefault()
+                handleSaveToFirebase()
+              }}
             >
               Next
             </Button>
@@ -528,6 +716,42 @@ const Admin: React.FC = () => {
             gap: '1rem'
           }}
         >
+          {/* Map Engagements */}
+          {engagements?.map((engagement) => (
+            <Box
+              key={engagement.id}
+              onClick={() => navigate(`/admin_home/${engagement.id}`)}
+              sx={{
+                backgroundColor: '#fff',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                cursor: 'pointer',
+                '&:hover': {
+                  boxShadow: '0 4px 8px rgba(0,0,0,0.15)'
+                }
+              }}
+            >
+              <img
+                src={engagement.imageUrl || 'https://via.placeholder.com/300x200'}
+                alt={engagement.title || 'Engagement'}
+                style={{
+                  width: '100%',
+                  height: '200px',
+                  objectFit: 'cover'
+                }}
+              />
+              <Box sx={{ p: 2 }}>
+                <Typography variant='subtitle1' fontWeight='bold'>
+                  {engagement.title}
+                </Typography>
+                <Typography variant='body2' color='text.secondary'>
+                  {engagement.imageCaption || 'No caption provided'}
+                </Typography>
+              </Box>
+            </Box>
+          ))}
+
           <Button
             onClick={handleOpenTitleScreen}
             sx={{

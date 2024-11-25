@@ -1,12 +1,15 @@
 import React, { useState } from 'react'
 import { Box, Typography, IconButton } from '@mui/material'
 import { Home, MessageSquare, ImagePlus } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import HomeContent from './HomeContent'
 import QnaContent from './QnaContent'
 import ImageContent from './ImageContent'
 
-const Admin_home: React.FC<{ engagementId: string }> = ({ engagementId }) => {
+const Admin_home: React.FC = () => {
+  const { id } = useParams()
+  const engagementId = id
+
   const [activeTab, setActiveTab] = useState('home')
   const navigate = useNavigate()
 
