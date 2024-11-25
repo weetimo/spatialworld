@@ -8,8 +8,9 @@ import {
   ResponsiveContainer
 } from 'recharts'
 import { Typography, Box, Button } from '@mui/material'
-import { useState } from 'react'
-import { mockData } from './data'
+import React, { useEffect, useState } from 'react'
+import { generateData, getTopicsForQuestion } from './util'
+import { useDatabase } from '../../../hooks'
 
 // Define types for the data structure
 interface Response {
@@ -37,21 +38,35 @@ interface ColorScheme {
   border: string
 }
 
-const QnaContent = () => {
+const QnaContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
+  const { readData } = useDatabase()
+
   // State for storing selected filters for each question
   const [selectedFilters, setSelectedFilters] = useState<
     Record<number, string>
   >({})
+  const [multipleChoiceData, setMultipleChoiceData] = useState<any[]>([])
+  const [openEndedData, setOpenEndedData] = useState<any[]>([])
 
-  // Get topics for a specific question
-  const getTopicsForQuestion = (questionIndex: number): string[] => {
-    const topics = new Set<string>()
-    mockData.openEnded[questionIndex].categories.forEach((category) => {
-      topics.add(category.topic)
-    })
-    return ['All', ...Array.from(topics)]
-  }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const questions = await readData(`questionnaires/${engagementId}/questions`)
+        const users = await readData('users')
 
+        if (!questions || !users) return
+
+        const { multipleChoice, openEnded } = generateData(users, questions)
+        setMultipleChoiceData(multipleChoice)
+        setOpenEndedData(openEnded)
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      }
+    }
+
+    fetchData()
+  }, [engagementId, readData])
+  
   // Get color for a topic
   const getTopicColor = (topic: string, topics: string[]): ColorScheme => {
     const topicIndex = topics.indexOf(topic)
@@ -110,7 +125,7 @@ const QnaContent = () => {
         </Typography>
       </Box>
       {/* Multiple Choice Responses */}
-      {mockData.multipleChoice.map(
+      {multipleChoiceData.map(
         (question: MultipleChoiceQuestion, index: number) => (
           <Box key={index} sx={{ mb: 4 }}>
             <Typography
@@ -154,9 +169,9 @@ const QnaContent = () => {
       )}
 
       {/* Open Ended Responses */}
-      {mockData.openEnded.map(
+      {openEndedData.map(
         (openEndedQuestion: OpenEndedQuestion, questionIndex: number) => {
-          const topics = getTopicsForQuestion(questionIndex)
+          const topics = getTopicsForQuestion(openEndedQuestion)
           const currentFilter = selectedFilters[questionIndex] || 'All'
 
           return (

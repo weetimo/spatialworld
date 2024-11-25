@@ -6,7 +6,7 @@ import { QuestionnaireType } from '../../enums'
 import { Answer, Questionnaire } from '../../types'
 import { useDatabase, useCurrentUser } from '../../hooks'
 
-const UserPreferences: React.FC = () => {
+const UserPreferences: React.FC<{ engagementId: string }> = ({ engagementId }) => {
   const navigate = useNavigate()
   const { createData, readData } = useDatabase()
   const { currentUser } = useCurrentUser()
@@ -19,7 +19,7 @@ const UserPreferences: React.FC = () => {
   useEffect(() => {
     const fetchQuestionnaire = async () => {
       try {
-        const data = await readData('questionnaires/q1')
+        const data = await readData(`questionnaires/${engagementId}`)
         setQuestionnaire(data);
         console.log('Questionnaire loaded successfully:', data)
       } catch (error) {

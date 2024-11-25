@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Box,
   Typography,
@@ -32,20 +32,20 @@ import {
   Cell
 } from 'recharts'
 import ReactWordcloud from 'react-d3-cloud'
+import { exportToCSV, demographicsData, regionData } from './utils'
+import { useDatabase } from '../../../hooks'
 
-import {
-  regionData,
-  demographicsData,
-  participantsData,
-  wordCloudData
-} from './data'
-import { exportToCSV } from './utils'
-import baseImage from './images/base_inpaint.jpg'
-import heatmapImage from './images/heatmap_inpaint.jpg'
-import communityImage from './images/community_image.jpg'
-// import wordCloudImage from './images/word_cloud.jpg'
+const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
+  const { readData } = useDatabase()
 
-const HomeContent = () => {
+  const [engagementData, setEngagementData] = useState<any>(null)
+  const [participants, setParticipants] = useState<any[]>([])
+  const [generations, setGenerations] = useState<any[]>([])
+
+  const [wordCloudData, setWordCloudData] = useState<any[]>([])
+  const [heatmapImageUrl, setHeatmapImageUrl] = useState<string>('')
+  const [communityImageUrl, setCommunityImageUrl] = useState<string>('')
+
   const [openWordCloudSettings, setOpenWordCloudSettings] = useState(false)
   const [wordCloudGender, setWordCloudGender] = useState('male')
   const [wordCloudAge, setWordCloudAge] = useState([20, 35])
@@ -54,6 +54,84 @@ const HomeContent = () => {
   const [openSettings, setOpenSettings] = useState(false)
   const [gender, setGender] = useState('male')
   const [age, setAge] = useState([20, 35])
+
+  useEffect(() => {
+    const fetchParticipants = async () => {
+      try {
+        const data = await readData('users')
+        if (data) {
+          const usersArray = Object.entries(data).map(([id, user]) => ({ id, ...user }))
+          setParticipants(usersArray)
+        }
+      } catch (error) {
+        console.error('Error fetching participants:', error)
+      }
+    }
+
+    fetchParticipants()
+  }, [readData])
+
+  useEffect(() => {
+    const fetchEngagement = async () => {
+      try {
+        const data = await readData(`engagements/${engagementId}`)
+        setEngagementData(data)
+      } catch (error) {
+        console.error('Error fetching engagement data:', error)
+      }
+    }
+
+    const fetchGenerations = async () => {
+      try {
+        const data = await readData(`generations/${engagementId}`)
+        setGenerations(data)
+      } catch (error) {
+        console.error('Error fetching generations data:', error)
+      }
+    }
+
+    if (engagementId) {
+      fetchEngagement()
+      fetchGenerations()
+    }
+  }, [engagementId, readData])
+
+  useEffect(() => {
+    generateWordCloud()
+  }, [])
+
+  const generateWordCloud = async () => {
+    try {
+      const response = await fetch('/api/generateWordCloud') // TODO: Change to actual API
+      const data = await response.json() || {}
+      setWordCloudData(data)
+    } catch (error) {
+      console.error('Error generating word cloud:', error)
+    }
+  }
+
+  const generateHeatMap = async () => {
+    try {
+      const response = await fetch('/api/generateHeatMap') // TODO: Change to actual API
+      const data = await response.json()
+      setHeatmapImageUrl(data.url)
+      setShowHeatMap(true)
+    } catch (error) {
+      console.error('Error generating heat map:', error)
+    }
+  }
+
+  const generateCommunityImage = async () => {
+    try {
+      const response = await fetch('/api/generateCommunityImage') // TODO: Change to actual API
+      const data = await response.json()
+      setCommunityImageUrl(data.url)
+      setShowGeneratedImage(true)
+    } catch (error) {
+      console.error('Error generating community image:', error);
+    }
+  }
+
   const handleGenderChange = (
     _event: React.MouseEvent<HTMLElement>,
     newGender: string | null
@@ -341,7 +419,7 @@ const HomeContent = () => {
             }}
           >
             <Button
-              onClick={() => exportToCSV(participantsData)}
+              onClick={() => exportToCSV(participants)}
               startIcon={<Download size={18} />}
               variant='outlined'
               sx={{ borderRadius: '8px' }}
@@ -369,7 +447,7 @@ const HomeContent = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {participantsData.map((participant) => (
+                {participants.map((participant) => (
                   <TableRow key={participant.id}>
                     <TableCell>{participant.name}</TableCell>
                     <TableCell>{participant.email}</TableCell>
@@ -381,11 +459,11 @@ const HomeContent = () => {
                           py: 0.5,
                           borderRadius: '16px',
                           backgroundColor:
-                            participant.gender === 'Male'
+                            participant.gender === 'MALE'
                               ? '#e0f2fe'
                               : '#fce7f3',
                           color:
-                            participant.gender === 'Male'
+                            participant.gender === 'MALE'
                               ? '#0369a1'
                               : '#be185d'
                         }}
@@ -432,14 +510,14 @@ const HomeContent = () => {
               <ResponsiveContainer>
                 <PieChart>
                   <Pie
-                    data={regionData}
+                    data={regionData(participants)}
                     dataKey='value'
                     nameKey='name'
                     cx='50%'
                     cy='50%'
                     outerRadius={100}
                   >
-                    {regionData.map((entry, index) => (
+                    {regionData(participants).map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -459,7 +537,7 @@ const HomeContent = () => {
                 justifyContent: 'center'
               }}
             >
-              {regionData.map((region) => (
+              {regionData(participants).map((region) => (
                 <Box
                   key={region.name}
                   sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
@@ -501,32 +579,23 @@ const HomeContent = () => {
           >
             Age & Gender
           </Typography>
-          {/* <Box
-            sx={{
-              height: '300px',
-              backgroundColor: 'white',
-              p: 2,
-              borderRadius: '8px',
-              boxShadow: '0 2px 3px rgba(0,0,0,0.1)'
-            }}
-          > */}
           <Box sx={{ height: '300px' }}>
             <ResponsiveContainer width='100%' height='100%'>
               <BarChart
                 layout='vertical'
-                data={demographicsData}
+                data={demographicsData(participants)}
                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
               >
                 <XAxis type='number' />
-                <YAxis dataKey='age' type='category' />
+                <YAxis dataKey='age' type='category' interval={0} />
                 <Tooltip
                   cursor={false}
                   content={({ payload }) => {
                     if (!payload || !payload.length) return null
 
                     const colors = {
-                      Male: '#ef4444',
-                      Female: '#f97316'
+                      male: '#ef4444',
+                      female: '#f97316'
                     }
 
                     return (
@@ -599,7 +668,7 @@ const HomeContent = () => {
         >
           {/* Base Image */}
           <img
-            src={baseImage}
+            src={engagementData?.imageUrl}
             alt='Base area'
             style={{
               width: '800px', // Add this line to set fixed width
@@ -613,7 +682,7 @@ const HomeContent = () => {
           {/* Heat Map Overlay - Only shown when showHeatMap is true */}
           {showHeatMap && (
             <img
-              src={heatmapImage}
+              src={heatmapImageUrl}
               alt='Heat map overlay'
               style={{
                 position: 'absolute',
@@ -631,7 +700,7 @@ const HomeContent = () => {
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
           <Button
             variant='outlined'
-            onClick={() => setShowHeatMap(!showHeatMap)}
+            onClick={generateHeatMap}
             sx={{
               borderRadius: '8px',
               textTransform: 'none',
@@ -696,12 +765,11 @@ const HomeContent = () => {
           {/* Show image only when generated */}
           {showGeneratedImage ? (
             <img
-              src={communityImage}
+              src={communityImageUrl}
               alt='Generated community'
               style={{
                 width: '100%',
                 aspectRatio: '16/9', // Maintains consistent height ratio
-                // height: '100%',
                 objectFit: 'cover',
                 borderRadius: '8px'
               }}
@@ -729,7 +797,7 @@ const HomeContent = () => {
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
           <Button
             variant='contained'
-            onClick={() => setShowGeneratedImage(true)}
+            onClick={generateCommunityImage}
             sx={{
               borderRadius: '8px',
               textTransform: 'none',

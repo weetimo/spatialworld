@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Box, Typography, IconButton } from '@mui/material'
 import { Home, MessageSquare, ImagePlus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -6,7 +6,7 @@ import HomeContent from './HomeContent'
 import QnaContent from './QnaContent'
 import ImageContent from './ImageContent'
 
-const Admin_home = () => {
+const Admin_home: React.FC<{ engagementId: string }> = ({ engagementId }) => {
   const [activeTab, setActiveTab] = useState('home')
   const navigate = useNavigate()
 
@@ -133,17 +133,6 @@ const Admin_home = () => {
           minWidth: 0
         }}
       >
-        {/* Header
-        <Box
-          sx={{
-            padding: '1rem 2rem',
-            backgroundColor: 'white',
-            zIndex: 1
-          }}
-        >
-          <Typography variant='h5'>Public Engagement Dashboard</Typography>
-        </Box> */}
-
         {/* Scrollable Content Area */}
         <Box
           sx={{
@@ -163,9 +152,9 @@ const Admin_home = () => {
               maxWidth: '100%'
             }}
           >
-            {activeTab === 'home' && <HomeContent />}
-            {activeTab === 'qa' && <QnaContent />}
-            {activeTab === 'ai' && <ImageContent />}
+            {activeTab === 'home' && <HomeContent engagementId={engagementId} />}
+            {activeTab === 'qa' && <QnaContent engagementId={'q1'} />}
+            {/* {activeTab === 'ai' && <ImageContent engagementId={engagementId} />} */}
           </Box>
         </Box>
       </Box>

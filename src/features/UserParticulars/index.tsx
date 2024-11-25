@@ -5,9 +5,9 @@ import { ageGroups } from '../../constants'
 import { Gender, UserRole } from '../../enums'
 import { useDatabase, useCurrentUser } from '../../hooks'
 
-const UserParticulars: React.FC = () => {
+const UserParticulars: React.FC<{ engagementId: string }> = ({ engagementId }) => {
   const navigate = useNavigate()
-  const { createData } = useDatabase()
+  const { createData, updateData } = useDatabase()
   const { saveUser } = useCurrentUser()
 
   const [user, setUser] = useState({
@@ -31,6 +31,11 @@ const UserParticulars: React.FC = () => {
     const userWithId = { ...user, id: userId }
 
     await createData(`users/${userId}`, userWithId)
+
+    await updateData(`engagements/${engagementId}`, {
+      userIds: { [userId]: true }
+    })
+
     saveUser(userWithId)
 
     navigate('/user-preferences')
