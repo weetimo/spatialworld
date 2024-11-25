@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Request
 from image_segmentation import ImageSegmentationService, PointCoordinates, SegmentationResponse
 from topic_modelling import GenerateTopics
 from caption_upscaling import CaptionUpscale
+from overlay_heatmap import HeatmapService, HeatmapRequest, HeatmapResponse
 from openai import OpenAI
 from typing import List
 import os
@@ -11,6 +12,7 @@ app = FastAPI()
 
 # intialize image segmentation
 image_segmentation_service = ImageSegmentationService()
+heatmap_service = HeatmapService()
 
 @app.post("/segment/", response_model=SegmentationResponse)
 async def segment_image(coordinates: PointCoordinates):
@@ -27,10 +29,10 @@ async def segment_image(coordinates: PointCoordinates):
     except HTTPException as e:
         raise e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) 
-    
+        raise HTTPException(status_code=500, detail=str(e))
 
-    
+
+
 @app.post("/generate-topics/")
 async def generate_topics(request: Request):
     try:
@@ -45,7 +47,6 @@ async def generate_topics(request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    
 
 @app.post("/improve-caption/")
 async def improve_caption(request: Request):
@@ -57,6 +58,15 @@ async def improve_caption(request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/overlay-heatmap/", response_model=HeatmapResponse)
+async def overlay_heatmap(request: HeatmapRequest):
+    try:
+        response = await heatmap_service.create_overlay(request)
+        if not response.success:
+            raise HTTPException(status_code=500, detail=response.error)
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":
