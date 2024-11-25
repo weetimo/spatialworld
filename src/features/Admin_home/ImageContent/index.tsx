@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import {
   Box,
   Typography,
@@ -9,69 +9,60 @@ import {
   InputAdornment,
   TextField,
   alpha,
-  IconButton,
-  Container,
-  Divider
+  IconButton
 } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import { Favorite as HeartIcon } from '@mui/icons-material'
 import ClearIcon from '@mui/icons-material/Clear'
 import Fuse from 'fuse.js'
-import { mockImages } from './MockData'
 import ImageView from '../ImageView'
+import { useDatabase } from '../../../hooks'
+import { calculateStats, stringToPastelColor } from './utils'
 
-const predefinedCategories = [{ name: 'All', color: '#e5e7eb' }]
+const ImageContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
+  const { readData } = useDatabase()
 
-const stringToPastelColor = (string) => {
-  let hash = 0
-  for (let i = 0; i < string.length; i++) {
-    hash = string.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  const hue = hash % 360
-  const saturation = 70
-  const lightness = 80
-  return `hsl(${hue}, ${saturation}%, ${lightness}%)`
-}
+  const [generations, setGenerations] = useState<any[]>([])
 
-const calculateStats = () => {
-  const distribution = mockImages.reduce((acc, img) => {
-    acc[img.category] = (acc[img.category] || 0) + 1
-    return acc
-  }, {})
-
-  const total = mockImages.length
-
-  const distributionStats = Object.entries(distribution).map(
-    ([category, count]) => ({
-      category,
-      count,
-      percentage: (count / total) * 100,
-      color: category === 'All' ? '#e5e7eb' : stringToPastelColor(category)
-    })
-  )
-
-  return { distributionStats, total }
-}
-
-const ImageContent = () => {
   const [activeCategory, setActiveCategory] = useState('All')
-  const { distributionStats } = calculateStats()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedImage, setSelectedImage] = useState(null)
 
+  const { distributionStats } = calculateStats(generations)
+
+  const predefinedCategories = [{ name: 'All', color: '#e5e7eb' }]
+
+  const stableReadData = useCallback(readData, [])
+
+  useEffect(() => {
+    const fetchGenerations = async () => {
+      try {
+        const data = await readData(`generations/${engagementId}`)
+        const formattedData = Object.values(data).map((img: any) => img)
+        setGenerations(formattedData)
+      } catch (error) {
+        console.error('Error fetching generations data:', error)
+      }
+    }
+
+    if (engagementId) {
+      fetchGenerations()
+    }
+  }, [engagementId, stableReadData])
+
   const fuse = useMemo(
     () =>
-      new Fuse(mockImages, {
-        keys: ['prompt'],
+      new Fuse(generations, {
+        keys: ['upscaledPrompt'],
         threshold: 0.6,
         minMatchCharLength: 1,
         shouldSort: true
       }),
-    []
+    [generations]
   )
 
   const getFilteredImages = useMemo(() => {
-    let results = mockImages
+    let results = generations
     if (searchQuery.trim()) {
       const searchResults = fuse.search(searchQuery)
       results = searchResults.map((result) => result.item)
@@ -271,7 +262,7 @@ const ImageContent = () => {
           gap: 3
         }}
       >
-        {getFilteredImages.map((image) => (
+        {getFilteredImages?.map((image) => (
           <Paper
             key={image.id}
             elevation={0}
@@ -292,7 +283,7 @@ const ImageContent = () => {
           >
             <Box
               component='img'
-              src={image.url}
+              src={image.imageUrl}
               sx={{
                 width: '100%',
                 objectFit: 'cover',
@@ -314,7 +305,7 @@ const ImageContent = () => {
               }}
             >
               <Typography variant='subtitle1' sx={{ mb: 1, padding: 1 }}>
-                {image.prompt}
+                {image.upscaledPrompt}
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', px: 1, pb: 1 }}>
                 <HeartIcon fontSize='small' sx={{ color: '#ef4444' }} />
@@ -322,7 +313,7 @@ const ImageContent = () => {
                   variant='caption'
                   sx={{ ml: 0.5, color: '#ef4444' }}
                 >
-                  {image.likes}
+                  {image.voters?.length}
                 </Typography>
               </Box>
             </Box>
@@ -344,7 +335,7 @@ const ImageContent = () => {
         ))}
       </Box>
 
-      {getFilteredImages.length === 0 && (
+      {getFilteredImages?.length === 0 && (
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <Typography color='textSecondary'>
             No images found matching your criteria

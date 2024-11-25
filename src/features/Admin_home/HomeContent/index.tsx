@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
   Box,
   Typography,
@@ -55,6 +55,8 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
   const [gender, setGender] = useState('male')
   const [age, setAge] = useState([20, 35])
 
+  const stableReadData = useCallback(readData, [])
+
   useEffect(() => {
     const fetchParticipants = async () => {
       try {
@@ -69,7 +71,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
     }
 
     fetchParticipants()
-  }, [readData])
+  }, [stableReadData])
 
   useEffect(() => {
     const fetchEngagement = async () => {
@@ -94,7 +96,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
       fetchEngagement()
       fetchGenerations()
     }
-  }, [engagementId, readData])
+  }, [engagementId, stableReadData])
 
   useEffect(() => {
     generateWordCloud()

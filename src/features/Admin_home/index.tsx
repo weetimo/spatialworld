@@ -153,8 +153,8 @@ const Admin_home: React.FC<{ engagementId: string }> = ({ engagementId }) => {
             }}
           >
             {activeTab === 'home' && <HomeContent engagementId={engagementId} />}
-            {activeTab === 'qa' && <QnaContent engagementId={'q1'} />}
-            {/* {activeTab === 'ai' && <ImageContent engagementId={engagementId} />} */}
+            {activeTab === 'qa' && <QnaContent engagementId={engagementId} />}
+            {activeTab === 'ai' && <ImageContent engagementId={engagementId} />}
           </Box>
         </Box>
       </Box>

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import {
   Box,
   Typography,
@@ -15,25 +15,42 @@ import {
   ArrowBack as ArrowBackIcon,
   Favorite as HeartIcon,
   Person as PersonIcon,
-  Assignment as AssignmentIcon,
-  History as HistoryIcon
+  Assignment as AssignmentIcon
 } from '@mui/icons-material'
+import { useDatabase } from '../../../hooks'
+import { getQuestionsAndAnswers, stringToPastelColor } from './utils'
 
-const stringToPastelColor = (string) => {
-  let hash = 0
-  for (let i = 0; i < string.length; i++) {
-    hash = string.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  const hue = hash % 360
-  return `hsl(${hue}, 70%, 80%)`
-}
-
-const ImageView = ({ imageData, onBack }) => {
+const ImageView: React.FC<{ imageData: any, onBack: any }> = ({ imageData, onBack }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-  const isTablet = useMediaQuery(theme.breakpoints.down('lg'))
 
   if (!imageData) return null
+
+  const { readData } = useDatabase()
+
+  const [user, setUser] = useState<any[]>([])
+  const [questionsAndAnswers, setQuestionsAndAnswers] = useState<any[]>([])
+
+  const stableReadData = useCallback(readData, [])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const user = await readData(`users/${imageData.userId}`)
+        setUser(user)
+
+        const questions = await getQuestionsAndAnswers(
+          imageData.engagementId,
+          user.preferences.answers
+        )
+        setQuestionsAndAnswers(questions)
+      } catch (error) {
+        console.error('Error fetching generations data:', error)
+      }
+    }
+  
+    fetchData()
+  }, [imageData, stableReadData])
 
   return (
     <Box
@@ -131,8 +148,8 @@ const ImageView = ({ imageData, onBack }) => {
           >
             <Box
               component='img'
-              src={imageData.url}
-              alt={imageData.prompt}
+              src={imageData.imageUrl}
+              alt={imageData.originalPrompt}
               sx={{
                 width: '100%',
                 height: '100%',
@@ -159,7 +176,7 @@ const ImageView = ({ imageData, onBack }) => {
               </Typography>
             </Box>
             <Grid container spacing={{ xs: 1, sm: 2 }}>
-              {Object.entries(imageData.userProfile).map(([key, value]) => (
+              {Object.entries({ name: user.name, ageGroup: user.ageGroup, postalCode: user.postalCode, email: user.email }).map(([key, value]) => (
                 <Grid item xs={12} key={key}>
                   <Typography
                     variant='caption'
@@ -243,7 +260,7 @@ const ImageView = ({ imageData, onBack }) => {
                     sx={{ color: '#ef4444' }}
                   />
                   <Typography sx={{ color: '#ef4444', fontWeight: 500 }}>
-                    {imageData.likes}
+                    {imageData.voters?.length}
                   </Typography>
                 </Box>
               </Box>
@@ -259,7 +276,7 @@ const ImageView = ({ imageData, onBack }) => {
                   User Input
                 </Typography>
                 <Typography variant={isMobile ? 'body2' : 'body1'}>
-                  {imageData.prompt}
+                  {imageData.originalPrompt}
                 </Typography>
               </Box>
               <Box>
@@ -295,27 +312,28 @@ const ImageView = ({ imageData, onBack }) => {
               </Typography>
             </Box>
             <Stack spacing={{ xs: 1, sm: 2 }}>
-              {Object.entries(imageData.questionnaire).map(([key, value]) => (
+              {questionsAndAnswers.map((qa, index) => (
                 <Box
-                  key={key}
+                  key={index}
                   sx={{
                     p: { xs: 1.5, sm: 2 },
                     bgcolor: 'background.default',
-                    borderRadius: 4
+                    borderRadius: 4,
                   }}
                 >
                   <Typography
-                    variant='caption'
-                    color='text.secondary'
-                    display='block'
+                    variant="caption"
+                    color="text.secondary"
+                    display="block"
+                    gutterBottom
                   >
-                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                    {qa.question}
                   </Typography>
                   <Typography
-                    fontWeight='500'
-                    variant={isMobile ? 'body2' : 'body1'}
+                    fontWeight="500"
+                    variant="body1"
                   >
-                    {value}
+                    {qa.answers.join(', ')}
                   </Typography>
                 </Box>
               ))}

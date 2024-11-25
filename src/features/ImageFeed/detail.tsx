@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Box, Typography, IconButton, Avatar } from '@mui/material'
 import { ArrowBack, Favorite, FavoriteBorder } from '@mui/icons-material'
@@ -25,6 +25,8 @@ const FeedDetail: React.FC = () => {
     }
   }, [voters, currentUser?.id])
 
+  const stableReadData = useCallback(readData, [])
+
   useEffect(() => {
     const fetchUserName = async () => {
       try {
@@ -36,7 +38,7 @@ const FeedDetail: React.FC = () => {
     }
 
     fetchUserName()
-  }, [userId, readData])
+  }, [userId, stableReadData])
 
   const handleLike = async () => {
     const userId = currentUser?.id

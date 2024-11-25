@@ -1,3 +1,4 @@
+import React, { useEffect, useState, useCallback } from 'react'
 import {
   BarChart,
   Bar,
@@ -8,7 +9,6 @@ import {
   ResponsiveContainer
 } from 'recharts'
 import { Typography, Box, Button } from '@mui/material'
-import React, { useEffect, useState } from 'react'
 import { generateData, getTopicsForQuestion } from './util'
 import { useDatabase } from '../../../hooks'
 
@@ -48,6 +48,8 @@ const QnaContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
   const [multipleChoiceData, setMultipleChoiceData] = useState<any[]>([])
   const [openEndedData, setOpenEndedData] = useState<any[]>([])
 
+  const stableReadData = useCallback(readData, [])
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -65,7 +67,7 @@ const QnaContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
     }
 
     fetchData()
-  }, [engagementId, readData])
+  }, [engagementId, stableReadData])
   
   // Get color for a topic
   const getTopicColor = (topic: string, topics: string[]): ColorScheme => {
