@@ -75,7 +75,7 @@ const Feed: React.FC<{ engagementId: string }> = ({ engagementId }) => {
       {/* Feed Content */}
       <Box sx={styles.content}>
         {posts.map((post) => (
-          <Link to={`/feed/${post.id}`} key={post.id} state={{ post }} style={styles.link}>
+          <Link to={`/feed/${post.userId}`} key={post.id} state={{ post }} style={styles.link}>
             <Box sx={styles.postContainer}>
               <Box sx={styles.userInfo}>
                 <Avatar src={post.user?.avatar} alt={users[post.userId] || 'Unknown User'} sx={styles.avatar} />
