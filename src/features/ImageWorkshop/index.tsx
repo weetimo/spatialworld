@@ -1,7 +1,8 @@
 // ImageWorkshop.tsx
 
 import React, { useState, useEffect } from 'react';
-import { garden0, garden1, garden2, garden3 } from '../../assets/sample-photos';
+import { useParams } from 'react-router-dom';
+import { garden0 } from '../../assets/sample-photos';
 import InfoCritiqueButton from './Critique/infoButton';
 import ImageCarousel from './InpaintingCarousel';
 import { Tabs } from '../../components';
@@ -25,6 +26,9 @@ interface Image {
 // ========================
 
 const ImageWorkshop: React.FC = () => {
+  const { id } = useParams()
+  const engagementId = id
+
   // ========================
   // State Management
   // ========================
@@ -206,6 +210,7 @@ const ImageWorkshop: React.FC = () => {
       label: 'Input',
       content: (
         <Prompt
+          engagementId={engagementId}
           previousPrompt={'This is a test previous prompt.'}
           promptText={promptText}
           setPromptText={setPromptText}

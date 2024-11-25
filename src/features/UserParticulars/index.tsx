@@ -1,11 +1,14 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Box, Button, MenuItem, TextField, Typography } from '@mui/material'
 import { ageGroups } from '../../constants'
 import { Gender, UserRole } from '../../enums'
 import { useDatabase, useCurrentUser } from '../../hooks'
 
-const UserParticulars: React.FC<{ engagementId: string }> = ({ engagementId }) => {
+const UserParticulars = () => {
+  const { id } = useParams()
+  const engagementId = id
+
   const navigate = useNavigate()
   const { createData, updateData } = useDatabase()
   const { saveUser } = useCurrentUser()
@@ -38,7 +41,7 @@ const UserParticulars: React.FC<{ engagementId: string }> = ({ engagementId }) =
 
     saveUser(userWithId)
 
-    navigate('/user-preferences')
+    navigate(`/user-preferences/${engagementId}`)
   }
 
   return (

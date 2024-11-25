@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Box, Button, Typography } from '@mui/material'
 import { garden1, garden2, garden3 } from '../../assets/sample-photos'
 
@@ -22,6 +22,9 @@ const steps = [
 ]
 
 const Welcome: React.FC = () => {
+  const { id } = useParams()
+  const engagementId = id
+
   const navigate = useNavigate()
   
   const [currentStep, setCurrentStep] = useState(0)
@@ -30,7 +33,7 @@ const Welcome: React.FC = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
     } else {
-      navigate('/user-details')
+      navigate(`/user-details/${engagementId}`)
     }
   }
 

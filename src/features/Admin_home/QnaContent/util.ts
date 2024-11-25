@@ -22,7 +22,7 @@ const aggregateMultipleChoice = (users: any[], questions: any[]): any[] => {
     )
   })
 
-  Object.values(users)?.forEach((user) => {
+  users?.forEach((user) => {
     user.preferences?.answers?.forEach((answer: any) => {
       const questionId = answer.questionId
 
@@ -63,7 +63,7 @@ const aggregateOpenEnded = (users: any[], questions: any): any[] => {
   const randomTopics = ['Topic A', 'Topic B', 'Topic C']
 
   const answersByQuestion: Record<string, string[]> = {}
-  Object.values(users).forEach((user) => {
+  users?.forEach((user) => {
     user.preferences?.answers?.forEach((answer: any) => {
       const questionId = answer.questionId
       if (questionMap[questionId]) {

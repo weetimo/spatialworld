@@ -1,14 +1,17 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Avatar, Chip, Box, Button, Typography } from '@mui/material'
 import { Character } from '../../types'
 import { alex, eleanor, ethan, kumar, maya } from '../../assets/avatars'
 
 const MeetTheCharacters: React.FC = () => {
+  const { id } = useParams()
+  const engagementId = id
+
   const navigate = useNavigate()
 
   const handleStartWorkshop = (): void => {
-    navigate('/image-workshop')
+    navigate(`/image-workshop/${engagementId}`)
   }
 
   const characters: Character[] = [

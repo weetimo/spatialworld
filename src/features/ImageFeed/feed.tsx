@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { Box, Typography, IconButton, Avatar } from '@mui/material'
 import { Favorite, FavoriteBorder } from '@mui/icons-material'
 import { useDatabase, useCurrentUser } from '../../hooks'
 
-const Feed: React.FC<{ engagementId: string }> = ({ engagementId }) => {
+const Feed = () => {
+  const { id } = useParams()
+  const engagementId = id
+
   const { readData, updateData } = useDatabase()
   const { currentUser } = useCurrentUser()
 
@@ -75,7 +78,7 @@ const Feed: React.FC<{ engagementId: string }> = ({ engagementId }) => {
       {/* Feed Content */}
       <Box sx={styles.content}>
         {posts.map((post) => (
-          <Link to={`/feed/${post.userId}`} key={post.id} state={{ post }} style={styles.link}>
+          <Link to={`/feed/${engagementId}/${post.userId}`} key={post.id} state={{ post }} style={styles.link}>
             <Box sx={styles.postContainer}>
               <Box sx={styles.userInfo}>
                 <Avatar src={post.user?.avatar} alt={users[post.userId] || 'Unknown User'} sx={styles.avatar} />

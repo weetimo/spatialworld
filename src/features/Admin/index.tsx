@@ -101,7 +101,7 @@ const Admin: React.FC = () => {
       await createData(`questionnaires/${engagementId}`, questionnaireData);
       console.log('Questionnaire saved successfully:', questionnaireData);
       
-      navigate('/admin_home')
+      navigate(`/admin_home/${engagementId}`)
     } catch (error) {
       console.error('Error saving engagement to Firebase:', error);
     }

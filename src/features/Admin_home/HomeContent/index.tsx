@@ -62,7 +62,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
       try {
         const data = await readData('users')
         if (data) {
-          const usersArray = Object.entries(data).map(([id, user]) => ({ id, ...user }))
+          const usersArray = Object.entries(data).map(([id, user]) => ({ id, ...user })).filter(user => user.preferences?.questionnaireId === engagementId)
           setParticipants(usersArray)
         }
       } catch (error) {

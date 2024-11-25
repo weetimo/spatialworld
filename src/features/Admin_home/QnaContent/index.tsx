@@ -55,10 +55,11 @@ const QnaContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
       try {
         const questions = await readData(`questionnaires/${engagementId}/questions`)
         const users = await readData('users')
+        const usersArray = Object.entries(users).map(([id, user]) => ({ id, ...user })).filter(user => user.preferences?.questionnaireId === engagementId)
 
         if (!questions || !users) return
 
-        const { multipleChoice, openEnded } = generateData(users, questions)
+        const { multipleChoice, openEnded } = generateData(usersArray, questions)
         setMultipleChoiceData(multipleChoice)
         setOpenEndedData(openEnded)
       } catch (error) {

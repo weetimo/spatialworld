@@ -6,13 +6,13 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Welcome />} />
-        <Route path="/user-details" element={<UserParticulars engagementId={'e0d2d314-3512-49d6-9fb9-6a27cfc384ad'} />} />
-        <Route path="/user-preferences" element={<UserPreferences engagementId={'e0d2d314-3512-49d6-9fb9-6a27cfc384ad'} />} />
-        <Route path="/meet-characters" element={<MeetTheCharacters />} />
-        <Route path="/image-workshop" element={<ImageWorkshop />} />
-        <Route path="/feed" element={<ImageFeed engagementId={'e0d2d314-3512-49d6-9fb9-6a27cfc384ad'} />} />
-        <Route path="/feed/:id" element={<FeedDetail />} />
+        <Route path="/:id" element={<Welcome />} />
+        <Route path="/user-details/:id" element={<UserParticulars />} />
+        <Route path="/user-preferences/:id" element={<UserPreferences />} />
+        <Route path="/meet-characters/:id" element={<MeetTheCharacters />} />
+        <Route path="/image-workshop/:id" element={<ImageWorkshop />} />
+        <Route path="/feed/:id" element={<ImageFeed />} />
+        <Route path="/feed/:engagementId/:id" element={<FeedDetail />} />
         <Route path='/admin' element={<Admin />} />
         <Route path='/admin_home/:id' element={<Admin_home />} />
       </Routes>

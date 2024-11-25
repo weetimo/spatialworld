@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Box, Typography, Button, TextField, LinearProgress } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import { QuestionnaireType } from '../../enums'
 import { Answer, Questionnaire } from '../../types'
 import { useDatabase, useCurrentUser } from '../../hooks'
 
-const UserPreferences: React.FC<{ engagementId: string }> = ({ engagementId }) => {
+const UserPreferences = () => {
+  const { id } = useParams()
+  const engagementId = id
+
   const navigate = useNavigate()
   const { createData, readData } = useDatabase()
   const { currentUser } = useCurrentUser()
@@ -73,7 +76,7 @@ const UserPreferences: React.FC<{ engagementId: string }> = ({ engagementId }) =
     })
     console.log('Preferences saved successfully')
 
-    navigate('/meet-characters')
+    navigate(`/meet-characters/${engagementId}`)
   }
 
   return (

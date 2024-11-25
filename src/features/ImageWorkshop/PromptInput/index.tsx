@@ -7,6 +7,7 @@ import starIcon from '../../../assets/icons/ai.png'
 import activeStarIcon from '../../../assets/icons/ai-white.png'
 
 interface PromptInputProps {
+  engagementId: string
   promptText: string
   setPromptText: React.Dispatch<React.SetStateAction<string>>
   handleProcessPrompt: () => void
@@ -17,6 +18,7 @@ interface PromptInputProps {
 }
 
 const PromptInput: React.FC<PromptInputProps> = ({
+  engagementId,
   promptText,
   setPromptText,
   handleProcessPrompt,
@@ -41,7 +43,7 @@ const PromptInput: React.FC<PromptInputProps> = ({
   const handleResetPrompt = (): void => setPromptText('')
   
   const handleEndJourney = (): void => {
-    navigate('/feed')
+    navigate(`/feed/${engagementId}`)
   }
 
   return (
