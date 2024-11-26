@@ -31,7 +31,7 @@ const PromptInput: React.FC<PromptInputProps> = ({
 
   const [copySuccessSnackbarOpen, setCopySuccessSnackbarOpen] = useState(false)
 
-  const isActive: boolean = isImageEdited && promptText.length > 0 && !loading
+  const isActive: boolean = promptText.length > 0 && !loading
 
   const handleCopyPrompt = (): void => {
     navigator.clipboard.writeText(promptText)
@@ -92,7 +92,7 @@ const PromptInput: React.FC<PromptInputProps> = ({
       </Box>
 
       {/* Previous Prompt Section */}
-      {previousPrompt && <PreviousGeneration previousPrompt={previousPrompt} handleGoToPreviousGeneration={handleGoToPreviousGeneration} />}
+      {/* {previousPrompt && <PreviousGeneration previousPrompt={previousPrompt} handleGoToPreviousGeneration={handleGoToPreviousGeneration} />} */}
 
       {/* Finish Button */}
       <Button variant="contained" fullWidth sx={styles.finishButton} onClick={handleEndJourney}>
