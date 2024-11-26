@@ -1,6 +1,6 @@
 // ImageWorkshop.tsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { garden0 } from '../../assets/sample-photos';
 import InfoCritiqueButton from './Critique/infoButton';
@@ -10,6 +10,7 @@ import Prompt from './PromptInput';
 import InpaintingTools from './InpaintingTools';
 import Critique from './Critique/dialog';
 import { Box, Button, Dialog, DialogContent, Typography } from '@mui/material';
+import { useDatabase } from '../../hooks';
 
 // ========================
 // Type Definitions
@@ -29,11 +30,32 @@ const ImageWorkshop: React.FC = () => {
   const { id } = useParams()
   const engagementId = id
 
+  const { readData } = useDatabase()
+
+  const [engagementData, setEngagementData] = useState<any>(null)
+
+  const stableReadData = useCallback(readData, [])
+
+  useEffect(() => {
+    const fetchEngagement = async () => {
+      try {
+        const data = await readData(`engagements/${engagementId}`)
+        setEngagementData(data)
+      } catch (error) {
+        console.error('Error fetching engagement data:', error)
+      }
+    }
+
+    if (engagementId) {
+      fetchEngagement()
+    }
+  }, [engagementId, stableReadData])
+
   // ========================
   // State Management
   // ========================
 
-  const [images, setImages] = useState<Image[]>([ { src: garden0, tags: ['Photogenic', 'Fine Dining', 'Plate of Food'] }]);
+  const [images, setImages] = useState<Image[]>([ { src: engagementData?.imageUrl, tags: ['Photogenic', 'Fine Dining', 'Plate of Food'] }]);
 
   const [isImageEdited, setIsImageEdited] = useState(false);
   const [maskedImageData, setMaskedImageData] = useState<string | null>(null);
