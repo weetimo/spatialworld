@@ -32,7 +32,7 @@ import {
   Cell
 } from 'recharts'
 import ReactWordcloud from 'react-d3-cloud'
-import { exportToCSV, demographicsData, regionData } from './utils'
+import { exportToCSV, demographicsData, regionData, word_cloud } from './utils'
 import { useDatabase } from '../../../hooks'
 
 const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
@@ -42,7 +42,9 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
   const [participants, setParticipants] = useState<any[]>([])
   const [generations, setGenerations] = useState<any[]>([])
 
-  const [wordCloudData, setWordCloudData] = useState<any[]>([])
+  const [wordCloudData, setWordCloudData] = useState<
+    Array<{ text: string; value: number }>
+  >([])
   const [heatmapImageUrl, setHeatmapImageUrl] = useState<string>('')
   const [communityImageUrl, setCommunityImageUrl] = useState<string>('')
 
@@ -62,7 +64,11 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
       try {
         const data = await readData('users')
         if (data) {
-          const usersArray = Object.entries(data).map(([id, user]) => ({ id, ...user })).filter(user => user.preferences?.questionnaireId === engagementId)
+          const usersArray = Object.entries(data)
+            .map(([id, user]) => ({ id, ...user }))
+            .filter(
+              (user) => user.preferences?.questionnaireId === engagementId
+            )
           setParticipants(usersArray)
         }
       } catch (error) {
@@ -85,8 +91,12 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
 
     const fetchGenerations = async () => {
       try {
-        const data = await readData(`generations/${engagementId}`)
-        setGenerations(data)
+        const data = await readData(`generations/${'5920582525'}`)
+        const generationsArray = Object.values(data)
+        setGenerations(generationsArray)
+
+        const cloud = word_cloud(generationsArray)
+        setWordCloudData(cloud)
       } catch (error) {
         console.error('Error fetching generations data:', error)
       }
@@ -98,19 +108,6 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
     }
   }, [engagementId, stableReadData])
 
-  useEffect(() => {
-    generateWordCloud()
-  }, [])
-
-  const generateWordCloud = async () => {
-    try {
-      const response = await fetch('/api/generateWordCloud') // TODO: Change to actual API
-      const data = await response.json() || {}
-      setWordCloudData(data)
-    } catch (error) {
-      console.error('Error generating word cloud:', error)
-    }
-  }
 
   const generateHeatMap = async () => {
     try {
@@ -130,7 +127,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
       setCommunityImageUrl(data.url)
       setShowGeneratedImage(true)
     } catch (error) {
-      console.error('Error generating community image:', error);
+      console.error('Error generating community image:', error)
     }
   }
 
@@ -871,13 +868,13 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
         >
           <ReactWordcloud
             data={wordCloudData}
-            fontSize={(word) => Math.log2(word.value) * 4} // Adjusted multiplier
+            fontSize={(word) => 20 + Math.pow(word.value, 3) * 1.5}
             font='impact'
-            rotate={0} // No rotation for cleaner look
-            padding={10} // Increased padding between words
-            width={1200} // Increased width
-            height={350} // Adjusted height
-            spiral='archimedean' // Changed spiral type
+            rotate={0}
+            padding={5}
+            width={1200}
+            height={350}
+            spiral='archimedean'
             fill={(_word: any, index: number) =>
               ['#0d47a1', '#2e7d32', '#ef4444', '#f97316'][index % 4]
             }

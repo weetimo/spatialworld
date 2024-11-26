@@ -115,3 +115,59 @@ export const regionData = (users: any[]) => {
     color
   }))
 }
+
+interface Generation {
+  prompt: string;
+}
+
+// Updated interface to match ReactWordcloud expectations
+interface WordCloudData {
+  text: string;
+  value: number;
+}
+
+export const word_cloud = (generations: Generation[]): WordCloudData[] => {
+  const stopWords = new Set([
+    'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from',
+    'has', 'he', 'in', 'is', 'it', 'its', 'of', 'on', 'that', 'the',
+    'to', 'was', 'were', 'will', 'with', 'the', 'this', 'but', 'they',
+    'have', 'had', 'what', 'when', 'where', 'who', 'which', 'why', 'how'
+  ]);
+
+  const wordCount: { [key: string]: number } = {};
+
+  generations.forEach(generation => {
+    const words = generation.originalPrompt
+      .toLowerCase()
+      .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+      .split(/\s+/);
+
+    words.forEach(word => {
+      if (word && !stopWords.has(word)) {
+        if (wordCount[word] === undefined) {
+          wordCount[word] = 1;
+        } else {
+          wordCount[word] += 1;
+        }
+      }
+    });
+  });
+
+  // Transform to ReactWordcloud format
+  const wordCloudData: WordCloudData[] = Object.entries(wordCount)
+    .map(([text, value]) => ({ text, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 20);
+
+  // Find min and max values for normalization
+  const maxValue = Math.max(...wordCloudData.map(word => word.value));
+  const minValue = Math.min(...wordCloudData.map(word => word.value));
+
+  // Normalize the values to 1-10
+  return wordCloudData.map(word => ({
+    text: word.text,
+    value: minValue === maxValue
+      ? 5  // If all values are the same, set to middle of range
+      : 1 + ((word.value - minValue) * (10 - 1)) / (maxValue - minValue)
+  }));
+};
