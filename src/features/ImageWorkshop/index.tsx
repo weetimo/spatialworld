@@ -33,6 +33,7 @@ const ImageWorkshop: React.FC = () => {
   const { readData } = useDatabase()
 
   const [engagementData, setEngagementData] = useState<any>(null)
+  const [images, setImages] = useState<Image[]>([ { src: engagementData?.imageUrl, tags: [engagementData?.imageCaption] }]);
 
   const stableReadData = useCallback(readData, [])
 
@@ -51,12 +52,15 @@ const ImageWorkshop: React.FC = () => {
     }
   }, [engagementId, stableReadData])
 
+  useEffect(() => {
+    if (engagementData) {
+      setImages([{ src: engagementData.imageUrl, tags: [engagementData.imageCaption] }])
+    }
+  }, [engagementData])
+
   // ========================
   // State Management
   // ========================
-
-  const [images, setImages] = useState<Image[]>([ { src: engagementData?.imageUrl, tags: ['Photogenic', 'Fine Dining', 'Plate of Food'] }]);
-
   const [isImageEdited, setIsImageEdited] = useState(false);
   const [maskedImageData, setMaskedImageData] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
