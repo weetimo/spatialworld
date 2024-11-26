@@ -10,6 +10,8 @@ import os
 from PIL import Image, ImageOps
 import io
 import logging
+import base64
+import requests
 
 # initialize
 app = FastAPI()
@@ -147,6 +149,30 @@ async def improve_caption(request: Request):
     except Exception as e:
         logger.error(f"Error improving caption: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/img2img")
+async def img2img(
+    image: UploadFile = File(...),
+    prompt: str = Form(...)
+):
+    contents = await image.read()
+    base64_image = base64.b64encode(contents).decode('utf-8')
+    response = requests.post(
+        "https://api.getimg.ai/v1/stable-diffusion-xl/image-to-image",
+        headers={
+            "accept": "application/json",
+            "content-type": "application/json",
+            "authorization": f"Bearer {os.getenv('GETIMG_API_KEY')}"
+        },
+        json={
+            "prompt": prompt,
+            "image": base64_image,
+            "strength": 0.5
+        }
+    ) 
+    return {"url": response.json()["url"]}
+
 
 if __name__ == "__main__":
     import uvicorn
