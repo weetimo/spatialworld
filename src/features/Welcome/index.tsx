@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Box, Button, Typography } from '@mui/material'
 import { garden1, garden2, garden3 } from '../../assets/sample-photos'
+import { useDatabase } from '../../hooks'
 
 const steps = [
   {
@@ -11,7 +12,7 @@ const steps = [
   },
   {
     title: 'Your Canvas: The Green Field',
-    description: 'Begin with a blank slate - a peaceful green field in SUTD. Imagine and shape this open space into your ideal vision with the power of AI!',
+    description: 'Begin with a blank slate, and imagine and shape this open space into your ideal vision with the power of AI!',
     image: garden2
   },
   {
@@ -26,8 +27,26 @@ const Welcome: React.FC = () => {
   const engagementId = id
 
   const navigate = useNavigate()
+  const { readData } = useDatabase()
   
   const [currentStep, setCurrentStep] = useState(0)
+  const [location, setLocationLink] = useState('')
+
+  const stableReadData = useCallback(readData, [])
+
+  useEffect(() => {
+    const fetchEngagement = async () => {
+      try {
+        const data = await readData(`engagements/${engagementId}`)
+        setLocationLink(data.location)
+        console.log('Location loaded successfully:', data)
+      } catch (error) {
+        console.error('Error fetching engagement:', error)
+      }
+    }
+
+    fetchEngagement()
+  }, [stableReadData, engagementId, readData])
 
   const handleNext = (): void => {
     if (currentStep < steps.length - 1) {
@@ -66,13 +85,26 @@ const Welcome: React.FC = () => {
           {steps[currentStep].description}
         </Typography>
 
+        {currentStep === steps.length - 1 && location && (
+          <Button
+            variant="contained"
+            href={location}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{ ...styles.nextButton, ...styles.mapButton, marginBottom: '1rem' }}
+            fullWidth
+          >
+            View Location in Maps
+          </Button>
+        )}
+
         <Button
           variant="contained"
           onClick={handleNext}
           sx={styles.nextButton}
           fullWidth
         >
-          Next
+          {currentStep === steps.length - 1 ? 'Finish' : 'Next'}
         </Button>
       </Box>
     </Box>
@@ -127,6 +159,12 @@ const styles = {
     fontSize: '1rem',
     lineHeight: '1.6',
     marginBottom: '3rem',
+  },
+  mapButton: {
+    backgroundColor: '#4bbfb4',
+    '&:hover': {
+      backgroundColor: '#4bbfb4',
+    },
   },
   nextButton: {
     backgroundColor: '#007bff',

@@ -9,7 +9,7 @@ import { useDatabase, useCloudinary } from '../../hooks'
 const Admin: React.FC = () => {
   const navigate = useNavigate()
   const { createData, readData } = useDatabase()
-  const { uploadImage, uploading, error } = useCloudinary()
+  const { uploadImage } = useCloudinary()
 
   const [engagements, setEngagements] = useState<any[]>([])
 
@@ -17,6 +17,7 @@ const Admin: React.FC = () => {
   const [showContextScreen, setShowContextScreen] = useState(false)
   const [title, setTitle] = useState('')
   const [titleError, setTitleError] = useState(false)
+  const [location, setLocation] = useState('')
   const [image, setImage] = useState<{ url: string; caption: string } | null>(null)
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
   const [tempImage, setTempImage] = useState<string | null>(null)
@@ -85,6 +86,7 @@ const Admin: React.FC = () => {
 
     const engagementData = {
       title,
+      location,
       imageUrl: image?.url || 'https://res.cloudinary.com/dgfvymgcc/image/upload/v1732469193/garden0_r84x8n.jpg',
       imageCaption: image?.caption || ''
     }
@@ -188,14 +190,14 @@ const Admin: React.FC = () => {
 
         <Box sx={{ 
           width: '100%',
-          maxWidth: '600px',
+          maxWidth: '800px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           margin: '0 auto',
           mt: 8
         }}>
-          <Typography variant='h3' sx={{ mb: 6 }}>Let's start with a title</Typography>
+          <Typography variant='h3' sx={{ mb: 6 }}>Let's start with a title and location</Typography>
           <TextField
             autoFocus
             fullWidth
@@ -205,6 +207,36 @@ const Admin: React.FC = () => {
               setTitleError(false)
             }}
             placeholder="Type here"
+            variant="standard"
+            sx={{ 
+              mb: 2,
+              '& .MuiInputBase-input::placeholder': {
+                color: 'text.secondary',
+                opacity: 1
+              },
+              '& .MuiInputBase-input': {
+                color: 'text.primary'
+              },
+              '& input': {
+                color: 'text.primary'
+              },
+              '& .MuiInput-underline:before': {
+                borderBottomColor: 'text.secondary'
+              }
+            }}
+            error={titleError}
+            InputProps={{
+              style: { color: 'inherit' }
+            }}
+          />
+          <TextField
+            autoFocus
+            fullWidth
+            value={location}
+            onChange={(e) => {
+              setLocation(e.target.value)
+            }}
+            placeholder="Input the Google Maps link of the engagement session location"
             variant="standard"
             sx={{ 
               mb: 2,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Box, Typography, Button, TextField, LinearProgress } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
@@ -19,6 +19,8 @@ const UserPreferences = () => {
   const [answers, setAnswers] = useState<Answer[]>([])
   const [freeResponse, setFreeResponse] = useState('')
 
+  const stableReadData = useCallback(readData, [])
+
   useEffect(() => {
     const fetchQuestionnaire = async () => {
       try {
@@ -31,7 +33,7 @@ const UserPreferences = () => {
     }
 
     fetchQuestionnaire()
-  }, [])
+  }, [stableReadData])
 
   const currentQuestion = questionnaire?.questions?.[currentQuestionIndex]
   const isLastQuestion = currentQuestionIndex === (questionnaire?.questions?.length || 0) - 1
