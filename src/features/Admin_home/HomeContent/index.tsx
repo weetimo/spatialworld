@@ -94,8 +94,10 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
         const data = await readData(`generations/${'5920582525'}`)
         const generationsArray = Object.values(data)
         setGenerations(generationsArray)
+        console.log('generations:', generationsArray)
 
         const cloud = word_cloud(generationsArray)
+        console.log('cloud:', cloud)
         setWordCloudData(cloud)
       } catch (error) {
         console.error('Error fetching generations data:', error)
@@ -107,7 +109,6 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
       fetchGenerations()
     }
   }, [engagementId, stableReadData])
-
 
   const generateHeatMap = async () => {
     try {
@@ -868,7 +869,8 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
         >
           <ReactWordcloud
             data={wordCloudData}
-            fontSize={(word) => 20 + Math.pow(word.value, 3) * 1.5}
+            // fontSize={(word) => 10 + Math.pow(word.value, 3) * 1.5}
+            fontSize={(word) => 10 + Math.pow(word.value, 2) * 1.4}
             font='impact'
             rotate={0}
             padding={5}
