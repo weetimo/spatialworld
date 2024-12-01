@@ -41,7 +41,6 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
 
   const [engagementData, setEngagementData] = useState<any>(null)
   const [participants, setParticipants] = useState<any[]>([])
-  const [generations, setGenerations] = useState<Generation[]>([])
 
   const [wordCloudData, setWordCloudData] = useState<
     Array<{ text: string; value: number }>
@@ -63,7 +62,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
   useEffect(() => {
     const fetchParticipants = async () => {
       try {
-        const data = await readData('users')
+        const data = await readData('users') as Record<string, User>
         if (data) {
           const usersArray = Object.entries(data)
             .map(([id, user]: [string, User]) => ({ id, ...user }))
@@ -78,12 +77,12 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
     }
 
     fetchParticipants()
-  }, [stableReadData])
+  }, [stableReadData, engagementId])
 
   useEffect(() => {
     const fetchEngagement = async () => {
       try {
-        const data = await readData(`engagements/${engagementId}`)
+        const data = await readData(`engagements/${engagementId}`) as any
         setEngagementData(data)
       } catch (error) {
         console.error('Error fetching engagement data:', error)
@@ -92,8 +91,8 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
 
     const fetchGenerations = async () => {
       try {
-        const data = await readData(`generations/${'5920582525'}`)
-        const generationsArray = Object.values(data) as Generation[]
+        const data = await readData(`generations/${'5920582525'}`) as Record<string, Generation>
+        const generationsArray = Object.values(data)
         setGenerations(generationsArray)
         console.log('generations:', generationsArray)
 
