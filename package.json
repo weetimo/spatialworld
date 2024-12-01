@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://weetimo.github.io/spatialworld/",
+  "homepage": "https://weetimo.github.io/spatialworld",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc -b && vite build",
