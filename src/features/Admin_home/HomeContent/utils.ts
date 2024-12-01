@@ -171,3 +171,108 @@ export const word_cloud = (generations: Generation[]): WordCloudData[] => {
       : 1 + ((word.value - minValue) * (10 - 1)) / (maxValue - minValue)
   }));
 };
+
+interface ImageDimensions {
+  width: number;
+  height: number;
+}
+
+// Helper function to convert base64 to image
+export const base64ToImage = (base64: string): Promise<HTMLImageElement> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+
+    img.onload = () => {
+      resolve(img);
+    };
+
+    img.onerror = (error) => {
+      reject(new Error(`Failed to load image: ${error}`));
+    };
+
+    try {
+      if (!base64.startsWith('data:image')) {
+        base64 = `data:image/png;base64,${base64}`;
+      }
+      img.src = base64;
+    } catch (error) {
+      reject(new Error(`Invalid base64 data: ${error}`));
+    }
+  });
+};
+
+// Get image dimensions
+export const getImageDimensions = (imageUrl: string): Promise<ImageDimensions> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      resolve({
+        width: img.width,
+        height: img.height
+      });
+    };
+    img.src = imageUrl;
+  });
+};
+
+export const generateHeatmapOverlay = async (
+  baseImageDimensions: ImageDimensions,
+  highlightAreas: string[]
+): Promise<string> => {
+  const canvas = document.createElement('canvas');
+  canvas.width = baseImageDimensions.width;
+  canvas.height = baseImageDimensions.height;
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) {
+    throw new Error('Could not get canvas context');
+  }
+
+  ctx.clearRect(0, 0, baseImageDimensions.width, baseImageDimensions.height);
+  ctx.globalCompositeOperation = 'screen';
+
+  // Process each highlight
+  for (const base64Data of highlightAreas) {
+    try {
+      const fullBase64 = base64Data.startsWith('data:image')
+        ? base64Data
+        : `data:image/png;base64,${base64Data}`;
+
+      const img = await base64ToImage(fullBase64);
+
+      ctx.globalAlpha = 0.2;
+      ctx.drawImage(img, 0, 0);
+
+    } catch (error) {
+      console.error('Error processing highlight:', error);
+    }
+  }
+
+  // Apply color gradient
+  const imageData = ctx.getImageData(0, 0, baseImageDimensions.width, baseImageDimensions.height);
+  const data = imageData.data;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const intensity = data[i];
+    if (intensity > 0) {
+      if (intensity < 128) {
+        // Cold color (Blue)
+        data[i] = 0;
+        data[i + 1] = 0;
+        data[i + 2] = 255;
+        data[i + 3] = Math.min(255, intensity * 2);
+      } else {
+        // Hot color (Red)
+        data[i] = 255;
+        data[i + 1] = 0;
+        data[i + 2] = 0;
+        data[i + 3] = Math.min(255, intensity);
+      }
+    }
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+  return canvas.toDataURL('image/png');
+};
+

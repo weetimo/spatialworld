@@ -32,7 +32,14 @@ import {
   Cell
 } from 'recharts'
 import ReactWordcloud from 'react-d3-cloud'
-import { exportToCSV, demographicsData, regionData, word_cloud } from './utils'
+import {
+  exportToCSV,
+  demographicsData,
+  regionData,
+  word_cloud,
+  generateHeatmapOverlay
+} from './utils'
+import { mock_highlight_regions } from './data'
 import { useDatabase } from '../../../hooks'
 import { Generation, User } from '../../../types'
 
@@ -43,10 +50,15 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
   const [participants, setParticipants] = useState<any[]>([])
   const [generations, setGenerations] = useState<Generation[]>([])
 
+  const [baseImageDimensions, setBaseImageDimensions] = useState<{
+    width: number
+    height: number
+  }>({ width: 0, height: 0 })
+  const [heatmapCanvas, setHeatmapCanvas] = useState<string>('')
+
   const [wordCloudData, setWordCloudData] = useState<
     Array<{ text: string; value: number }>
   >([])
-  const [heatmapImageUrl, setHeatmapImageUrl] = useState<string>('')
   const [communityImageUrl, setCommunityImageUrl] = useState<string>('')
 
   const [openWordCloudSettings, setOpenWordCloudSettings] = useState(false)
@@ -81,6 +93,27 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
   }, [stableReadData])
 
   useEffect(() => {
+    console.log('Image URL:', engagementData?.imageUrl)
+    if (engagementData?.imageUrl) {
+      const img = new Image()
+      img.onload = () => {
+        console.log('Image loaded with dimensions:', {
+          width: img.width,
+          height: img.height
+        })
+        setBaseImageDimensions({
+          width: img.width || 800,
+          height: img.height || 600
+        })
+      }
+      img.onerror = (error) => {
+        console.error('Error loading image:', error)
+      }
+      img.src = engagementData.imageUrl
+    }
+  }, [engagementData?.imageUrl])
+
+  useEffect(() => {
     const fetchEngagement = async () => {
       try {
         const data = await readData(`engagements/${engagementId}`)
@@ -111,11 +144,34 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
     }
   }, [engagementId, stableReadData])
 
+  // const generateHeatMap = async () => {
+  //   try {
+  //     const response = await fetch('/api/generateHeatMap') // TODO: Change to actual API
+  //     const data = await response.json()
+  //     setHeatmapImageUrl(data.url)
+  //     setShowHeatMap(true)
+  //   } catch (error) {
+  //     console.error('Error generating heat map:', error)
+  //   }
+  // }
+
   const generateHeatMap = async () => {
+    console.log('Generate heatmap clicked')
+    console.log('Current dimensions:', baseImageDimensions)
+    console.log('Highlight areas count:', mock_highlight_regions.length)
+
+    if (!baseImageDimensions.width || !baseImageDimensions.height) {
+      console.error('Invalid image dimensions:', baseImageDimensions)
+      return
+    }
+
     try {
-      const response = await fetch('/api/generateHeatMap') // TODO: Change to actual API
-      const data = await response.json()
-      setHeatmapImageUrl(data.url)
+      const heatmapUrl = await generateHeatmapOverlay(
+        baseImageDimensions,
+        mock_highlight_regions
+      )
+      console.log('Heatmap generated successfully')
+      setHeatmapCanvas(heatmapUrl)
       setShowHeatMap(true)
     } catch (error) {
       console.error('Error generating heat map:', error)
@@ -671,9 +727,16 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
           <img
             src={engagementData?.imageUrl}
             alt='Base area'
+            onLoad={(e) => {
+              console.log('Base image loaded:', {
+                naturalWidth: e.currentTarget.naturalWidth,
+                naturalHeight: e.currentTarget.naturalHeight
+              })
+            }}
+            onError={(e) => console.error('Error loading base image:', e)}
             style={{
-              width: '800px', // Add this line to set fixed width
-              margin: '0 auto', // Add this to center the container
+              width: '800px',
+              margin: '0 auto',
               height: 'auto',
               borderRadius: '8px',
               display: 'block'
@@ -683,7 +746,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
           {/* Heat Map Overlay - Only shown when showHeatMap is true */}
           {showHeatMap && (
             <img
-              src={heatmapImageUrl}
+              src={heatmapCanvas}
               alt='Heat map overlay'
               style={{
                 position: 'absolute',
@@ -692,7 +755,8 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
                 width: '100%',
                 height: '100%',
                 opacity: 0.7,
-                borderRadius: '8px'
+                borderRadius: '8px',
+                pointerEvents: 'none'
               }}
             />
           )}
