@@ -34,13 +34,14 @@ import {
 import ReactWordcloud from 'react-d3-cloud'
 import { exportToCSV, demographicsData, regionData, word_cloud } from './utils'
 import { useDatabase } from '../../../hooks'
+import { Generation, User } from '../../../types'
 
 const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
   const { readData } = useDatabase()
 
   const [engagementData, setEngagementData] = useState<any>(null)
   const [participants, setParticipants] = useState<any[]>([])
-  const [generations, setGenerations] = useState<any[]>([])
+  const [generations, setGenerations] = useState<Generation[]>([])
 
   const [wordCloudData, setWordCloudData] = useState<
     Array<{ text: string; value: number }>
@@ -65,7 +66,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
         const data = await readData('users')
         if (data) {
           const usersArray = Object.entries(data)
-            .map(([id, user]) => ({ id, ...user }))
+            .map(([id, user]: [string, User]) => ({ id, ...user }))
             .filter(
               (user) => user.preferences?.questionnaireId === engagementId
             )
@@ -92,7 +93,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
     const fetchGenerations = async () => {
       try {
         const data = await readData(`generations/${'5920582525'}`)
-        const generationsArray = Object.values(data)
+        const generationsArray = Object.values(data) as Generation[]
         setGenerations(generationsArray)
         console.log('generations:', generationsArray)
 

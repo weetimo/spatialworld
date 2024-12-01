@@ -527,7 +527,7 @@ const Admin: React.FC = () => {
             />
             {modalType === 'MULTI_ANSWERS' && (
               <>
-                {currentQuestion.choices.map((choice, index) => (
+                {currentQuestion.choices.map((choice: string, index: number) => (
                   <Box key={index} display="flex" alignItems="center" gap={2} mb={2}>
                     <TextField
                       fullWidth
@@ -657,7 +657,7 @@ const Admin: React.FC = () => {
                       Choices:
                     </Typography>
                     <ul>
-                      {q.choices.map((choice, idx) => (
+                      {q.choices.map((choice: string, idx: number) => (
                         <li key={idx}>
                           <Typography variant="body2">{choice}</Typography>
                         </li>
