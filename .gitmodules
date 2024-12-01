@@ -1,0 +1,3 @@
+[submodule "image-segmentation/FastSAM"]
+path = image-segmentation/FastSAM
+url = https://github.com/CASIA-IVA-Lab/FastSAM.git
