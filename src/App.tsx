@@ -13,8 +13,9 @@ import {
 
 function App() {
   return (
-    <Router>
+    <Router basename="/spatialworld">
       <Routes>
+        <Route path="/" element={<Welcome />} />
         <Route path='/:id' element={<Welcome />} />
         <Route path='/user-details/:id' element={<UserParticulars />} />
         <Route path='/user-preferences/:id' element={<UserPreferences />} />
