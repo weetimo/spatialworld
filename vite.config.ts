@@ -4,29 +4,14 @@ import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "./",
   plugins: [react()],
+  base: '/spatialworld/',
   build: {
-    outDir: 'dist',
-    sourcemap: true,
+    assetsDir: 'assets',
     rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, 'index.html'),
-      },
       output: {
-        entryFileNames: 'assets/[name].[hash].js',
-        chunkFileNames: 'assets/[name].[hash].js',
-        assetFileNames: 'assets/[name].[hash].[ext]',
-        format: 'es'
+        assetFileNames: 'assets/[name].[ext]'
       }
-    }
-  },
-  resolve: {
-    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json']
-  },
-  server: {
-    headers: {
-      'Content-Type': 'application/javascript'
     }
   }
 })
