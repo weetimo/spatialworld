@@ -6,6 +6,7 @@ import PreviousGeneration from '../PreviousGeneration'
 import starIcon from '../../../assets/icons/ai.png'
 import activeStarIcon from '../../../assets/icons/ai-white.png'
 
+
 interface PromptInputProps {
   engagementId: string
   promptText: string
@@ -15,6 +16,13 @@ interface PromptInputProps {
   previousPrompt?: string
   handleGoToPreviousGeneration?: () => void
   isImageEdited: boolean
+  finalImage: FinalImage | null
+  upscaledPrompt: string 
+}
+
+
+interface FinalImage {
+  src: string
 }
 
 const PromptInput: React.FC<PromptInputProps> = ({
@@ -25,12 +33,13 @@ const PromptInput: React.FC<PromptInputProps> = ({
   loading,
   previousPrompt,
   handleGoToPreviousGeneration,
-  isImageEdited
+  isImageEdited,  
+  finalImage,
+  upscaledPrompt
 }) => {
   const navigate = useNavigate()
 
   const [copySuccessSnackbarOpen, setCopySuccessSnackbarOpen] = useState(false)
-
   const isActive: boolean = promptText.length > 0 && !loading
 
   const handleCopyPrompt = (): void => {
@@ -43,6 +52,9 @@ const PromptInput: React.FC<PromptInputProps> = ({
   const handleResetPrompt = (): void => setPromptText('')
   
   const handleEndJourney = (): void => {
+    console.log('handleEndJourney')
+    console.log(finalImage?.src)
+    console.log('Upscaled prompt', upscaledPrompt)
     navigate(`/feed/${engagementId}`)
   }
 
@@ -90,9 +102,6 @@ const PromptInput: React.FC<PromptInputProps> = ({
           </IconButton>
         </Box>
       </Box>
-
-      {/* Previous Prompt Section */}
-      {/* {previousPrompt && <PreviousGeneration previousPrompt={previousPrompt} handleGoToPreviousGeneration={handleGoToPreviousGeneration} />} */}
 
       {/* Finish Button */}
       <Button variant="contained" fullWidth sx={styles.finishButton} onClick={handleEndJourney}>
@@ -193,3 +202,4 @@ const styles: any = {
 }
 
 export default PromptInput
+  
