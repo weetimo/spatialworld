@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { HashRouter as Router, Routes, Route } from 'react-router-dom'
 import {
   FeedDetail,
   ImageFeed,
@@ -13,7 +13,7 @@ import {
 
 function App() {
   return (
-    <Router basename="/spatialworld">
+    <Router>
       <Routes>
         <Route path="/" element={<Welcome />} />
         <Route path='/:id' element={<Welcome />} />
