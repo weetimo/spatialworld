@@ -30,9 +30,7 @@ app.add_middleware(
     allow_headers=["*"], 
 )
 
-client = OpenAI(
-    api_key="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"
-)
+client = OpenAI(api_key="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")
 
 topic_model = BERTopic()
 
@@ -273,8 +271,6 @@ async def analyze_image(request: Request):
         image_url = body.get("image_url")
         if not image_url:
             raise HTTPException(status_code=400, detail="Image URL is required")
-            
-        client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
