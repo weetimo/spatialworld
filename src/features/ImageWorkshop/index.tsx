@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
-import { garden0 } from '../../assets/sample-photos'
-import InfoCritiqueButton from './Critique/infoButton'
 import ImageCarousel from './InpaintingCarousel'
 import { Tabs } from '../../components'
 import Prompt from './PromptInput'
@@ -41,6 +39,7 @@ const ImageWorkshop: React.FC = () => {
   const [images, setImages] = useState<Image[]>([
     { src: engagementData?.imageUrl, tags: [engagementData?.imageCaption] }
   ])
+  const [category, setCategory] = useState<string>('')
 
   const stableReadData = useCallback(readData, [])
 
@@ -225,6 +224,7 @@ const ImageWorkshop: React.FC = () => {
             
             if (analysisResponse.ok) {
               const analysisData = await analysisResponse.json();
+              setCategory(analysisData.category)
               console.log('Image Category:', analysisData.category);
             }
           } catch (analysisError) {
@@ -350,7 +350,7 @@ const ImageWorkshop: React.FC = () => {
           loading={loading}
           finalImage={finalImage} 
           upscaledPrompt={upscaledPrompt}
-          // category of that image
+          category={category}
           // coordinates of that image mask
         />
       )

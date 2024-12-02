@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Box, IconButton, TextareaAutosize, Button, Snackbar, Alert } from '@mui/material'
 import { ContentCopy as ContentCopyIcon, Loop as ResetIcon } from '@mui/icons-material'
-import PreviousGeneration from '../PreviousGeneration'
+import { useDatabase, useCloudinary, useCurrentUser } from '../../../hooks'
 import starIcon from '../../../assets/icons/ai.png'
 import activeStarIcon from '../../../assets/icons/ai-white.png'
 
@@ -18,6 +18,8 @@ interface PromptInputProps {
   isImageEdited: boolean
   finalImage: FinalImage | null
   upscaledPrompt: string 
+  category: string
+  coordinates: number[]
 }
 
 
@@ -31,13 +33,15 @@ const PromptInput: React.FC<PromptInputProps> = ({
   setPromptText,
   handleProcessPrompt,
   loading,
-  previousPrompt,
-  handleGoToPreviousGeneration,
-  isImageEdited,  
   finalImage,
-  upscaledPrompt
+  upscaledPrompt,
+  category,
+  coordinates
 }) => {
   const navigate = useNavigate()
+  const { updateData } = useDatabase()
+  const { uploadImage } = useCloudinary()
+  const { currentUser } = useCurrentUser()
 
   const [copySuccessSnackbarOpen, setCopySuccessSnackbarOpen] = useState(false)
   const isActive: boolean = promptText.length > 0 && !loading
@@ -51,10 +55,21 @@ const PromptInput: React.FC<PromptInputProps> = ({
 
   const handleResetPrompt = (): void => setPromptText('')
   
-  const handleEndJourney = (): void => {
-    console.log('handleEndJourney')
-    console.log(finalImage?.src)
-    console.log('Upscaled prompt', upscaledPrompt)
+  const handleEndJourney = async (): Promise<void> => {
+    const cloudinaryUrl = await uploadImage(finalImage?.src)
+
+    await updateData(`generations/${engagementId}`, {
+      category,
+      createdAt: new Date().toISOString(),
+      engagementId,
+      imageUrl: cloudinaryUrl,
+      originalPrompt: promptText,
+      upscaledPrompt,
+      userId: currentUser?.id,
+      voters: [],
+      coordinates
+    })
+
     navigate(`/feed/${engagementId}`)
   }
 
