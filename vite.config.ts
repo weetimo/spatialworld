@@ -22,10 +22,7 @@ export default defineConfig({
     }
   },
   resolve: {
-    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    }
+    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json']
   },
   server: {
     headers: {
