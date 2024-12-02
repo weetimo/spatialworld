@@ -117,7 +117,7 @@ const ImageWorkshop: React.FC = () => {
   // Function to improve caption via API call
   const improveCaption = async (input: string): Promise<string> => {
     try {
-      const response = await fetch('http://localhost:8000/improve-caption/', {
+      const response = await fetch('/improve-caption/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: input })
@@ -182,18 +182,15 @@ const ImageWorkshop: React.FC = () => {
     const callImpactAPI = async (imageUrl: string) => {
       setImpactLoading(true)
       try {
-        const response = await fetch(
-          'http://localhost:8000/api/character-impact',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              image_url: imageUrl
-            })
-          }
-        )
+        const response = await fetch('/api/character-impact', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            image_url: imageUrl
+          })
+        })
 
         if (!response.ok) {
           throw new Error('Failed to analyze image impact')
@@ -229,7 +226,7 @@ const ImageWorkshop: React.FC = () => {
         const formData = new FormData()
         formData.append('image', originalImageBlob, 'original.png')
         formData.append('prompt', promptText)
-        const response = await fetch('http://localhost:8000/api/img2img', {
+        const response = await fetch('/api/img2img', {
           method: 'POST',
           body: formData
         })
@@ -265,16 +262,13 @@ const ImageWorkshop: React.FC = () => {
 
           // vision
           try {
-            const analysisResponse = await fetch(
-              'http://localhost:8000/api/analyze-image',
-              {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ image_url: data.url })
-              }
-            )
+            const analysisResponse = await fetch('/api/analyze-image', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ image_url: data.url })
+            })
 
             if (analysisResponse.ok) {
               const analysisData = await analysisResponse.json()
@@ -315,7 +309,7 @@ const ImageWorkshop: React.FC = () => {
         console.log('Prompt Text sent:', improvedPrompt)
         console.log('Sending API request with FormData...')
 
-        const response = await fetch('http://localhost:8000/api/edit-image', {
+        const response = await fetch('/api/edit-image', {
           method: 'POST',
           body: formData
         })
@@ -342,16 +336,13 @@ const ImageWorkshop: React.FC = () => {
 
             //VISION
             try {
-              const analysisResponse = await fetch(
-                'http://localhost:8000/api/analyze-image',
-                {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({ image_url: data.url })
-                }
-              )
+              const analysisResponse = await fetch('/api/analyze-image', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image_url: data.url })
+              })
 
               if (analysisResponse.ok) {
                 const analysisData = await analysisResponse.json()
