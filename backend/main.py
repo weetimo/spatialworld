@@ -552,14 +552,11 @@ def create_structured_prompt() -> str:
 async def character_impact(request: Request):
     try:
         body = await request.json()
-        image = body.get("image")
+        image_url = body.get("image_url")
         
         print("Received API Request")
-        if not image:
-            raise HTTPException(status_code=400, detail="Image is required")
-            
-        if not image.startswith('data:image'):
-            image = "data:image/jpeg;base64," + image
+        if not image_url:
+            raise HTTPException(status_code=400, detail="Image URL is required")
             
         print("Making OpenAI Request")
         response = client.chat.completions.create(
@@ -579,7 +576,8 @@ async def character_impact(request: Request):
                         {
                             "type": "image_url",
                             "image_url": {
-                                "url": image
+                                "url": image_url,
+                                "detail": "low"
                             }
                         }
                     ]
@@ -604,8 +602,7 @@ async def character_impact(request: Request):
             status_code=500,
             detail=f"Analysis failed: {str(e)}"
         )
-
-
+        
 # categorize free response
 @app.post("/api/categorize-responses")
 async def categorize_responses(request: Request):

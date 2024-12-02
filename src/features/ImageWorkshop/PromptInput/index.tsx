@@ -19,9 +19,7 @@ interface PromptInputProps {
   finalImage: FinalImage | null
   upscaledPrompt: string 
   category: string
-  coordinates: number[]
 }
-
 
 interface FinalImage {
   src: string
@@ -36,7 +34,6 @@ const PromptInput: React.FC<PromptInputProps> = ({
   finalImage,
   upscaledPrompt,
   category,
-  coordinates
 }) => {
   const navigate = useNavigate()
   const { updateData } = useDatabase()
@@ -67,7 +64,6 @@ const PromptInput: React.FC<PromptInputProps> = ({
       upscaledPrompt,
       userId: currentUser?.id,
       voters: [],
-      coordinates
     })
 
     navigate(`/feed/${engagementId}`)

@@ -2,12 +2,21 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
+import { garden0 } from '../../assets/sample-photos'
+import InfoCritiqueButton from './Critique/infoButton'
 import ImageCarousel from './InpaintingCarousel'
 import { Tabs } from '../../components'
 import Prompt from './PromptInput'
 import InpaintingTools from './InpaintingTools'
 import Critique from './Critique/dialog'
-import { Box, Button, Dialog, DialogContent, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  Typography,
+  CircularProgress
+} from '@mui/material'
 import { useDatabase } from '../../hooks'
 
 // ========================
@@ -23,7 +32,6 @@ interface Image {
 interface FinalImage {
   src: string
 }
-
 
 // ========================
 // ImageWorkshop Component
@@ -87,10 +95,10 @@ const ImageWorkshop: React.FC = () => {
   const [finalImage, setFinalImage] = useState<FinalImage | null>(null)
   const [upscaledPrompt, setUpscaledPrompt] = useState<string>('')
 
-
   // Brush Size
   const [brushSize, setBrushSize] = useState<number>(50)
   const [selectedTab, setSelectedTab] = useState(0)
+  const [impactLoading, setImpactLoading] = useState(false)
 
   // ========================
   // Helper Functions
@@ -171,7 +179,48 @@ const ImageWorkshop: React.FC = () => {
         reader.readAsDataURL(blob)
       })
     }
-  
+    const callImpactAPI = async (imageUrl: string) => {
+      setImpactLoading(true)
+      try {
+        const response = await fetch(
+          'http://localhost:8000/api/character-impact',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              image_url: imageUrl
+            })
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('Failed to analyze image impact')
+        }
+
+        const data = await response.json()
+        console.log('Impact API response:', data)
+
+        if (data.analysis) {
+          const formattedImpactText = Object.entries(data.analysis)
+            .map(([character, impact]) => {
+              return `**${character}**\n${impact}`
+            })
+            .join('\n\n')
+
+          setCriticText(formattedImpactText)
+          setIsGeneratedModalOpen(true) // Only open modal after impact is received
+        }
+      } catch (error) {
+        console.error('Error calling impact API:', error)
+        setCriticText('Error analyzing image impact. Please try again.')
+        setIsGeneratedModalOpen(true) // Open modal with error message if failed
+      } finally {
+        setImpactLoading(false)
+      }
+    }
+
     if (!maskedImageData && promptText) {
       try {
         console.log('Using img2img endpoint')
@@ -179,7 +228,7 @@ const ImageWorkshop: React.FC = () => {
         const originalImageBlob = await originalImageResponse.blob()
         const formData = new FormData()
         formData.append('image', originalImageBlob, 'original.png')
-        formData.append('prompt', promptText) 
+        formData.append('prompt', promptText)
         const response = await fetch('http://localhost:8000/api/img2img', {
           method: 'POST',
           body: formData
@@ -201,41 +250,46 @@ const ImageWorkshop: React.FC = () => {
           setFinalImage({
             src: base64Image,
           })
-          
+
           // set upscaled prompt
           if (data.upscaledPrompt) {
             setUpscaledPrompt(data.upscaledPrompt)
           }
-    
+
           setImages((prevImages) => [...prevImages, newImage])
           setCurrentImageIndex(newIndex)
           setGeneratedImage(data.url)
           setIsGeneratedModalOpen(true)
+          console.log('Getting character impact...')
+          callImpactAPI(data.url)
 
           // vision
           try {
-            const analysisResponse = await fetch('http://localhost:8000/api/analyze-image', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ image_url: data.url })
-            });
-            
+            const analysisResponse = await fetch(
+              'http://localhost:8000/api/analyze-image',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image_url: data.url })
+              }
+            )
+
             if (analysisResponse.ok) {
-              const analysisData = await analysisResponse.json();
+              const analysisData = await analysisResponse.json()
               setCategory(analysisData.category)
-              console.log('Image Category:', analysisData.category);
+              console.log('Image Category:', analysisData.category)
             }
           } catch (analysisError) {
-            console.error('Error analyzing image:', analysisError);
+            console.error('Error analyzing image:', analysisError)
           }
         }
       } catch (error) {
         console.error('Error occurred during img2img:', error)
       } finally {
         setLoading(false)
-      }    
+      }
     } else if (maskedImageData && promptText) {
       try {
         const improvedPrompt = await improveCaption(promptText)
@@ -284,23 +338,28 @@ const ImageWorkshop: React.FC = () => {
             console.log('Generated image URL:', data.url)
             setGeneratedImage(data.url)
             setIsGeneratedModalOpen(true)
+            await callImpactAPI(data.url)
 
             //VISION
             try {
-              const analysisResponse = await fetch('http://localhost:8000/api/analyze-image', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ image_url: data.url })
-              });
-              
+              const analysisResponse = await fetch(
+                'http://localhost:8000/api/analyze-image',
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({ image_url: data.url })
+                }
+              )
+
               if (analysisResponse.ok) {
-                const analysisData = await analysisResponse.json();
-                console.log('Image Category:', analysisData.category);
+                const analysisData = await analysisResponse.json()
+                console.log('Image Category:', analysisData.category)
+                setCategory(analysisData.category)
               }
             } catch (analysisError) {
-              console.error('Error analyzing image:', analysisError);
+              console.error('Error analyzing image:', analysisError)
             }
           }
         } else {
@@ -316,7 +375,7 @@ const ImageWorkshop: React.FC = () => {
       console.warn('Image or prompt missing!')
       setLoading(false)
     }
-}
+  }
 
   // Handle opening the critique modal
   const handleOpenCritiqueModal = () => setOpenCritiqueModal(true)
@@ -348,9 +407,12 @@ const ImageWorkshop: React.FC = () => {
           isImageEdited={isImageEdited}
           handleProcessPrompt={handleProcessPrompt}
           loading={loading}
-          finalImage={finalImage} 
+          finalImage={finalImage}
           upscaledPrompt={upscaledPrompt}
-          category={category}
+          category = {category}
+          
+          
+          // category of that image
           // coordinates of that image mask
         />
       )
@@ -445,7 +507,8 @@ const ImageWorkshop: React.FC = () => {
             sx: {
               borderRadius: '12px',
               boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-              backdropFilter: 'blur(10px)'
+              backdropFilter: 'blur(10px)',
+              height: '65vh'
             }
           }}
         >
@@ -453,7 +516,8 @@ const ImageWorkshop: React.FC = () => {
             sx={{
               display: 'flex',
               flexDirection: 'column',
-              padding: '20px'
+              padding: '20px',
+              gap: 2
             }}
           >
             {generatedImage && (
@@ -464,21 +528,45 @@ const ImageWorkshop: React.FC = () => {
                   width: '100%',
                   height: 'auto',
                   borderRadius: '12px',
-                  marginBottom: '20px',
                   objectFit: 'cover'
                 }}
               />
             )}
-            <Typography
-              variant='h6'
-              fontWeight='bold'
-              align='left'
-              sx={{ marginBottom: '10px' }}
-            >
-              Impact
-            </Typography>
 
-            <Typography align='left'>{criticText}</Typography>
+            {impactLoading ? (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 2,
+                  padding: 3
+                }}
+              >
+                <CircularProgress size={20} />
+                <Typography>Analyzing impact...</Typography>
+              </Box>
+            ) : (
+              <Box sx={{ whiteSpace: 'pre-line' }}>
+                {criticText.split('\n').map((line, index) => (
+                  <Typography
+                    key={index}
+                    align='left'
+                    sx={{
+                      marginBottom: 1,
+                      ...(line.startsWith('**') && line.endsWith('**')
+                        ? {
+                            fontWeight: 'bold'
+                          }
+                        : {})
+                    }}
+                  >
+                    {line.replace(/\*\*/g, '')}
+                  </Typography>
+                ))}
+              </Box>
+            )}
+
             <Button
               variant='contained'
               onClick={() => {
@@ -491,15 +579,12 @@ const ImageWorkshop: React.FC = () => {
                 borderRadius: '12px',
                 padding: '12px 0',
                 textTransform: 'none',
-                marginTop: '18px',
+                marginTop: 'auto',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                '&:hover': {
-                  // Optional hover effect
-                }
+                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)'
               }}
             >
               Acknowledged
