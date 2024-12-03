@@ -65,7 +65,9 @@ const apiProcessResponses = async (responses: string[]): Promise<any[]> => {
     throw new Error(`Failed to process responses: ${response.statusText}`)
   }
 
-  return await response.json()
+  const jsonResponse = await response.json()
+
+  return jsonResponse?.categories
 }
 
 

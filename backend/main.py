@@ -621,35 +621,53 @@ async def categorize_responses(request: Request):
         topic_model = initialize_topic_model()
         topics, _ = topic_model.fit_transform(responses)
         
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "Based on these key words, provide a concise 1-2 word category name. The category name should be broad enough to encompass similar responses."
-                },
-                {
-                    "role": "user",
-                    "content": f"Keywords: {', '.join([word for word, _ in topic_model.get_topic(0)[:5]])}"
-                }
-            ],
-            max_tokens=10
-        )
+        topic_categories = {}
+        grouped_responses = {} 
         
-        category_name = response.choices[0].message.content.strip()
-        
-        response_categories = {}
+        for topic_id in set(topics):
+            if topic_id == -1: continue  # Skip invalid topics
+            keywords = topic_model.get_topic(topic_id)[:5]
+            keyword_list = ', '.join([word for word, _ in keywords])
+            
+            # Generate category name using the model
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Based on these key words, provide a concise 1-2 word category name. The category name should be broad enough to encompass similar responses."
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Keywords: {keyword_list}"
+                    }
+                ],
+                max_tokens=10
+            )
+            
+            category_name = response.choices[0].message.content.strip()
+            topic_categories[topic_id] = category_name
+            grouped_responses[category_name] = []
+
+        # Assign responses to their respective categories
         for r, t in zip(responses, topics):
             if t != -1:
-                response_categories[r] = category_name
+                category_name = topic_categories[t]
+                grouped_responses[category_name].append(r)
             else:
-                response_categories[r] = "Other"
+                grouped_responses.setdefault("Other", []).append(r)
         
-        print("Categories assigned:", response_categories)
+        # Format the output
+        output = [
+            {"topic": topic, "responses": grouped_responses[topic]}
+            for topic in grouped_responses
+        ]
+        
+        print("Grouped responses:", output)
         
         return JSONResponse({
             "success": True,
-            "categories": response_categories
+            "categories": output
         })
         
     except Exception as e:
