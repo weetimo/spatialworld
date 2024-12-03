@@ -74,7 +74,7 @@ def CaptionUpscale(prompt: str):
     1. FULL SCENE DESCRIPTION:
     - Describe the complete scene as you want it to appear in the final image
     - Include both the areas being kept AND the areas being edited
-    - Maintain context and continuity with the unmasked portions of the image
+    - maintain context and continuity with the unmasked portions of the image
 
     2. KEY ELEMENTS TO SPECIFY:
     - Main subjects and their placement

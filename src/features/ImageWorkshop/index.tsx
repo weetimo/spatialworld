@@ -18,6 +18,7 @@ import {
   CircularProgress
 } from '@mui/material'
 import { useDatabase } from '../../hooks'
+import { getApiUrl } from '../../config/api'
 
 // ========================
 // Type Definitions
@@ -117,7 +118,7 @@ const ImageWorkshop: React.FC = () => {
   // Function to improve caption via API call
   const improveCaption = async (input: string): Promise<string> => {
     try {
-      const response = await fetch('/improve-caption/', {
+      const response = await fetch(getApiUrl('improve-caption/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: input })
@@ -182,7 +183,7 @@ const ImageWorkshop: React.FC = () => {
     const callImpactAPI = async (imageUrl: string) => {
       setImpactLoading(true)
       try {
-        const response = await fetch('/api/character-impact', {
+        const response = await fetch(getApiUrl('api/character-impact'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -226,7 +227,7 @@ const ImageWorkshop: React.FC = () => {
         const formData = new FormData()
         formData.append('image', originalImageBlob, 'original.png')
         formData.append('prompt', promptText)
-        const response = await fetch('/api/img2img', {
+        const response = await fetch(getApiUrl('api/img2img'), {
           method: 'POST',
           body: formData
         })
@@ -262,7 +263,7 @@ const ImageWorkshop: React.FC = () => {
 
           // vision
           try {
-            const analysisResponse = await fetch('/api/analyze-image', {
+            const analysisResponse = await fetch(getApiUrl('api/analyze-image'), {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
@@ -302,60 +303,63 @@ const ImageWorkshop: React.FC = () => {
 
         const originalImageResponse = await fetch(images[currentImageIndex].src)
         const originalImageBlob = await originalImageResponse.blob()
+        console.log('Original image size:', originalImageBlob.size, 'bytes')
         formData.append('image', originalImageBlob, 'original.png')
 
         formData.append('prompt', improvedPrompt)
         formData.append('size', '1024x1024')
         console.log('Prompt Text sent:', improvedPrompt)
+        console.log('FormData contents:', Array.from(formData.entries()).map(([key, value]) => `${key}: ${value instanceof Blob ? value.size + ' bytes' : value}`))
         console.log('Sending API request with FormData...')
 
-        const response = await fetch('/api/edit-image', {
+        const response = await fetch(getApiUrl('api/edit-image'), {
           method: 'POST',
           body: formData
         })
 
-        if (response.ok) {
-          const data = await response.json()
-          console.log('API call successful!', data)
-          const preloadedImageUrl = await preloadImage(data.url)
+        if (!response.ok) {
+          const errorData = await response.text()
+          console.error('API Error:', response.status, errorData)
+          throw new Error(`API call failed: ${response.status} ${errorData}`)
+        }
 
-          setIsImageEdited(false)
-          setMaskedImageData(null)
-          setPromptText('')
-          const newImage: Image = { src: data.url, tags: ['Generated'] }
-          const newIndex = images.length
-          setImages((prevImages) => [...prevImages, newImage])
-          setCurrentImageIndex(newIndex)
-          setEditMode(false)
+        const data = await response.json()
+        console.log('API call successful!', data)
+        const preloadedImageUrl = await preloadImage(data.url)
 
-          if (data.url) {
-            console.log('Generated image URL:', data.url)
-            setGeneratedImage(data.url)
-            setIsGeneratedModalOpen(true)
-            await callImpactAPI(data.url)
+        setIsImageEdited(false)
+        setMaskedImageData(null)
+        setPromptText('')
+        const newImage: Image = { src: data.url, tags: ['Generated'] }
+        const newIndex = images.length
+        setImages((prevImages) => [...prevImages, newImage])
+        setCurrentImageIndex(newIndex)
+        setEditMode(false)
 
-            //VISION
-            try {
-              const analysisResponse = await fetch('/api/analyze-image', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ image_url: data.url })
-              })
+        if (data.url) {
+          console.log('Generated image URL:', data.url)
+          setGeneratedImage(data.url)
+          setIsGeneratedModalOpen(true)
+          await callImpactAPI(data.url)
 
-              if (analysisResponse.ok) {
-                const analysisData = await analysisResponse.json()
-                console.log('Image Category:', analysisData.category)
-                setCategory(analysisData.category)
-              }
-            } catch (analysisError) {
-              console.error('Error analyzing image:', analysisError)
+          //VISION
+          try {
+            const analysisResponse = await fetch(getApiUrl('api/analyze-image'), {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ image_url: data.url })
+            })
+
+            if (analysisResponse.ok) {
+              const analysisData = await analysisResponse.json()
+              console.log('Image Category:', analysisData.category)
+              setCategory(analysisData.category)
             }
+          } catch (analysisError) {
+            console.error('Error analyzing image:', analysisError)
           }
-        } else {
-          const errorData = await response.json()
-          console.error('API call failed:', response.status, errorData)
         }
       } catch (error) {
         console.error('Error occurred during API call:', error)

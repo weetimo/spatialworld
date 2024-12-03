@@ -42,6 +42,7 @@ import {
 import { highlightCoordinates } from './data'
 import { useDatabase } from '../../../hooks'
 import { Generation, User } from '../../../types'
+import { getApiUrl } from '../../../config/api'
 
 const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
   const { readData } = useDatabase()
@@ -163,7 +164,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
 
   const generateCommunityImage = async () => {
     try {
-      const response = await fetch('/api/community-image') 
+      const response = await fetch(getApiUrl('api/community-image'))
       const data = await response.json()
       setCommunityImageUrl(data.url)
       setShowGeneratedImage(true)
