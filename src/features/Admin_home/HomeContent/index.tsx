@@ -37,9 +37,9 @@ import {
   demographicsData,
   regionData,
   word_cloud,
-  generateHeatmapOverlay
+  generateHeatMapData
 } from './utils'
-import { mock_highlight_regions } from './data'
+import { highlightCoordinates } from './data'
 import { useDatabase } from '../../../hooks'
 import { Generation, User } from '../../../types'
 
@@ -54,7 +54,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
     width: number
     height: number
   }>({ width: 0, height: 0 })
-  const [heatmapCanvas, setHeatmapCanvas] = useState<string>('')
+  const [heatmapImageUrl, setHeatmapImageUrl] = useState<string>('')
 
   const [wordCloudData, setWordCloudData] = useState<
     Array<{ text: string; value: number }>
@@ -125,7 +125,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
 
     const fetchGenerations = async () => {
       try {
-        const data = await readData(`generations/${'5920582525'}`)
+        const data = await readData(`generations/${engagementId}`)
         const generationsArray = Object.values(data) as Generation[]
         setGenerations(generationsArray)
         console.log('generations:', generationsArray)
@@ -144,34 +144,17 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
     }
   }, [engagementId, stableReadData])
 
-  // const generateHeatMap = async () => {
-  //   try {
-  //     const response = await fetch('/api/generateHeatMap') // TODO: Change to actual API
-  //     const data = await response.json()
-  //     setHeatmapImageUrl(data.url)
-  //     setShowHeatMap(true)
-  //   } catch (error) {
-  //     console.error('Error generating heat map:', error)
-  //   }
-  // }
-
-  const generateHeatMap = async () => {
-    console.log('Generate heatmap clicked')
-    console.log('Current dimensions:', baseImageDimensions)
-    console.log('Highlight areas count:', mock_highlight_regions.length)
-
-    if (!baseImageDimensions.width || !baseImageDimensions.height) {
-      console.error('Invalid image dimensions:', baseImageDimensions)
-      return
-    }
-
+  const generateHeatMap = () => {
     try {
-      const heatmapUrl = await generateHeatmapOverlay(
-        baseImageDimensions,
-        mock_highlight_regions
+      // Generate heat map data URL
+      const heatmapDataUrl = generateHeatMapData(
+        highlightCoordinates,
+        800, // width of your image
+        600 // height of your image
       )
-      console.log('Heatmap generated successfully')
-      setHeatmapCanvas(heatmapUrl)
+
+      // Set the data URL as the heat map image source
+      setHeatmapImageUrl(heatmapDataUrl)
       setShowHeatMap(true)
     } catch (error) {
       console.error('Error generating heat map:', error)
@@ -180,7 +163,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
 
   const generateCommunityImage = async () => {
     try {
-      const response = await fetch('/api/generateCommunityImage') // TODO: Change to actual API
+      const response = await fetch('/api/community-image') 
       const data = await response.json()
       setCommunityImageUrl(data.url)
       setShowGeneratedImage(true)
@@ -698,8 +681,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
           </Box>
         </Box>
       </Box>
-
-      {/* New Image Section */}
+      {/* Test in-painting section */}
       <Box sx={{ mt: 6 }}>
         <Typography
           variant='h6'
@@ -713,40 +695,28 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
         >
           Image
         </Typography>
-        {/* Image Container */}
         <Box
           sx={{
             position: 'relative',
-            width: '800px', // Add this line to set fixed width
-            margin: '0 auto', // Add this to center the container
+            width: '800px',
+            margin: '0 auto',
             borderRadius: '8px',
             overflow: 'hidden'
           }}
         >
-          {/* Base Image */}
           <img
             src={engagementData?.imageUrl}
             alt='Base area'
-            onLoad={(e) => {
-              console.log('Base image loaded:', {
-                naturalWidth: e.currentTarget.naturalWidth,
-                naturalHeight: e.currentTarget.naturalHeight
-              })
-            }}
-            onError={(e) => console.error('Error loading base image:', e)}
             style={{
               width: '800px',
-              margin: '0 auto',
               height: 'auto',
               borderRadius: '8px',
               display: 'block'
             }}
           />
-
-          {/* Heat Map Overlay - Only shown when showHeatMap is true */}
           {showHeatMap && (
             <img
-              src={heatmapCanvas}
+              src={heatmapImageUrl}
               alt='Heat map overlay'
               style={{
                 position: 'absolute',
@@ -755,24 +725,28 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
                 width: '100%',
                 height: '100%',
                 opacity: 0.7,
-                borderRadius: '8px',
-                pointerEvents: 'none'
+                borderRadius: '8px'
               }}
             />
           )}
         </Box>
-        {/* Toggle Button */}
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
           <Button
             variant='outlined'
-            onClick={generateHeatMap}
+            onClick={() => {
+              if (showHeatMap) {
+                setShowHeatMap(false) // Just hide the overlay
+              } else {
+                generateHeatMap() // Generate and show the overlay
+              }
+            }}
             sx={{
               borderRadius: '8px',
               textTransform: 'none',
               minWidth: '150px'
             }}
           >
-            Overlay Heat-map
+            {showHeatMap ? 'Hide Heat-map' : 'Show Heat-map'}
           </Button>
         </Box>
       </Box>

@@ -102,6 +102,9 @@ const Admin: React.FC = () => {
 
       await createData(`questionnaires/${engagementId}`, questionnaireData);
       console.log('Questionnaire saved successfully:', questionnaireData);
+
+      await createData(`generations/${engagementId}`, { engagementId });
+      console.log('Generation prepared:', { engagementId });
       
       navigate(`/admin_home/${engagementId}`)
     } catch (error) {

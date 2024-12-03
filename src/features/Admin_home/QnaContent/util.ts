@@ -50,7 +50,26 @@ const aggregateMultipleChoice = (users: any[], questions: any[]): any[] => {
   return multipleChoiceData
 }
 
-const aggregateOpenEnded = (users: any[], questions: any): any[] => {
+const apiProcessResponses = async (responses: string[]): Promise<any[]> => {
+  const apiUrl = "/api/categorize-responses" 
+
+  const response = await fetch(apiUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ responses })
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to process responses: ${response.statusText}`)
+  }
+
+  return await response.json()
+}
+
+
+const aggregateOpenEnded = async (users: any[], questions: any): any[] => {
   const openEndedData: any[] = []
 
   const questionMap: Record<string, string> = {}
@@ -59,8 +78,6 @@ const aggregateOpenEnded = (users: any[], questions: any): any[] => {
       questionMap[question.id] = question.question
     }
   })
-
-  const randomTopics = ['Topic A', 'Topic B', 'Topic C']
 
   const answersByQuestion: Record<string, string[]> = {}
   users?.forEach((user) => {
@@ -75,17 +92,14 @@ const aggregateOpenEnded = (users: any[], questions: any): any[] => {
     })
   })
 
-  // TODO: Fix this randomizing logic
-  Object.entries(answersByQuestion).forEach(([questionId, responses]) => {
-    const categories = randomTopics.map((topic) => ({
-      topic,
-      responses: responses.splice(0, Math.ceil(responses.length / randomTopics.length)),
-    }))
+  for (const [questionId, responses] of Object.entries(answersByQuestion)) {
+    const categorizedResponses = await apiProcessResponses(responses)
+
     openEndedData.push({
       question: questionMap[questionId],
-      categories,
+      categories: categorizedResponses
     })
-  })
+  }
 
   return openEndedData
 }
