@@ -85,7 +85,6 @@ const ImageWorkshop: React.FC = () => {
   const [loading, setLoading] = useState(false) // Loading state
   const [editMode, setEditMode] = useState<boolean>(false)
 
-  const [openCritiqueModal, setOpenCritiqueModal] = useState(false)
   const [isGeneratedModalOpen, setIsGeneratedModalOpen] =
     useState<boolean>(false)
   const [generatedImage, setGeneratedImage] = useState<string | null>(null)
@@ -165,21 +164,48 @@ const ImageWorkshop: React.FC = () => {
   // Event Handlers
   // ========================
 
+  // Handle passing the final generated image as a file
+  const convertToBase64 = async (url: string): Promise<string> => {
+    const response = await fetch(url)
+    const blob = await response.blob()
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+  }
+
+  const base64ToFile = (base64: string, fileName: string, mimeType: string): File => {
+    const byteString = atob(base64.split(',')[1]) // Decode Base64 string
+    const arrayBuffer = new ArrayBuffer(byteString.length)
+    const uintArray = new Uint8Array(arrayBuffer)
+  
+    for (let i = 0; i < byteString.length; i++) {
+      uintArray[i] = byteString.charCodeAt(i)
+    }
+  
+    return new File([arrayBuffer], fileName, { type: mimeType })
+  }
+  
+
+  const processImage = async (url: string) => {
+    // Convert URL to Base64
+    const base64Image = await convertToBase64(url)
+  
+    // Convert Base64 to File
+    const mimeType = 'image/jpeg' // Replace with the correct MIME type for your image
+    const fileName = 'image.jpg' // Replace with a meaningful name for your image
+    const file = base64ToFile(base64Image, fileName, mimeType)
+    
+    return file
+  }
+
   // Handle sending the prompt to generate an image
   const handleProcessPrompt = async () => {
     console.log('handleProcessPrompt invoked')
     setLoading(true)
 
-    const convertToBase64 = async (url: string): Promise<string> => {
-      const response = await fetch(url)
-      const blob = await response.blob()
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onloadend = () => resolve(reader.result as string)
-        reader.onerror = reject
-        reader.readAsDataURL(blob)
-      })
-    }
     const callImpactAPI = async (imageUrl: string) => {
       setImpactLoading(true)
       try {
@@ -243,11 +269,8 @@ const ImageWorkshop: React.FC = () => {
           const newImage: Image = { src: data.url, tags: ['Generated'] }
           const newIndex = images.length
           // convert to base64 image
-          const base64Image = await convertToBase64(data.url)
-          // set final image as state
-          setFinalImage({
-            src: base64Image,
-          })
+          const finalFileImage = await processImage(data.url)
+          setFinalImage({ src: finalFileImage })
 
           // set upscaled prompt
           if (data.upscaledPrompt) {
@@ -372,12 +395,6 @@ const ImageWorkshop: React.FC = () => {
     }
   }
 
-  // Handle opening the critique modal
-  const handleOpenCritiqueModal = () => setOpenCritiqueModal(true)
-
-  // Handle closing the critique modal
-  const handleCloseCritiqueModal = () => setOpenCritiqueModal(false)
-
   const handleRedoInpainting = () => {
     // Add your redo inpainting logic here
   }
@@ -405,10 +422,7 @@ const ImageWorkshop: React.FC = () => {
           finalImage={finalImage}
           upscaledPrompt={upscaledPrompt}
           category = {category}
-          
-          
-          // category of that image
-          // coordinates of that image mask
+          // TODO: ADD COORDINATES
         />
       )
     },
@@ -446,25 +460,6 @@ const ImageWorkshop: React.FC = () => {
           width: '100%'
         }}
       >
-        {/* Cleaned Code */}
-        {/* <InfoCritiqueButton
-          onInfoClick={handleOpenCritiqueModal}
-          critique={[
-            { character: 'Elderly', feedback: 'FEEDBACK' },
-            { character: 'Children', feedback: 'FEEDBACK' }
-          ]} // SAMPLE DATA
-        />
-
-        <Critique
-          open={openCritiqueModal}
-          onClose={handleCloseCritiqueModal}
-          generatedImageUrl={garden0} // SAMPLE DATA
-          critique={[
-            { character: 'Elderly', feedback: 'FEEDBACK' },
-            { character: 'Children', feedback: 'FEEDBACK' }
-          ]} // SAMPLE DATA
-        /> */}
-
         {/* Image Carousel */}
         <ImageCarousel
           images={images}

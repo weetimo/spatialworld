@@ -24,7 +24,7 @@ const InpaintingTools: React.FC<InpaintingToolsProps> = ({ brushSize, setBrushSi
   return (
     <Box sx={styles.container}>
       {/* Undo and Redo Buttons */}
-      <Box sx={styles.undoRedoContainer}>
+      {/* <Box sx={styles.undoRedoContainer}>
         <IconButton
           onClick={() => handleToolClick('undo', handleUndo)}
           sx={{
@@ -44,7 +44,7 @@ const InpaintingTools: React.FC<InpaintingToolsProps> = ({ brushSize, setBrushSi
         >
           <RedoIcon sx={styles.icon} />
         </IconButton>
-      </Box>
+      </Box> */}
 
       {/* Brush Icon and Slider */}
       <Box sx={styles.brushContainer}>
