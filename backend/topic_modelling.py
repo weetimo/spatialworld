@@ -7,7 +7,7 @@ import os
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=OPENAI_API_KEY) 
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 def GenerateTopics(prompts: List[str]):
     combined_text = "\n\n".join(prompts)  
@@ -20,7 +20,7 @@ def GenerateTopics(prompts: List[str]):
     )
 
     completion = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.5,
         max_tokens=500
