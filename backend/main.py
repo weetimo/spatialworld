@@ -308,7 +308,7 @@ async def analyze_image(request: Request):
 def initialize_topic_model():
     try:
         representation_model = BertOpenAI(
-            client=client,  
+            # client=client,  
             model="gpt-4o-mini",
             chat=True
         )
@@ -414,7 +414,7 @@ async def generate_words(request: Request):
                             key=lambda x: word_frequencies[x], 
                             reverse=True)
 
-        logger.info(f"Generated {len(sorted_words)} unique wor  ds")
+        logger.info(f"Generated {len(sorted_words)} unique words")
         return JSONResponse({
             "words": sorted_words
         })
