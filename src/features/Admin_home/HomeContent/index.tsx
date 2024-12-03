@@ -163,7 +163,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
 
   const generateCommunityImage = async () => {
     try {
-      const response = await fetch('/api/generateCommunityImage') // TODO: Change to actual API
+      const response = await fetch('/api/community-image') 
       const data = await response.json()
       setCommunityImageUrl(data.url)
       setShowGeneratedImage(true)

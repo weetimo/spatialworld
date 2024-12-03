@@ -51,7 +51,7 @@ const aggregateMultipleChoice = (users: any[], questions: any[]): any[] => {
 }
 
 const apiProcessResponses = async (responses: string[]): Promise<any[]> => {
-  const apiUrl = "/api/generateApiResponse" // TODO: Change to actual API
+  const apiUrl = "/api/categorize-responses" 
 
   const response = await fetch(apiUrl, {
     method: "POST",
