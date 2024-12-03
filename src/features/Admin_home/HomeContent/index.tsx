@@ -125,7 +125,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
 
     const fetchGenerations = async () => {
       try {
-        const data = await readData(`generations/${'5920582525'}`)
+        const data = await readData(`generations/${engagementId}`)
         const generationsArray = Object.values(data) as Generation[]
         setGenerations(generationsArray)
         console.log('generations:', generationsArray)
@@ -143,17 +143,6 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
       fetchGenerations()
     }
   }, [engagementId, stableReadData])
-
-  // const generateHeatMap = async () => {
-  //   try {
-  //     const response = await fetch('/api/generateHeatMap') // TODO: Change to actual API
-  //     const data = await response.json()
-  //     setHeatmapImageUrl(data.url)
-  //     setShowHeatMap(true)
-  //   } catch (error) {
-  //     console.error('Error generating heat map:', error)
-  //   }
-  // }
 
   const generateHeatMap = () => {
     try {
