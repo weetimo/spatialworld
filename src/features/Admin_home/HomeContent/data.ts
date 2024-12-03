@@ -202,159 +202,58 @@ export const regionData = [
   ]
 
 
-  interface MaskRegion {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  }
-
-  // Simulate common areas where users might focus
-  const commonFocusAreas = [
-    // Center of interest regions
-    { x: 320, y: 200, width: 160, height: 140 },  // Primary focal point
-    { x: 300, y: 180, width: 200, height: 180 },  // Slightly larger overlap
-    { x: 280, y: 160, width: 240, height: 220 },  // Even larger overlap
-
-    // Secondary points of interest
-    { x: 150, y: 250, width: 120, height: 100 },
-    { x: 550, y: 220, width: 140, height: 120 },
-
-    // Small detail areas
-    { x: 400, y: 350, width: 80, height: 60 },
-    { x: 200, y: 150, width: 90, height: 70 }
+  export const highlightCoordinates = [
+    // User highlighting a small region in top-left
+    {
+      userId: "user_001",
+      coordinates: { x1: 100, y1: 150, x2: 200, y2: 250 }
+    },
+    // User highlighting a larger central region
+    {
+      userId: "user_002",
+      coordinates: { x1: 300, y1: 200, x2: 600, y2: 450 }
+    },
+    // User highlighting multiple smaller regions
+    {
+      userId: "user_003",
+      coordinates: { x1: 450, y1: 100, x2: 550, y2: 200 }
+    },
+    {
+      userId: "user_003",
+      coordinates: { x1: 600, y1: 300, x2: 700, y2: 400 }
+    },
+    // User highlighting a region in bottom-right
+    {
+      userId: "user_004",
+      coordinates: { x1: 800, y1: 500, x2: 900, y2: 600 }
+    },
+    // User highlighting overlapping region with user_002
+    {
+      userId: "user_005",
+      coordinates: { x1: 350, y1: 250, x2: 550, y2: 400 }
+    },
+    // User highlighting a thin horizontal region
+    {
+      userId: "user_006",
+      coordinates: { x1: 200, y1: 350, x2: 800, y2: 380 }
+    },
+    // User highlighting a thin vertical region
+    {
+      userId: "user_007",
+      coordinates: { x1: 400, y1: 100, x2: 430, y2: 500 }
+    },
+    // User highlighting near edges
+    {
+      userId: "user_008",
+      coordinates: { x1: 0, y1: 0, x2: 100, y2: 100 }
+    },
+    {
+      userId: "user_009",
+      coordinates: { x1: 900, y1: 550, x2: 1000, y2: 600 }
+    },
+    // User highlighting very small region
+    {
+      userId: "user_010",
+      coordinates: { x1: 275, y1: 275, x2: 325, y2: 325 }
+    }
   ];
-
-  function createMockHighlight(width: number, height: number, regions: MaskRegion[]): string {
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext('2d');
-
-    if (!ctx) {
-      throw new Error('Could not get canvas context');
-    }
-
-    // Clear canvas
-    ctx.clearRect(0, 0, width, height);
-
-    // Create gradient for more natural highlighting
-    regions.forEach(region => {
-      const gradient = ctx.createRadialGradient(
-        region.x + region.width/2, region.y + region.height/2, 0,
-        region.x + region.width/2, region.y + region.height/2, region.width/2
-      );
-
-      gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-      gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.3)');
-      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-
-      ctx.fillStyle = gradient;
-
-      // Draw elliptical shapes instead of rectangles for more natural look
-      ctx.beginPath();
-      ctx.ellipse(
-        region.x + region.width/2,
-        region.y + region.height/2,
-        region.width/2,
-        region.height/2,
-        0, 0, 2 * Math.PI
-      );
-      ctx.fill();
-    });
-
-    // Apply gaussian blur for softer edges
-    ctx.filter = 'blur(15px)';
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = width;
-    tempCanvas.height = height;
-    const tempCtx = tempCanvas.getContext('2d');
-
-    if (tempCtx) {
-      tempCtx.drawImage(canvas, 0, 0);
-      ctx.clearRect(0, 0, width, height);
-      ctx.drawImage(tempCanvas, 0, 0);
-    }
-
-    return canvas.toDataURL('image/png').split(',')[1];
-  }
-
-  export function generateMockHighlightPatterns(width: number, height: number): string[] {
-    // Simulate 10 different users' focus patterns
-    return [
-      // User 1: Focused mainly on central area
-      createMockHighlight(width, height, [
-        commonFocusAreas[0],
-        commonFocusAreas[1],
-        { x: 350, y: 230, width: 100, height: 80 }
-      ]),
-
-      // User 2: Interested in details
-      createMockHighlight(width, height, [
-        commonFocusAreas[5],
-        commonFocusAreas[6],
-        { x: 280, y: 200, width: 60, height: 40 }
-      ]),
-
-      // User 3: Broad focus pattern
-      createMockHighlight(width, height, [
-        commonFocusAreas[2],
-        commonFocusAreas[3],
-        { x: 450, y: 280, width: 160, height: 140 }
-      ]),
-
-      // User 4: Asymmetric focus
-      createMockHighlight(width, height, [
-        commonFocusAreas[1],
-        commonFocusAreas[4],
-        { x: 200, y: 300, width: 140, height: 120 }
-      ]),
-
-      // User 5: Detail-oriented
-      createMockHighlight(width, height, [
-        commonFocusAreas[5],
-        commonFocusAreas[6],
-        { x: 380, y: 220, width: 70, height: 50 },
-        { x: 440, y: 180, width: 60, height: 40 }
-      ]),
-
-      // User 6: Central focus with peripheral interest
-      createMockHighlight(width, height, [
-        commonFocusAreas[0],
-        { x: 180, y: 160, width: 100, height: 80 },
-        { x: 520, y: 240, width: 90, height: 70 }
-      ]),
-
-      // User 7: Scattered attention
-      createMockHighlight(width, height, [
-        commonFocusAreas[3],
-        commonFocusAreas[4],
-        { x: 300, y: 350, width: 120, height: 90 },
-        { x: 400, y: 150, width: 80, height: 60 }
-      ]),
-
-      // User 8: Focused on secondary details
-      createMockHighlight(width, height, [
-        commonFocusAreas[5],
-        { x: 250, y: 200, width: 110, height: 90 },
-        { x: 480, y: 280, width: 100, height: 80 }
-      ]),
-
-      // User 9: Broad strokes
-      createMockHighlight(width, height, [
-        commonFocusAreas[2],
-        { x: 200, y: 250, width: 180, height: 160 },
-        { x: 450, y: 200, width: 160, height: 140 }
-      ]),
-
-      // User 10: Mixed focus
-      createMockHighlight(width, height, [
-        commonFocusAreas[1],
-        commonFocusAreas[5],
-        { x: 350, y: 300, width: 130, height: 110 },
-        { x: 200, y: 180, width: 90, height: 70 }
-      ])
-    ];
-  }
-
-  export const mock_highlight_regions = generateMockHighlightPatterns(800, 600);

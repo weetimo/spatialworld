@@ -172,107 +172,73 @@ export const word_cloud = (generations: Generation[]): WordCloudData[] => {
   }));
 };
 
-interface ImageDimensions {
-  width: number;
-  height: number;
-}
-
-// Helper function to convert base64 to image
-export const base64ToImage = (base64: string): Promise<HTMLImageElement> => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-
-    img.onload = () => {
-      resolve(img);
+// function that takes in highlighted coordinates, and output heatmap data
+export const generateHeatMapData = (
+  coordinates: Array<{
+    userId: string;
+    coordinates: {
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
     };
-
-    img.onerror = (error) => {
-      reject(new Error(`Failed to load image: ${error}`));
-    };
-
-    try {
-      if (!base64.startsWith('data:image')) {
-        base64 = `data:image/png;base64,${base64}`;
-      }
-      img.src = base64;
-    } catch (error) {
-      reject(new Error(`Invalid base64 data: ${error}`));
-    }
-  });
-};
-
-// Get image dimensions
-export const getImageDimensions = (imageUrl: string): Promise<ImageDimensions> => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      resolve({
-        width: img.width,
-        height: img.height
-      });
-    };
-    img.src = imageUrl;
-  });
-};
-
-export const generateHeatmapOverlay = async (
-  baseImageDimensions: ImageDimensions,
-  highlightAreas: string[]
-): Promise<string> => {
+  }>,
+  width: number,
+  height: number
+): string => {
+  // Create an off-screen canvas
   const canvas = document.createElement('canvas');
-  canvas.width = baseImageDimensions.width;
-  canvas.height = baseImageDimensions.height;
+  canvas.width = width;
+  canvas.height = height;
   const ctx = canvas.getContext('2d');
 
   if (!ctx) {
     throw new Error('Could not get canvas context');
   }
 
-  ctx.clearRect(0, 0, baseImageDimensions.width, baseImageDimensions.height);
-  ctx.globalCompositeOperation = 'screen';
+  // Clear canvas
+  ctx.clearRect(0, 0, width, height);
 
-  // Process each highlight
-  for (const base64Data of highlightAreas) {
-    try {
-      const fullBase64 = base64Data.startsWith('data:image')
-        ? base64Data
-        : `data:image/png;base64,${base64Data}`;
+  // Draw heat map
+  coordinates.forEach(highlight => {
+    const centerX = (highlight.coordinates.x1 + highlight.coordinates.x2) / 2;
+    const centerY = (highlight.coordinates.y1 + highlight.coordinates.y2) / 2;
 
-      const img = await base64ToImage(fullBase64);
+    const highlightWidth = Math.abs(highlight.coordinates.x2 - highlight.coordinates.x1);
+    const highlightHeight = Math.abs(highlight.coordinates.y2 - highlight.coordinates.y1);
+    const size = Math.sqrt(highlightWidth * highlightHeight);
+    const radius = 30; // You can adjust this value
 
-      ctx.globalAlpha = 0.2;
-      ctx.drawImage(img, 0, 0);
+    const gradient = ctx.createRadialGradient(
+      centerX, centerY, 0,
+      centerX, centerY, radius + (size / 4)
+    );
 
-    } catch (error) {
-      console.error('Error processing highlight:', error);
-    }
-  }
+    gradient.addColorStop(0, 'rgba(255, 0, 0, 0.2)');
+    gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
 
-  // Apply color gradient
-  const imageData = ctx.getImageData(0, 0, baseImageDimensions.width, baseImageDimensions.height);
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius + (size / 4), 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Apply color transformation
+  const imageData = ctx.getImageData(0, 0, width, height);
   const data = imageData.data;
 
   for (let i = 0; i < data.length; i += 4) {
-    const intensity = data[i];
-    if (intensity > 0) {
-      if (intensity < 128) {
-        // Cold color (Blue)
-        data[i] = 0;
-        data[i + 1] = 0;
-        data[i + 2] = 255;
-        data[i + 3] = Math.min(255, intensity * 2);
-      } else {
-        // Hot color (Red)
-        data[i] = 255;
-        data[i + 1] = 0;
-        data[i + 2] = 0;
-        data[i + 3] = Math.min(255, intensity);
-      }
+    const alpha = data[i + 3];
+    if (alpha > 0) {
+      data[i] = 255;
+      data[i + 1] = Math.min(255, alpha * 2);
+      data[i + 2] = Math.min(255, alpha);
+      data[i + 3] = Math.min(255, alpha * 2);
     }
   }
 
   ctx.putImageData(imageData, 0, 0);
+
+  // Convert canvas to data URL
   return canvas.toDataURL('image/png');
 };
-
