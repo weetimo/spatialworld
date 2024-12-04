@@ -21,13 +21,13 @@ load_dotenv()
 
 app = FastAPI()
 
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
-    allow_credentials=False,  
-    allow_methods=["*"], 
-    allow_headers=["*"], 
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 client = OpenAI(api_key="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")
@@ -64,63 +64,65 @@ async def validate_and_prepare_image(image: UploadFile, target_size: tuple = Non
         raise HTTPException(status_code=500, detail="Invalid image format or processing error.")
 
 
-def CaptionUpscale(prompt: str):
-    llm_prompt = """
-    You are an expert in crafting detailed prompts for DALL-E's inpainting feature.
-    IMPORTANT: Your prompts must describe the ENTIRE desired final image, not just the area being edited.
-
-    Transform the user's input into a comprehensive prompt by following these guidelines:
-
-    1. FULL SCENE DESCRIPTION:
-    - Describe the complete scene as you want it to appear in the final image
-    - Include both the areas being kept AND the areas being edited
-    - maintain context and continuity with the unmasked portions of the image
-
-    2. KEY ELEMENTS TO SPECIFY:
-    - Main subjects and their placement
-    - Complete environment and setting
-    - Background elements and their relationship to the main subject
-    - Overall composition and layout
-    - Lighting conditions affecting the entire scene
-    - Color palette and mood for the whole image
-    - Perspective and viewing angle
-
-    Remember: 
-    - The prompt should describe how the ENTIRE final image should look, not just the masked area
-    - Ensure visual coherence between edited and unedited areas
-    - Keep descriptions clear and precise, maximum 30 words
-    - Focus on natural integration between existing and new elements
-
-    Example:
-    Instead of: "Add a cat in the empty space"
-    Write: "A cozy living room with a ginger cat lounging on the green sofa, warm sunlight streaming through bay windows, vintage photographs on cream walls"
+def generate_prompt(prompt: str, mode: str) -> str:
     """
-    print('Received caption!')
+    Generates a refined and task-specific prompt based on the given mode (img2img or inpainting).
+    :param prompt: User-provided input.
+    :param mode: Operation mode ('img2img' or 'inpainting').
+    :return: A crafted prompt tailored for the given mode.
+    """
+    if mode == "inpainting":
+        llm_prompt = """
+        You are an expert in creating prompts for inpainting tasks using DALL-E or similar tools.
+        
+        Goal:
+        - Focus only on what needs to be added or changed in the masked area.
+        - Capture the users wants, and make it clear, emphasize on the mood and the them as well.
+        """
+    elif mode == "img2img":
+        llm_prompt = """
+        You are an expert in creating prompts for img2img transformations using DALL-E or similar tools.
+        
+        Goal:
+        - Focus on extracting the overall transformation idea from the user input.
+        - Keep it descriptive but concise, emphasizing the high-level style, mood, or theme of the image.
+        """
+    else:
+        raise ValueError("Invalid mode. Supported modes: 'img2img', 'inpainting'.")
+
+    print(f"Generating a refined {mode} prompt...")
     completion = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": llm_prompt},
             {"role": "user", "content": prompt}
         ]
     )
-    print('Finished!')
+    print("Prompt generation completed.")
     return completion.choices[0].message.content
 
+
+# caption improvement
 @app.post("/improve-caption/")
 async def improve_caption(request: Request):
     try:
         logger.info("Received caption improvement request")
         body = await request.json()
         user_prompt = body.get("prompt", "")
-        
-        logger.info("Processing caption improvement...")
-        improved_prompt = CaptionUpscale(user_prompt)
-        logger.info("Caption improvement completed")
-        
+        mode = body.get("mode", "").lower()
+        if not user_prompt:
+            raise HTTPException(status_code=400, detail="Prompt is required.")
+        if mode not in ["img2img", "inpainting"]:
+            raise HTTPException(status_code=400, detail="Invalid mode. Use 'img2img' or 'inpainting'.")
+
+        logger.info(f"Processing {mode} caption improvement...")
+        improved_prompt = generate_prompt(user_prompt, mode)
+        logger.info("Caption improvement completed successfully.")
+
         return {"improved_prompt": improved_prompt}
     except Exception as e:
         logger.error(f"Error improving caption: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 
 # inpainting image
@@ -129,14 +131,30 @@ async def edit_image(
     image: UploadFile = File(...),
     mask: Optional[UploadFile] = File(None),
     prompt: str = Form(...),
-    size: str = Form("1024x1024")
+    size: str = Form("512x512")  
 ):
     try:
-        width, height = map(int, size.split('x'))
+        width, height = 512, 512
         image_contents = await image.read()
-        base64_image = base64.b64encode(image_contents).decode('utf-8')
-        mask_contents = await mask.read() if mask else None
-        base64_mask = base64.b64encode(mask_contents).decode('utf-8') if mask_contents else None
+        original_img = Image.open(io.BytesIO(image_contents))
+        logger.info(f"Original Image Size: {original_img.size}")
+        resized_img = original_img.resize((width, height), Image.Resampling.LANCZOS)
+        buffer = io.BytesIO()
+        resized_img.save(buffer, format="PNG")
+        resized_contents = buffer.getvalue()
+        base64_image = base64.b64encode(resized_contents).decode('utf-8')
+        base64_mask = None
+        if mask:
+            mask_contents = await mask.read()
+            mask_img = Image.open(io.BytesIO(mask_contents))
+            logger.info(f"Original Mask Size: {mask_img.size}")
+            resized_mask = mask_img.resize((width, height), Image.Resampling.LANCZOS)
+            mask_buffer = io.BytesIO()
+            resized_mask.save(mask_buffer, format="PNG")
+            resized_mask_contents = mask_buffer.getvalue()
+            base64_mask = base64.b64encode(resized_mask_contents).decode('utf-8')
+            logger.info(f"Resized Mask Size: {resized_mask.size}")
+
         response = requests.post(
             "https://api.getimg.ai/v1/stable-diffusion-xl/inpaint",
             headers={
@@ -145,32 +163,25 @@ async def edit_image(
                 "authorization": f"Bearer {os.getenv('GETIMG_API_KEY')}"
             },
             json={
+                "model": "stable-diffusion-xl-v1-0",
                 "prompt": prompt,
-                "image": base64_image,
+                "image": base64_image,#
                 "mask_image": base64_mask,
                 "width": width,
                 "height": height,
-                "strength": 0.5,
-                "response_format": "url",  
-                "output_format": "jpeg"  
+                "strength": 0.7,
+                "steps": 80,
+                "guidance": 10,
+                "response_format": "url",
+                "output_format": "jpeg"
             }
         )
-        
-        logger.info(f"GETIMG API response status: {response.status_code}")
-        logger.info(f"GETIMG API response headers: {dict(response.headers)}")
-        
+
         if response.status_code != 200:
-            logger.error(f"GETIMG API error: {response.text}")
-            raise HTTPException(
-                status_code=response.status_code,
-                detail="Image generation failed"
-            )
+            raise HTTPException(status_code=response.status_code, detail="Image generation failed")
             
         result = response.json()
-        return JSONResponse({
-            "success": True,
-            "url": result["url"]
-        })
+        return JSONResponse({"success": True, "url": result["url"]})
 
     except Exception as e:
         logger.error(f"Error processing image: {str(e)}")
@@ -180,88 +191,40 @@ async def edit_image(
 @app.post("/api/img2img")
 async def img2img(
     image: UploadFile = File(...),
-    prompt: str = Form(...)
+    prompt: str = Form(...),
+    size: str = Form("1024x1024")
 ):
     try:
-        logger.info(f"Received img2img request with prompt: {prompt}")
         contents = await image.read()
-        img = Image.open(io.BytesIO(contents))
-        if img.format != 'PNG':
-            buffer = io.BytesIO()
-            img.save(buffer, format="PNG")
-            contents = buffer.getvalue()
-        
         base64_image = base64.b64encode(contents).decode('utf-8')
-        logger.info(f"Image size: {len(base64_image)}")
-        logger.info(f"Image dimensions: {img.size}")
-        
-        api_key = os.getenv('GETIMG_API_KEY')
-        if not api_key:
-            logger.error("GETIMG_API_KEY not found")
-            return JSONResponse(
-                status_code=500,
-                content={"error": "GETIMG API key not configured"}
-            )
-        
-        payload = {
-            "prompt": prompt,
-            "image": base64_image,
-            "strength": 0.5,
-            "response_format": "url"
-        }
-        logger.info("Making request to GETIMG API")
-        logger.info(f"Headers: {{'Authorization': 'Bearer ***', 'Content-Type': 'application/json'}}")
-        logger.info(f"Payload keys: {list(payload.keys())}")
         
         response = requests.post(
             "https://api.getimg.ai/v1/stable-diffusion-xl/image-to-image",
             headers={
                 "accept": "application/json",
                 "content-type": "application/json",
-                "authorization": f"Bearer {api_key}"
+                "authorization": f"Bearer {os.getenv('GETIMG_API_KEY')}"
             },
-            json=payload
+            json={
+                "model": "realvis-xl-v4",
+                "prompt": prompt,
+                "image": base64_image,
+                "width": 1024,
+                "height": 1024,
+                "strength": 0.5,
+                "response_format": "url"
+            }
         )
-        logger.info(f"Response status: {response.status_code}")
-        logger.info(f"Response headers: {dict(response.headers)}")
-        
-        try:
-            result = response.json()
-            logger.info(f"Response content: {result}")
-            if "error" in result:
-                return JSONResponse(
-                    status_code=500,
-                    content={"error": f"GETIMG API error: {result['error']}"}
-                )
-            
-            if "url" not in result:
-                return JSONResponse(
-                    status_code=500,
-                    content={
-                        "error": "No URL in response",
-                        "received_keys": list(result.keys()),
-                        "response": result
-                    }
-                )
-            
-            return JSONResponse(
-                status_code=200,
-                content={"success": True, "url": result["url"]}
-            )
-            
-        except ValueError as e:
-            logger.error(f"Failed to parse response as JSON: {response.text}")
-            return JSONResponse(
-                status_code=500,
-                content={"error": f"Invalid JSON response: {response.text[:500]}"}
-            )
-            
+
+        if response.status_code != 200:
+            raise HTTPException(status_code=response.status_code, detail="Image generation failed")
+
+        result = response.json()
+        return JSONResponse({"success": True, "url": result["url"]})
+
     except Exception as e:
         logger.error(f"Error in img2img endpoint: {str(e)}")
-        return JSONResponse(
-            status_code=500,
-            content={"error": f"Server error: {str(e)}"}
-        )
+        raise HTTPException(status_code=500, detail="Image processing failed.")
 
 # analyze image to give them a tag
 @app.post("/api/analyze-image")

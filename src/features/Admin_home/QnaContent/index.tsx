@@ -53,15 +53,24 @@ const QnaContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const questions = await readData(`questionnaires/${engagementId}/questions`)
+        const questions = await readData(
+          `questionnaires/${engagementId}/questions`
+        )
         const users = await readData('users')
-        const usersArray = Object.entries(users).map(([id, user]) => ({ id, ...user })).filter(user => user.preferences?.questionnaireId === engagementId)
+        const usersArray = Object.entries(users)
+          .map(([id, user]) => ({ id, ...user }))
+          .filter((user) => user.preferences?.questionnaireId === engagementId)
 
         if (!questions || !users) return
 
-        const { multipleChoice, openEnded } = generateData(usersArray, questions)
+        const { multipleChoice, openEnded } = generateData(
+          usersArray,
+          questions
+        )
         setMultipleChoiceData(multipleChoice)
-        setOpenEndedData(openEnded)
+        // setOpenEndedData(openEnded)
+        // transform the object into an array if necessary
+        setOpenEndedData(Array.isArray(openEnded) ? openEnded : Object.values(openEnded))
       } catch (error) {
         console.error('Error fetching data:', error)
       }
@@ -69,7 +78,7 @@ const QnaContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
 
     fetchData()
   }, [engagementId, stableReadData])
-  
+
   // Get color for a topic
   const getTopicColor = (topic: string, topics: string[]): ColorScheme => {
     const topicIndex = topics.indexOf(topic)

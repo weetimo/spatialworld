@@ -114,7 +114,8 @@ const ImageContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
             maxWidth: '60rem'
           }}
         >
-          This page visually categorizes the image generations into themes derived from topic modeling using vision models.
+          This page visually categorizes the image generations into themes
+          derived from topic modeling using vision models.
         </Typography>
       </Box>
 
@@ -318,7 +319,7 @@ const ImageContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
               </Box>
             </Box>
             <Chip
-              label={image.category}
+              label={image.category || 'Uncategorized'}
               size='small'
               sx={{
                 position: 'absolute',

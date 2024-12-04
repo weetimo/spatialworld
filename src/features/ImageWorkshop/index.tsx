@@ -1,5 +1,3 @@
-// ImageWorkshop.tsx
-
 import React, { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { garden0 } from '../../assets/sample-photos'
@@ -20,10 +18,7 @@ import {
 import { useDatabase } from '../../hooks'
 import { getApiUrl } from '../../config/api'
 
-// ========================
 // Type Definitions
-// ========================
-
 // Define the structure for image objects
 interface Image {
   src: string
@@ -34,10 +29,7 @@ interface FinalImage {
   src: string
 }
 
-// ========================
 // ImageWorkshop Component
-// ========================
-
 const ImageWorkshop: React.FC = () => {
   const { id } = useParams()
   const engagementId = id
@@ -75,9 +67,7 @@ const ImageWorkshop: React.FC = () => {
     }
   }, [engagementData])
 
-  // ========================
   // State Management
-  // ========================
   const [isImageEdited, setIsImageEdited] = useState(false)
   const [maskedImageData, setMaskedImageData] = useState<string | null>(null)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
@@ -100,10 +90,7 @@ const ImageWorkshop: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState(0)
   const [impactLoading, setImpactLoading] = useState(false)
 
-  // ========================
   // Helper Functions
-  // ========================
-
   // Function to preload an image
   const preloadImage = (url: string): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -115,30 +102,26 @@ const ImageWorkshop: React.FC = () => {
   }
 
   // Function to improve caption via API call
-  const improveCaption = async (input: string): Promise<string> => {
+  const improveCaption = async (input: string, mode: string): Promise<string> => {
     try {
       const response = await fetch(getApiUrl('improve-caption/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: input })
-      })
-
+        body: JSON.stringify({ prompt: input, mode }) 
+      });
+  
       if (!response.ok) {
-        throw new Error('Failed to improve caption')
+        throw new Error('Failed to improve caption');
       }
-      const data = await response.json()
-      return data.improved_prompt
+      const data = await response.json();
+      return data.improved_prompt;
     } catch (error) {
-      console.error('Error improving caption:', error)
-      return input
+      console.error('Error improving caption:', error);
+      return input;
     }
-  }
-
-  // ========================
+  };
+  
   // Effects
-  // ========================
-
-  // Update selected tab based on edit mode
   useEffect(() => {
     if (editMode) {
       setSelectedTab(1)
@@ -160,10 +143,7 @@ const ImageWorkshop: React.FC = () => {
     localStorage.setItem('images', JSON.stringify(images))
   }, [images])
 
-  // ========================
   // Event Handlers
-  // ========================
-
   // Handle passing the final generated image as a file
   const convertToBase64 = async (url: string): Promise<string> => {
     const response = await fetch(url)
@@ -177,7 +157,7 @@ const ImageWorkshop: React.FC = () => {
   }
 
   const base64ToFile = (base64: string, fileName: string, mimeType: string): File => {
-    const byteString = atob(base64.split(',')[1]) // Decode Base64 string
+    const byteString = atob(base64.split(',')[1]) 
     const arrayBuffer = new ArrayBuffer(byteString.length)
     const uintArray = new Uint8Array(arrayBuffer)
   
@@ -190,12 +170,9 @@ const ImageWorkshop: React.FC = () => {
   
 
   const processImage = async (url: string) => {
-    // Convert URL to Base64
     const base64Image = await convertToBase64(url)
-  
-    // Convert Base64 to File
-    const mimeType = 'image/jpeg' // Replace with the correct MIME type for your image
-    const fileName = 'image.jpg' // Replace with a meaningful name for your image
+    const mimeType = 'image/jpeg' 
+    const fileName = 'image.jpg' 
     const file = base64ToFile(base64Image, fileName, mimeType)
     
     return file
@@ -234,12 +211,12 @@ const ImageWorkshop: React.FC = () => {
             .join('\n\n')
 
           setCriticText(formattedImpactText)
-          setIsGeneratedModalOpen(true) // Only open modal after impact is received
+          setIsGeneratedModalOpen(true) 
         }
       } catch (error) {
         console.error('Error calling impact API:', error)
         setCriticText('Error analyzing image impact. Please try again.')
-        setIsGeneratedModalOpen(true) // Open modal with error message if failed
+        setIsGeneratedModalOpen(true) 
       } finally {
         setImpactLoading(false)
       }
@@ -248,11 +225,13 @@ const ImageWorkshop: React.FC = () => {
     if (!maskedImageData && promptText) {
       try {
         console.log('Using img2img endpoint')
+        const improvedPrompt = await improveCaption(promptText, "img2img");
         const originalImageResponse = await fetch(images[currentImageIndex].src)
         const originalImageBlob = await originalImageResponse.blob()
         const formData = new FormData()
+        console.log('Upscaled prompt:', improvedPrompt)
         formData.append('image', originalImageBlob, 'original.png')
-        formData.append('prompt', promptText)
+        formData.append('prompt', improvedPrompt)
         const response = await fetch(getApiUrl('api/img2img'), {
           method: 'POST',
           body: formData
@@ -268,15 +247,12 @@ const ImageWorkshop: React.FC = () => {
           console.log('Generated image URL:', data.url)
           const newImage: Image = { src: data.url, tags: ['Generated'] }
           const newIndex = images.length
-          // convert to base64 image
           const finalFileImage = await processImage(data.url)
           setFinalImage({ src: finalFileImage })
 
-          // set upscaled prompt
           if (data.upscaledPrompt) {
             setUpscaledPrompt(data.upscaledPrompt)
           }
-
           setImages((prevImages) => [...prevImages, newImage])
           setCurrentImageIndex(newIndex)
           setGeneratedImage(data.url)
@@ -310,7 +286,7 @@ const ImageWorkshop: React.FC = () => {
       }
     } else if (maskedImageData && promptText) {
       try {
-        const improvedPrompt = await improveCaption(promptText)
+        const improvedPrompt = await improveCaption(promptText, "inpainting");
 
         console.log('Initiating API call...')
         console.log('Current Masked Image Data:', maskedImageData)

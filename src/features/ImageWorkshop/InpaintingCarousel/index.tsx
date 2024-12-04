@@ -1,13 +1,30 @@
-import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react'  
-import { Box, IconButton, Tooltip, Divider, Dialog, DialogContent, Slide } from '@mui/material'  
-import { ArrowForward as ArrowForward, ArrowBack as ArrowBack, Edit, Download, Close } from '@mui/icons-material'  
-import { TransitionProps } from '@mui/material/transitions'  
-import { keyframes } from '@mui/system' 
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  forwardRef,
+  useImperativeHandle
+} from 'react'
+import {
+  Box,
+  IconButton,
+  Tooltip,
+  Divider,
+  Dialog,
+  DialogContent,
+  Slide
+} from '@mui/material'
+import {
+  ArrowForward as ArrowForward,
+  ArrowBack as ArrowBack,
+  Edit,
+  Download,
+  Close
+} from '@mui/icons-material'
+import { TransitionProps } from '@mui/material/transitions'
+import { keyframes } from '@mui/system'
 
-// ========================
 // Type Definitions
-// ========================
-
 export interface Image {
   src: string
   tags: string[]
@@ -29,10 +46,7 @@ interface ImageCarouselProps {
   loading: boolean
 }
 
-// ========================
 // Transition Component
-// ========================
-
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
     children: React.ReactElement<any, any>
@@ -42,10 +56,7 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction='up' ref={ref} {...props} />
 })
 
-// ========================
 // Animations
-// ========================
-
 const pulse = keyframes`
   0% {
     filter: blur(0px) 
@@ -58,10 +69,7 @@ const pulse = keyframes`
   }
 `
 
-// ========================
 // ImageCarousel Component
-// ========================
-
 const ImageCarousel = forwardRef<ImageCarouselRef, ImageCarouselProps>(
   (
     {
@@ -77,80 +85,109 @@ const ImageCarousel = forwardRef<ImageCarouselRef, ImageCarouselProps>(
     },
     ref
   ) => {
-    // ========================
     // State Management
-    // ========================
-
     const [history, setHistory] = useState<string[]>([])
     const [isDrawing, setIsDrawing] = useState<boolean>(false)
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
     const [modalImage, setModalImage] = useState<string | null>(null)
 
-    // ========================
     // Refs
-    // ========================
-
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const contextRef = useRef<CanvasRenderingContext2D | null>(null)
 
-    // ========================
     // Imperative Handle (Expose Undo)
-    // ========================
-
     useImperativeHandle(ref, () => ({
       undo
     }))
 
-    // ========================
     // Effects
-    // ========================
+    // // Initialize Canvas for Editing
+    // useEffect(() => {
+    //   if (editMode) {
+    //     const initialState = images[currentIndex].src
+    //     setHistory([initialState])
 
-    // Initialize Canvas for Editing
+    //     const canvas = canvasRef.current
+    //     if (!canvas) return
+    //     const context = canvas.getContext('2d')
+    //     if (!context) return
+
+    //     // Set Canvas Dimensions
+    //     canvas.style.width = '100%'
+    //     canvas.style.height = '100%'
+    //     canvas.width = canvas.offsetWidth
+    //     canvas.height = canvas.offsetHeight
+
+    //     // Load and Draw Image
+    //     const img = new Image()
+    //     img.crossOrigin = 'anonymous'
+    //     img.src = images[currentIndex].src
+    //     img.onload = () => {
+    //       context.clearRect(0, 0, canvas.width, canvas.height)
+    //       context.drawImage(img, 0, 0, canvas.width, canvas.height)
+    //       context.globalCompositeOperation = 'destination-out'
+    //       context.strokeStyle = 'rgba(0, 0, 0, 1)'
+    //       context.lineWidth = brushSize
+    //       context.lineCap = 'round'
+    //       context.lineJoin = 'round'
+
+    //       contextRef.current = context
+    //     }
+    //   }
+    // }, [editMode, currentIndex, images])
+
+    const maskCanvasRef = useRef<HTMLCanvasElement | null>(null)
+    const maskContextRef = useRef<CanvasRenderingContext2D | null>(null)
+
     useEffect(() => {
       if (editMode) {
-        const initialState = images[currentIndex].src
-        setHistory([initialState])
-
         const canvas = canvasRef.current
-        if (!canvas) return
-        const context = canvas.getContext('2d')
-        if (!context) return
+        const maskCanvas = maskCanvasRef.current
+        if (!canvas || !maskCanvas) return
 
-        // Set Canvas Dimensions
+        const context = canvas.getContext('2d')
+        const maskContext = maskCanvas.getContext('2d')
+        if (!context || !maskContext) return
+
+        const container = canvas.parentElement
+        if (!container) return
+
+        const width = container.offsetWidth
+        const height = container.offsetHeight
+
         canvas.style.width = '100%'
         canvas.style.height = '100%'
-        canvas.width = canvas.offsetWidth
-        canvas.height = canvas.offsetHeight
+        canvas.width = width
+        canvas.height = height
 
-        // Load and Draw Image
+        maskCanvas.width = width
+        maskCanvas.height = height
+
+        maskContext.fillStyle = 'black'
+        maskContext.fillRect(0, 0, width, height)
+
         const img = new Image()
         img.crossOrigin = 'anonymous'
         img.src = images[currentIndex].src
         img.onload = () => {
-          context.clearRect(0, 0, canvas.width, canvas.height)
-          context.drawImage(img, 0, 0, canvas.width, canvas.height)
-          context.globalCompositeOperation = 'destination-out'
-          context.strokeStyle = 'rgba(0, 0, 0, 0.5)'
+          context.drawImage(img, 0, 0, width, height)
+          context.strokeStyle = 'white'
           context.lineWidth = brushSize
           context.lineCap = 'round'
           context.lineJoin = 'round'
 
+          maskContext.strokeStyle = 'white'
+          maskContext.lineWidth = brushSize
+          maskContext.lineCap = 'round'
+          maskContext.lineJoin = 'round'
+
           contextRef.current = context
+          maskContextRef.current = maskContext
         }
       }
     }, [editMode, currentIndex, images])
 
-    // Update Brush Size
-    useEffect(() => {
-      if (editMode && contextRef.current) {
-        contextRef.current.lineWidth = brushSize
-      }
-    }, [brushSize, editMode])
-
-    // ========================
     // Navigation Handlers
-    // ========================
-
     const handleNext = () => {
       const nextIndex = (currentIndex + 1) % images.length
       setCurrentIndex(nextIndex)
@@ -161,10 +198,7 @@ const ImageCarousel = forwardRef<ImageCarouselRef, ImageCarouselProps>(
       setCurrentIndex(prevIndex)
     }
 
-    // ========================
     // Drawing Handlers
-    // ========================
-
     const getEventCoords = (
       event:
         | React.MouseEvent<HTMLCanvasElement>
@@ -194,8 +228,10 @@ const ImageCarousel = forwardRef<ImageCarouselRef, ImageCarouselProps>(
     ) => {
       if (editMode) {
         const { offsetX, offsetY } = getEventCoords(event)
-        contextRef.current!.beginPath()
-        contextRef.current!.moveTo(offsetX, offsetY)
+        contextRef.current?.beginPath()
+        maskContextRef.current?.beginPath()
+        contextRef.current?.moveTo(offsetX, offsetY)
+        maskContextRef.current?.moveTo(offsetX, offsetY)
         setIsDrawing(true)
         setIsImageEdited(true)
       }
@@ -208,27 +244,34 @@ const ImageCarousel = forwardRef<ImageCarouselRef, ImageCarouselProps>(
     ) => {
       if (!isDrawing) return
       const { offsetX, offsetY } = getEventCoords(event)
-      contextRef.current!.lineTo(offsetX, offsetY)
-      contextRef.current!.stroke()
+      contextRef.current?.lineTo(offsetX, offsetY)
+      contextRef.current?.stroke()
+      maskContextRef.current?.lineTo(offsetX, offsetY)
+      maskContextRef.current?.stroke()
     }
 
     const finishDrawing = () => {
       if (!editMode) return
-      const canvas = canvasRef.current
-      if (contextRef.current && canvas) {
-        contextRef.current.closePath()
-        const dataURL = canvas.toDataURL('image/png')
-        setMaskedImageData(dataURL)
-        console.log('Masked Image Data auto-saved:', dataURL)
-        setHistory((prev) => [...prev, dataURL])
-      }
+      const maskCanvas = maskCanvasRef.current
+      if (!maskCanvas) return
+
+      contextRef.current?.closePath()
+      maskContextRef.current?.closePath()
+
+      const maskDataURL = maskCanvas.toDataURL('image/png')
+      setMaskedImageData(maskDataURL)
+      setHistory((prev) => [...prev, maskDataURL])
       setIsDrawing(false)
     }
 
-    // ========================
-    // Image Saving and Downloading
-    // ========================
+    const saveMask = () => {
+      const maskCanvas = maskCanvasRef.current
+      if (!maskCanvas) return
+      const dataURL = maskCanvas.toDataURL('image/png')
+      downloadImage(dataURL, 'mask.png')
+    }
 
+    // Image Saving and Downloading
     const saveEditedImage = () => {
       const canvas = canvasRef.current
       if (!canvas) return
@@ -246,10 +289,7 @@ const ImageCarousel = forwardRef<ImageCarouselRef, ImageCarouselProps>(
       document.body.removeChild(link)
     }
 
-    // ========================
     // Undo Functionality
-    // ========================
-
     const undo = () => {
       setHistory((prevHistory) => {
         if (prevHistory.length > 1) {
@@ -275,10 +315,7 @@ const ImageCarousel = forwardRef<ImageCarouselRef, ImageCarouselProps>(
       })
     }
 
-    // ========================
     // Modal Handlers
-    // ========================
-
     const openModal = () => {
       if (!editMode) {
         setModalImage(images[currentIndex].src)
@@ -291,10 +328,7 @@ const ImageCarousel = forwardRef<ImageCarouselRef, ImageCarouselProps>(
       setModalImage(null)
     }
 
-    // ========================
     // Render
-    // ========================
-
     return (
       <Box
         sx={{
@@ -330,19 +364,28 @@ const ImageCarousel = forwardRef<ImageCarouselRef, ImageCarouselProps>(
               onClick={openModal}
             />
           ) : (
-            <canvas
-              ref={canvasRef}
-              style={{ cursor: 'crosshair' }}
-              onMouseDown={startDrawing}
-              onMouseMove={draw}
-              onMouseUp={finishDrawing}
-              onMouseOut={finishDrawing}
-              onTouchStart={startDrawing}
-              onTouchMove={draw}
-              onTouchEnd={finishDrawing}
-            />
+            <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
+              <canvas
+                ref={canvasRef}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  cursor: 'crosshair'
+                }}
+                onMouseDown={startDrawing}
+                onMouseMove={draw}
+                onMouseUp={finishDrawing}
+                onMouseOut={finishDrawing}
+                onTouchStart={startDrawing}
+                onTouchMove={draw}
+                onTouchEnd={finishDrawing}
+              />
+              <canvas ref={maskCanvasRef} style={{ display: 'none' }} />
+            </Box>
           )}
-
           {/* Loading Overlay */}
           {loading && (
             <Box
@@ -449,6 +492,11 @@ const ImageCarousel = forwardRef<ImageCarouselRef, ImageCarouselProps>(
                 justifyContent: 'center'
               }}
             >
+              <Tooltip title='Download Mask'>
+                <IconButton sx={{ color: '#fff' }} onClick={saveMask}>
+                  <Download />
+                </IconButton>
+              </Tooltip>
               <IconButton
                 sx={{ color: '#fff' }}
                 onClick={() => setEditMode(false)}
