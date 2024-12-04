@@ -41,18 +41,32 @@ const ImageWorkshop: React.FC = () => {
 
   const stableReadData = useCallback(readData, [])
 
+  const proxyImageUrl = (url: string) => {
+    // If the URL is from Cloudflare R2, proxy it
+    if (url.includes('cloudflarestorage.com')) {
+      return `${getApiUrl()}/proxy-image?url=${encodeURIComponent(url)}`;
+    }
+    return url;
+  };
+
   useEffect(() => {
     const fetchEngagement = async () => {
       try {
-        const data = await readData(`engagements/${engagementId}`)
-        setEngagementData(data)
+        const data = await readData(`engagements/${engagementId}`);
+        setEngagementData(data);
+        if (data?.imageUrl) {
+          setImages([{ 
+            src: proxyImageUrl(data.imageUrl), 
+            tags: [data?.imageCaption] 
+          }]);
+        }
       } catch (error) {
-        console.error('Error fetching engagement data:', error)
+        console.error('Error fetching engagement data:', error);
       }
-    }
+    };
 
     if (engagementId) {
-      fetchEngagement()
+      fetchEngagement();
     }
   }, [engagementId, stableReadData])
 

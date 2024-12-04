@@ -43,6 +43,7 @@ const PromptInput: React.FC<PromptInputProps> = ({
   const { currentUser } = useCurrentUser()
 
   const [copySuccessSnackbarOpen, setCopySuccessSnackbarOpen] = useState(false)
+  const [error, setError] = useState('')
   const isActive: boolean = promptText.length > 0 && !loading
 
   const handleCopyPrompt = (): void => {
@@ -54,40 +55,80 @@ const PromptInput: React.FC<PromptInputProps> = ({
 
   const handleResetPrompt = (): void => setPromptText('')
 
-  const base64ToFile = (base64Image: string): File => {
-    const byteString = atob(base64Image.split(',')[1]) // Decode Base64 string
-    const arrayBuffer = new ArrayBuffer(byteString.length)
-    const uintArray = new Uint8Array(arrayBuffer)
-  
-    for (let i = 0; i < byteString.length; i++) {
-      uintArray[i] = byteString.charCodeAt(i)
-    }
+  const base64ToFile = (base64String?: string): File | null => {
+    try {
+      if (!base64String) {
+        console.error('No base64 string provided');
+        return null;
+      }
 
-    const mimeType = 'image/jpeg'
-    const fileName = 'image.jpg'
-  
-    return new File([arrayBuffer], fileName, { type: mimeType })
+      // Remove data URL prefix if it exists
+      const base64 = base64String.split(',')[1] || base64String;
+
+      // Decode base64
+      const byteString = atob(base64);
+      const arrayBuffer = new ArrayBuffer(byteString.length);
+      const uintArray = new Uint8Array(arrayBuffer);
+
+      for (let i = 0; i < byteString.length; i++) {
+        uintArray[i] = byteString.charCodeAt(i);
+      }
+
+      // Try to determine mime type from base64 prefix
+      let mimeType = 'image/jpeg';
+      if (base64String.startsWith('data:')) {
+        mimeType = base64String.split(';')[0].split(':')[1];
+      }
+
+      const blob = new Blob([arrayBuffer], { type: mimeType });
+      return new File([blob], 'image.jpg', { type: mimeType });
+    } catch (error) {
+      console.error('Error converting base64 to File:', error);
+      return null;
+    }
   }
 
   const handleEndJourney = async (): Promise<void> => {
-    const formattedImage = base64ToFile(finalImage?.src)
-    const cloudinaryUrl = await uploadImage(formattedImage)
+    try {
+      if (!finalImage?.src) {
+        console.error('No image data available');
+        setError('No image data available');
+        return;
+      }
 
-    const uniqueId = uuidv4()
+      const formattedImage = base64ToFile(finalImage.src);
+      if (!formattedImage) {
+        console.error('Failed to format image');
+        setError('Failed to format image');
+        return;
+      }
 
-    await updateData(`generations/${engagementId}/${currentUser?.id}`, {
-      category,
-      createdAt: new Date().toISOString(),
-      engagementId,
-      imageUrl: cloudinaryUrl,
-      originalPrompt: promptText,
-      upscaledPrompt,
-      userId: currentUser?.id,
-      voters: [],
-      coordinates
-    })
+      const cloudinaryUrl = await uploadImage(formattedImage);
+      if (!cloudinaryUrl) {
+        console.error('Failed to upload image to Cloudinary');
+        setError('Failed to upload image');
+        return;
+      }
 
-    navigate(`/feed/${engagementId}`)
+      const uniqueId = uuidv4();
+
+      await updateData(`generations/${engagementId}/${currentUser?.id}`, {
+        category,
+        createdAt: new Date().toISOString(),
+        engagementId,
+        imageUrl: cloudinaryUrl,
+        originalPrompt: promptText,
+        upscaledPrompt,
+        userId: currentUser?.id,
+        voters: [],
+        coordinates
+      });
+
+      navigate(`/feed/${engagementId}`);
+    } catch (error) {
+      console.error('Error in handleEndJourney:', error);
+      setError('Failed to complete journey. Please try again.');
+    }
   }
 
   return (
@@ -151,6 +192,18 @@ const PromptInput: React.FC<PromptInputProps> = ({
           Copied to clipboard!
         </Alert>
       </Snackbar>
+      {error && (
+        <Snackbar
+          open={true}
+          autoHideDuration={2000}
+          onClose={() => setError('')}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert onClose={() => setError('')} severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        </Snackbar>
+      )}
     </Box>
   )
 }
@@ -234,4 +287,3 @@ const styles: any = {
 }
 
 export default PromptInput
-  

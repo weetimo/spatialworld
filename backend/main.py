@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from image_segmentation import ImageSegmentationService, PointCoordinates, SegmentationResponse
 from topic_modelling import GenerateTopics
 from openai import OpenAI
@@ -31,6 +31,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"]
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://weetimo.github.io"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 client = OpenAI(api_key="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")
@@ -716,5 +724,20 @@ def save_image_locally(image_data: bytes, session_id: str = None) -> str:
         f.write(image_data)
     
     return str(file_path)
+
+@app.get("/proxy-image")
+async def proxy_image(url: str):
+    try:
+        response = requests.get(url)
+        return Response(
+            content=response.content,
+            media_type=response.headers.get('content-type', 'image/jpeg'),
+            headers={
+                'Cache-Control': 'public, max-age=31536000',
+                'Access-Control-Allow-Origin': '*'
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4 --reload
