@@ -44,7 +44,19 @@ interface ImageCarouselProps {
   setMaskedImageData: React.Dispatch<React.SetStateAction<string | null>>
   brushSize: number
   loading: boolean
+  allCoordinates: any
+  setAllCoordinates: any
 }
+
+interface DrawingCoordinate {
+  x: number
+  y: number
+}
+
+interface DrawingPath {
+  points: DrawingCoordinate[]
+}
+
 
 // Transition Component
 const Transition = React.forwardRef(function Transition(
@@ -81,8 +93,10 @@ const ImageCarousel = forwardRef<ImageCarouselRef, ImageCarouselProps>(
       editMode,
       setEditMode,
       brushSize,
-      loading
-    },
+      loading,
+      allCoordinates,
+      setAllCoordinates
+       },
     ref
   ) => {
     // State Management
@@ -94,6 +108,9 @@ const ImageCarousel = forwardRef<ImageCarouselRef, ImageCarouselProps>(
     // Refs
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const contextRef = useRef<CanvasRenderingContext2D | null>(null)
+
+    const [currentPath, setCurrentPath] = useState<DrawingCoordinate[]>([])
+    // const [allCoordinates, setAllCoordinates] = useState<DrawingCoordinate[]>([]);  
 
     // Imperative Handle (Expose Undo)
     useImperativeHandle(ref, () => ({
@@ -161,7 +178,7 @@ const ImageCarousel = forwardRef<ImageCarouselRef, ImageCarouselProps>(
         canvas.height = height
 
         maskCanvas.width = width
-        maskCanvas.height = height
+        maskCanvas.height = height  
 
         maskContext.fillStyle = 'black'
         maskContext.fillRect(0, 0, width, height)
@@ -234,6 +251,7 @@ const ImageCarousel = forwardRef<ImageCarouselRef, ImageCarouselProps>(
         maskContextRef.current?.moveTo(offsetX, offsetY)
         setIsDrawing(true)
         setIsImageEdited(true)
+        setCurrentPath([{ x: offsetX, y: offsetY }])
       }
     }
 
@@ -248,21 +266,30 @@ const ImageCarousel = forwardRef<ImageCarouselRef, ImageCarouselProps>(
       contextRef.current?.stroke()
       maskContextRef.current?.lineTo(offsetX, offsetY)
       maskContextRef.current?.stroke()
+      setCurrentPath(prev => [...prev, { x: offsetX, y: offsetY }])
     }
 
     const finishDrawing = () => {
       if (!editMode) return
       const maskCanvas = maskCanvasRef.current
       if (!maskCanvas) return
-
+    
       contextRef.current?.closePath()
       maskContextRef.current?.closePath()
-
+    
+      if (currentPath.length > 0) {
+        setAllCoordinates(prev => [...prev, ...currentPath]);
+        const formattedCoordinates = allCoordinates?.map(coord => `(${coord.x},${coord.y})`).join(' ');
+        console.log('All coordinates:', formattedCoordinates);
+      }
+    
       const maskDataURL = maskCanvas.toDataURL('image/png')
       setMaskedImageData(maskDataURL)
       setHistory((prev) => [...prev, maskDataURL])
       setIsDrawing(false)
+      setCurrentPath([])
     }
+    
 
     const saveMask = () => {
       const maskCanvas = maskCanvasRef.current

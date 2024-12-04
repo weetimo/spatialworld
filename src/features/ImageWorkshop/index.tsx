@@ -86,7 +86,7 @@ const ImageWorkshop: React.FC = () => {
   const [brushSize, setBrushSize] = useState<number>(50)
   const [selectedTab, setSelectedTab] = useState(0)
   const [impactLoading, setImpactLoading] = useState(false)
-
+  const [allCoordinates, setAllCoordinates] = useState([])
   // Helper Functions
   // Function to preload an image
   const preloadImage = (url: string): Promise<string> => {
@@ -232,7 +232,6 @@ const ImageWorkshop: React.FC = () => {
           setIsGeneratedModalOpen(true)
           console.log('Getting character impact...')
           callImpactAPI(data.url)
-          setPromptText('')
 
           // vision
           try {
@@ -261,7 +260,7 @@ const ImageWorkshop: React.FC = () => {
     } else if (maskedImageData && promptText) {
       try {
         const improvedPrompt = await improveCaption(promptText, "inpainting");
-
+        setUpscaledPrompt(improvedPrompt)
         console.log('Initiating API call...')
         console.log('Current Masked Image Data:', maskedImageData)
         console.log('Current Original Image:', images[currentImageIndex].src)
@@ -302,7 +301,6 @@ const ImageWorkshop: React.FC = () => {
 
         setIsImageEdited(false)
         setMaskedImageData(null)
-        setPromptText('')
         const newImage: Image = { src: data.url, tags: ['Generated'] }
         const newIndex = images.length
         setImages((prevImages) => [...prevImages, newImage])
@@ -314,6 +312,11 @@ const ImageWorkshop: React.FC = () => {
           setGeneratedImage(data.url)
           setIsGeneratedModalOpen(true)
           await callImpactAPI(data.url)
+          const newImage: Image = { src: data.url, tags: ['Generated'] }
+          const newIndex = images.length
+          // convert to base64 image
+          const base64Image = await convertToBase64(data.url)
+          setFinalImage({ src: base64Image })
 
           //VISION
           try {
@@ -372,6 +375,7 @@ const ImageWorkshop: React.FC = () => {
           finalImage={finalImage}
           upscaledPrompt={upscaledPrompt}
           category = {category}
+          coordinates={allCoordinates}
           // TODO: ADD COORDINATES
         />
       )
@@ -421,6 +425,8 @@ const ImageWorkshop: React.FC = () => {
           setMaskedImageData={setMaskedImageData}
           brushSize={brushSize}
           loading={loading} // Pass loading prop
+          allCoordinates={allCoordinates}
+          setAllCoordinates={setAllCoordinates}
         />
 
         {/* Tabs Section */}

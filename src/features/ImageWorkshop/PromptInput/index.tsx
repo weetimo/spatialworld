@@ -35,7 +35,7 @@ const PromptInput: React.FC<PromptInputProps> = ({
   finalImage,
   upscaledPrompt,
   category,
-  coordinates = []
+  coordinates
 }) => {
   const navigate = useNavigate()
   const { updateData } = useDatabase()
@@ -75,7 +75,7 @@ const PromptInput: React.FC<PromptInputProps> = ({
 
     const uniqueId = uuidv4()
 
-    await updateData(`generations/${engagementId}/${uniqueId}`, {
+    await updateData(`generations/${engagementId}/${currentUser?.id}`, {
       category,
       createdAt: new Date().toISOString(),
       engagementId,
