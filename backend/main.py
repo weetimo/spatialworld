@@ -16,6 +16,9 @@ from bertopic import BERTopic
 import openai
 from bertopic.representation import OpenAI as BertOpenAI
 import json
+from datetime import datetime
+import uuid
+import pathlib
 
 load_dotenv()
 
@@ -23,7 +26,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://weetimo.github.io", "http://localhost:3000", "http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -399,6 +402,7 @@ async def generate_community_image(request: Request):
         prompts = body.get("prompts", [])
         base64_image = body.get("image", "")
         image_path = body.get("image_path", "")
+        session_id = body.get("session_id", str(uuid.uuid4()))
         
         print(f"Processing {len(prompts)} prompts")
 
@@ -455,6 +459,10 @@ async def generate_community_image(request: Request):
         
         img2img_response = await img2img(image=upload_file, prompt=generated_prompt)
         result = json.loads(img2img_response.body)
+        
+        # Save the image locally
+        local_path = save_image_locally(contents, session_id)
+        print(f"Saved image locally to: {local_path}")
         
         return JSONResponse({
             "success": True,
@@ -640,4 +648,41 @@ async def categorize_responses(request: Request):
             status_code=500,
             detail=f"Categorization failed: {str(e)}"
         )
+
+def save_image_locally(image_data: bytes, session_id: str = None) -> str:
+    """
+    Save image data to a local directory outside the repo, organized by date and session.
+    
+    Args:
+        image_data: The image data in bytes
+        session_id: Optional session ID. If not provided, a new UUID will be generated
+        
+    Returns:
+        str: The path where the image was saved
+    """
+    # Create base directory in user's home directory
+    base_dir = pathlib.Path.home() / "spatial_journey_images"
+    
+    # Create date-based directory
+    date_dir = base_dir / datetime.now().strftime("%Y-%m-%d")
+    
+    # Create session directory
+    if not session_id:
+        session_id = str(uuid.uuid4())
+    session_dir = date_dir / session_id
+    
+    # Create all necessary directories
+    session_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename
+    timestamp = datetime.now().strftime("%H-%M-%S")
+    filename = f"image_{timestamp}.png"
+    file_path = session_dir / filename
+    
+    # Save the image
+    with open(file_path, "wb") as f:
+        f.write(image_data)
+    
+    return str(file_path)
+
 # uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4 --reload
