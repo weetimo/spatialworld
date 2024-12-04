@@ -5,7 +5,7 @@ import { ContentCopy as ContentCopyIcon, Loop as ResetIcon } from '@mui/icons-ma
 import { useDatabase, useCloudinary, useCurrentUser } from '../../../hooks'
 import starIcon from '../../../assets/icons/ai.png'
 import activeStarIcon from '../../../assets/icons/ai-white.png'
-
+import { v4 as uuidv4 } from 'uuid'
 
 interface PromptInputProps {
   engagementId: string
@@ -55,7 +55,9 @@ const PromptInput: React.FC<PromptInputProps> = ({
   const handleEndJourney = async (): Promise<void> => {
     const cloudinaryUrl = await uploadImage(finalImage?.src)
 
-    await updateData(`generations/${engagementId}`, {
+    const uniqueId = uuidv4()
+
+    await updateData(`generations/${engagementId}/${uniqueId}`, {
       category,
       createdAt: new Date().toISOString(),
       engagementId,
