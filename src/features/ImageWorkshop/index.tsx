@@ -2,13 +2,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
-import { garden0 } from '../../assets/sample-photos'
-import InfoCritiqueButton from './Critique/infoButton'
 import ImageCarousel from './InpaintingCarousel'
 import { Tabs } from '../../components'
 import Prompt from './PromptInput'
 import InpaintingTools from './InpaintingTools'
-import Critique from './Critique/dialog'
 import {
   Box,
   Button,
@@ -176,31 +173,6 @@ const ImageWorkshop: React.FC = () => {
     })
   }
 
-  const base64ToFile = (base64: string, fileName: string, mimeType: string): File => {
-    const byteString = atob(base64.split(',')[1]) // Decode Base64 string
-    const arrayBuffer = new ArrayBuffer(byteString.length)
-    const uintArray = new Uint8Array(arrayBuffer)
-  
-    for (let i = 0; i < byteString.length; i++) {
-      uintArray[i] = byteString.charCodeAt(i)
-    }
-  
-    return new File([arrayBuffer], fileName, { type: mimeType })
-  }
-  
-
-  const processImage = async (url: string) => {
-    // Convert URL to Base64
-    const base64Image = await convertToBase64(url)
-  
-    // Convert Base64 to File
-    const mimeType = 'image/jpeg' // Replace with the correct MIME type for your image
-    const fileName = 'image.jpg' // Replace with a meaningful name for your image
-    const file = base64ToFile(base64Image, fileName, mimeType)
-    
-    return file
-  }
-
   // Handle sending the prompt to generate an image
   const handleProcessPrompt = async () => {
     console.log('handleProcessPrompt invoked')
@@ -269,8 +241,8 @@ const ImageWorkshop: React.FC = () => {
           const newImage: Image = { src: data.url, tags: ['Generated'] }
           const newIndex = images.length
           // convert to base64 image
-          const finalFileImage = await processImage(data.url)
-          setFinalImage({ src: finalFileImage })
+          const base64Image = await convertToBase64(data.url)
+          setFinalImage({ src: base64Image })
 
           // set upscaled prompt
           if (data.upscaledPrompt) {
