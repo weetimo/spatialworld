@@ -153,28 +153,6 @@ const ImageWorkshop: React.FC = () => {
     })
   }
 
-  const base64ToFile = (base64: string, fileName: string, mimeType: string): File => {
-    const byteString = atob(base64.split(',')[1]) 
-    const arrayBuffer = new ArrayBuffer(byteString.length)
-    const uintArray = new Uint8Array(arrayBuffer)
-  
-    for (let i = 0; i < byteString.length; i++) {
-      uintArray[i] = byteString.charCodeAt(i)
-    }
-  
-    return new File([arrayBuffer], fileName, { type: mimeType })
-  }
-  
-
-  const processImage = async (url: string) => {
-    const base64Image = await convertToBase64(url)
-    const mimeType = 'image/jpeg' 
-    const fileName = 'image.jpg' 
-    const file = base64ToFile(base64Image, fileName, mimeType)
-    
-    return file
-  }
-
   // Handle sending the prompt to generate an image
   const handleProcessPrompt = async () => {
     console.log('handleProcessPrompt invoked')
@@ -223,6 +201,7 @@ const ImageWorkshop: React.FC = () => {
       try {
         console.log('Using img2img endpoint')
         const improvedPrompt = await improveCaption(promptText, "img2img");
+        setUpscaledPrompt(improvedPrompt)
         const originalImageResponse = await fetch(images[currentImageIndex].src)
         const originalImageBlob = await originalImageResponse.blob()
         const formData = new FormData()
@@ -247,16 +226,13 @@ const ImageWorkshop: React.FC = () => {
           // convert to base64 image
           const base64Image = await convertToBase64(data.url)
           setFinalImage({ src: base64Image })
-
-          if (data.upscaledPrompt) {
-            setUpscaledPrompt(data.upscaledPrompt)
-          }
           setImages((prevImages) => [...prevImages, newImage])
           setCurrentImageIndex(newIndex)
           setGeneratedImage(data.url)
           setIsGeneratedModalOpen(true)
           console.log('Getting character impact...')
           callImpactAPI(data.url)
+          setPromptText('')
 
           // vision
           try {
