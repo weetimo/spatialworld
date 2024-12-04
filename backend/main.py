@@ -26,8 +26,8 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://weetimo.github.io", "http://localhost:3000", "http://localhost:5173"],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"]
@@ -198,37 +198,69 @@ async def img2img(
     size: str = Form("512x512")
 ):
     try:
+        logger.info("Starting img2img processing...")
+        logger.info(f"Received image: {image.filename}, content_type: {image.content_type}")
+        logger.info(f"Prompt: {prompt}")
         contents = await image.read()
-        base64_image = base64.b64encode(contents).decode('utf-8')
-        
+        img = Image.open(io.BytesIO(contents))
+        logger.info(f"Original image size: {img.size}, mode: {img.mode}")
+        width, height = 512, 512
+        img = ImageOps.fit(img, (width, height), method=Image.Resampling.LANCZOS)
+        if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+            img = img.convert('RGB')
+        buffer = io.BytesIO()
+        img.save(buffer, format="JPEG", quality=95)
+        buffer.seek(0)
+        base64_image = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        api_key = os.getenv('GETIMG_API_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="API key not configured")
+        payload = {
+            "model": "realvis-xl-v4",
+            "prompt": prompt,
+            "image": base64_image,
+            "width": width,
+            "height": height,
+            "strength": 0.7,
+            "response_format": "url"
+        }
+
+        logger.info("Sending request to GetImg.ai API...")
         response = requests.post(
             "https://api.getimg.ai/v1/stable-diffusion-xl/image-to-image",
             headers={
                 "accept": "application/json",
                 "content-type": "application/json",
-                "authorization": f"Bearer {os.getenv('GETIMG_API_KEY')}"
+                "authorization": f"Bearer {api_key}"
             },
-            json={
-                "model": "realvis-xl-v4",
-                "prompt": prompt,
-                "image": base64_image,
-                "width": 1024,
-                "height": 1024,
-                "strength": 0.8,
-                "response_format": "url"
-            }
+            json=payload,
+            timeout=30
         )
+        
+        logger.info(f"API response status code: {response.status_code}")
+        response_json = response.json()
 
         if response.status_code != 200:
-            raise HTTPException(status_code=response.status_code, detail="Image generation failed")
+            error_detail = response_json.get('error', {}).get('message', 'Unknown error')
+            logger.error(f"API request failed: {response.status_code} {error_detail}")
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"Image generation failed: {error_detail}"
+            )
 
-        result = response.json()
-        return JSONResponse({"success": True, "url": result["url"]})
+        if "url" not in response_json:
+            raise HTTPException(status_code=502, detail="Invalid response from image service")
 
+        logger.info("Successfully generated image")
+        return JSONResponse({"success": True, "url": response_json["url"]})
+
+    except HTTPException as he:
+        raise he
     except Exception as e:
-        logger.error(f"Error in img2img endpoint: {str(e)}")
-        raise HTTPException(status_code=500, detail="Image processing failed.")
-
+        logger.error(f"Unexpected error in img2img endpoint: {str(e)}")
+        logger.exception("Full traceback:")
+        raise HTTPException(status_code=500, detail=f"Image processing failed: {str(e)}")
+    
 # analyze image to give them a tag
 @app.post("/api/analyze-image")
 async def analyze_image(request: Request):
