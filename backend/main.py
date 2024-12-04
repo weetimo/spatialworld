@@ -156,20 +156,20 @@ async def edit_image(
             logger.info(f"Resized Mask Size: {resized_mask.size}")
 
         response = requests.post(
-            "https://api.getimg.ai/v1/stable-diffusion-xl/inpaint",
+            "https://api.getimg.ai/v1/stable-diffusion/inpaint",
             headers={
                 "accept": "application/json",
                 "content-type": "application/json",
                 "authorization": f"Bearer {os.getenv('GETIMG_API_KEY')}"
             },
             json={
-                "model": "stable-diffusion-xl-v1-0",
+                "model": "realistic-vision-v5-1-inpainting",
                 "prompt": prompt,
                 "image": base64_image,#
                 "mask_image": base64_mask,
                 "width": width,
                 "height": height,
-                "strength": 0.7,
+                "strength": 0.8,
                 "steps": 80,
                 "guidance": 10,
                 "response_format": "url",
@@ -192,7 +192,7 @@ async def edit_image(
 async def img2img(
     image: UploadFile = File(...),
     prompt: str = Form(...),
-    size: str = Form("1024x1024")
+    size: str = Form("512x512")
 ):
     try:
         contents = await image.read()
@@ -211,7 +211,7 @@ async def img2img(
                 "image": base64_image,
                 "width": 1024,
                 "height": 1024,
-                "strength": 0.5,
+                "strength": 0.8,
                 "response_format": "url"
             }
         )
