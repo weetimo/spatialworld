@@ -1,12 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
-import { garden0 } from '../../assets/sample-photos'
-import InfoCritiqueButton from './Critique/infoButton'
 import ImageCarousel from './InpaintingCarousel'
 import { Tabs } from '../../components'
 import Prompt from './PromptInput'
 import InpaintingTools from './InpaintingTools'
-import Critique from './Critique/dialog'
 import {
   Box,
   Button,
@@ -247,8 +244,9 @@ const ImageWorkshop: React.FC = () => {
           console.log('Generated image URL:', data.url)
           const newImage: Image = { src: data.url, tags: ['Generated'] }
           const newIndex = images.length
-          const finalFileImage = await processImage(data.url)
-          setFinalImage({ src: finalFileImage })
+          // convert to base64 image
+          const base64Image = await convertToBase64(data.url)
+          setFinalImage({ src: base64Image })
 
           if (data.upscaledPrompt) {
             setUpscaledPrompt(data.upscaledPrompt)

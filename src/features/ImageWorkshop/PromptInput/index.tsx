@@ -5,7 +5,7 @@ import { ContentCopy as ContentCopyIcon, Loop as ResetIcon } from '@mui/icons-ma
 import { useDatabase, useCloudinary, useCurrentUser } from '../../../hooks'
 import starIcon from '../../../assets/icons/ai.png'
 import activeStarIcon from '../../../assets/icons/ai-white.png'
-
+import { v4 as uuidv4 } from 'uuid'
 
 interface PromptInputProps {
   engagementId: string
@@ -19,6 +19,7 @@ interface PromptInputProps {
   finalImage: FinalImage | null
   upscaledPrompt: string 
   category: string
+  coordinates?: any
 }
 
 interface FinalImage {
@@ -34,6 +35,7 @@ const PromptInput: React.FC<PromptInputProps> = ({
   finalImage,
   upscaledPrompt,
   category,
+  coordinates = []
 }) => {
   const navigate = useNavigate()
   const { updateData } = useDatabase()
@@ -51,11 +53,29 @@ const PromptInput: React.FC<PromptInputProps> = ({
   const handleCloseSnackbar = (): void => setCopySuccessSnackbarOpen(false)
 
   const handleResetPrompt = (): void => setPromptText('')
-  
-  const handleEndJourney = async (): Promise<void> => {
-    const cloudinaryUrl = await uploadImage(finalImage?.src)
 
-    await updateData(`generations/${engagementId}`, {
+  const base64ToFile = (base64Image: string): File => {
+    const byteString = atob(base64Image.split(',')[1]) // Decode Base64 string
+    const arrayBuffer = new ArrayBuffer(byteString.length)
+    const uintArray = new Uint8Array(arrayBuffer)
+  
+    for (let i = 0; i < byteString.length; i++) {
+      uintArray[i] = byteString.charCodeAt(i)
+    }
+
+    const mimeType = 'image/jpeg'
+    const fileName = 'image.jpg'
+  
+    return new File([arrayBuffer], fileName, { type: mimeType })
+  }
+
+  const handleEndJourney = async (): Promise<void> => {
+    const formattedImage = base64ToFile(finalImage?.src)
+    const cloudinaryUrl = await uploadImage(formattedImage)
+
+    const uniqueId = uuidv4()
+
+    await updateData(`generations/${engagementId}/${uniqueId}`, {
       category,
       createdAt: new Date().toISOString(),
       engagementId,
@@ -64,6 +84,7 @@ const PromptInput: React.FC<PromptInputProps> = ({
       upscaledPrompt,
       userId: currentUser?.id,
       voters: [],
+      coordinates
     })
 
     navigate(`/feed/${engagementId}`)
