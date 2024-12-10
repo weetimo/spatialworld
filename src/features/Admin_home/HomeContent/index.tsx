@@ -163,7 +163,22 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
 
   const generateCommunityImage = async () => {
     try {
-      const response = await fetch('/api/community-image') 
+      const prompts = generations?.map((generation) => generation?.upscaledPrompt)
+
+      const payload = {
+        prompts,
+        image: "base64",
+        image_path: ""
+      }
+  
+      const response = await fetch('/api/community-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      })
+  
       const data = await response.json()
       setCommunityImageUrl(data.url)
       setShowGeneratedImage(true)
