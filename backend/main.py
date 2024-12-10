@@ -434,7 +434,7 @@ async def generate_words(request: Request):
             }
         )
 
-# community image  
+# community image
 @app.post("/api/community-image")
 async def generate_community_image(request: Request):
     try:
@@ -442,7 +442,6 @@ async def generate_community_image(request: Request):
         prompts = body.get("prompts", [])
         base64_image = body.get("image", "")
         image_path = body.get("image_path", "")
-        session_id = body.get("session_id", str(uuid.uuid4()))
         
         print(f"Processing {len(prompts)} prompts")
 
@@ -500,10 +499,6 @@ async def generate_community_image(request: Request):
         img2img_response = await img2img(image=upload_file, prompt=generated_prompt)
         result = json.loads(img2img_response.body)
         
-        # Save the image locally
-        local_path = save_image_locally(contents, session_id)
-        print(f"Saved image locally to: {local_path}")
-        
         return JSONResponse({
             "success": True,
             "url": result["url"],
@@ -514,7 +509,6 @@ async def generate_community_image(request: Request):
     except Exception as e:
         print(f"Error in community image: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Community image generation failed: {str(e)}")
-    
     
 # impact
 CHARACTERS = {
