@@ -880,7 +880,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
               variant='h6'
               sx={{ mb: 2, fontWeight: 700, fontSize: '1.4rem' }}
             >
-              Most Popular Topics
+              Most Popular Words
             </Typography>
           </Box>
           <Button

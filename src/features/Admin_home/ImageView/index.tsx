@@ -260,7 +260,7 @@ const ImageView: React.FC<{ imageData: any, onBack: any }> = ({ imageData, onBac
                     sx={{ color: '#ef4444' }}
                   />
                   <Typography sx={{ color: '#ef4444', fontWeight: 500 }}>
-                    {imageData.voters?.length}
+                    {imageData.voters?.length || 0}
                   </Typography>
                 </Box>
               </Box>

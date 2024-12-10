@@ -417,15 +417,20 @@ const ImageWorkshop: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
+        height: '100vh',
         boxSizing: 'border-box',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        position: 'fixed',
+        top: 0,
+        left: 0
       }}
     >
       <Box
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          width: '100%'
+          width: '100%',
+          height: '100%'
         }}
       >
         {/* Image Carousel */}
