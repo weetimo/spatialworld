@@ -53,7 +53,7 @@ const ImageWorkshop: React.FC = () => {
         setEngagementData(data);
         if (data?.imageUrl) {
           setImages([{ 
-            src: proxyImageUrl(data.imageUrl), 
+            src: data.imageUrl, 
             tags: [data?.imageCaption] 
           }]);
         }
@@ -213,8 +213,10 @@ const ImageWorkshop: React.FC = () => {
         console.log('Using img2img endpoint')
         const improvedPrompt = await improveCaption(promptText, "img2img");
         setUpscaledPrompt(improvedPrompt)
-        const originalImageResponse = await fetch(proxyImageUrl(images[currentImageIndex].src))
+        console.log('Original Image Response')
+        const originalImageResponse = await fetch(images[currentImageIndex].src)
         const originalImageBlob = await originalImageResponse.blob()
+        console.log('Original Image Response Blob')
         const formData = new FormData()
         console.log('Upscaled prompt:', improvedPrompt)
         formData.append('image', originalImageBlob, 'original.png')
@@ -235,7 +237,9 @@ const ImageWorkshop: React.FC = () => {
           const newImage: Image = { src: proxyImageUrl(data.url), tags: ['Generated'] }
           const newIndex = images.length
           // convert to base64 image
+          console.log('Converting to base64...')
           const base64Image = await convertToBase64(data.url)
+          console.log('Converted to base64!')
           setFinalImage({ src: base64Image })
           setImages((prevImages) => [...prevImages, newImage])
           setCurrentImageIndex(newIndex)
@@ -283,10 +287,10 @@ const ImageWorkshop: React.FC = () => {
           `data:image/png;base64,${maskBase64}`
         ).then((r) => r.blob())
         formData.append('mask', maskBlob, 'mask.png')
-
-        // const originalImageResponse = await fetch(images[currentImageIndex].src)
-        const originalImageResponse = await fetch(proxyImageUrl(images[currentImageIndex].src));
+        console.log('Original Image response')
+        const originalImageResponse = await fetch(images[currentImageIndex].src)
         const originalImageBlob = await originalImageResponse.blob()
+        console.log('Original Image Blob Created')
         console.log('Original image size:', originalImageBlob.size, 'bytes')
         formData.append('image', originalImageBlob, 'original.png')
 
