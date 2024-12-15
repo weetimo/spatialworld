@@ -145,6 +145,7 @@ const ImageWorkshop: React.FC = () => {
     try {
         console.log('Converting to base64:', url);
         const response = await fetch(getApiUrl(`api/proxy-image?url=${encodeURIComponent(url)}`));
+        console.log('Converted to base 64')
         
         if (!response.ok) {
             throw new Error(`Failed to fetch image: ${response.status}`);
@@ -168,6 +169,7 @@ const ImageWorkshop: React.FC = () => {
     setLoading(true)
 
     let originalImageBlob;
+    console.log({ test: images[currentImageIndex] })
     try {
         if (images[currentImageIndex].src.startsWith('data:')) {
             originalImageBlob = await fetch(images[currentImageIndex].src).then(r => r.blob());
