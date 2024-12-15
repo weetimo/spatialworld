@@ -63,7 +63,7 @@ const QnaContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
 
         if (!questions || !users) return
 
-        const { multipleChoice, openEnded } = generateData(
+        const { multipleChoice, openEnded } = await generateData(
           usersArray,
           questions
         )

@@ -69,8 +69,6 @@ const apiProcessResponses = async (responses: string[]): Promise<any[]> => {
 
   const jsonResponse = await response.json()
 
-  console.log({ jsonResponse })
-
   return jsonResponse?.categories
 }
 
@@ -85,8 +83,6 @@ const aggregateOpenEnded = async (users: any[], questions: any): any[] => {
     }
   })
   
-  console.log({ questionMap })
-
   const answersByQuestion: Record<string, string[]> = {}
   users?.forEach((user) => {
     user.preferences?.answers?.forEach((answer: any) => {
@@ -99,8 +95,6 @@ const aggregateOpenEnded = async (users: any[], questions: any): any[] => {
       }
     })
   })
-
-  console.log({ answersByQuestion })
 
   for (const [questionId, responses] of Object.entries(answersByQuestion)) {
     const categorizedResponses = await apiProcessResponses(responses)
@@ -124,9 +118,9 @@ export const getTopicsForQuestion = (question: any): string[] => {
   return ['All', ...Array.from(topics)]
 }
 
-export const generateData = (users: any[], questions: any): any => {
+export const generateData = async (users: any[], questions: any): any => {
   return {
     multipleChoice: aggregateMultipleChoice(users, questions),
-    openEnded: aggregateOpenEnded(users, questions)
+    openEnded: await aggregateOpenEnded(users, questions)
   }
 }
