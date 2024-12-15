@@ -40,18 +40,35 @@ const ImageWorkshop: React.FC = () => {
   const [category, setCategory] = useState<string>('')
 
   const stableReadData = useCallback(readData, [])
+
+  const proxyImageUrl = (url: string) => {
+    console.log('reached proxy function')
+    console.log('url:', url)
+
+    if (url.includes('cloudflarestorage.com')) {
+      return `${getApiUrl('proxy-image')}?url=${encodeURIComponent(url)}`;
+    }
+    return url
+  }
+
   useEffect(() => {
     const fetchEngagement = async () => {
       try {
-        const data = await readData(`engagements/${engagementId}`)
-        setEngagementData(data)
+        const data = await readData(`engagements/${engagementId}`);
+        setEngagementData(data);
+        if (data?.imageUrl) {
+          setImages([{ 
+            src: data.imageUrl, 
+            tags: [data?.imageCaption] 
+          }]);
+        }
       } catch (error) {
-        console.error('Error fetching engagement data:', error)
+        console.error('Error fetching engagement data:', error);
       }
-    }
+    };
 
     if (engagementId) {
-      fetchEngagement()
+      fetchEngagement();
     }
   }, [engagementId, stableReadData])
 
@@ -86,16 +103,6 @@ const ImageWorkshop: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState(0)
   const [impactLoading, setImpactLoading] = useState(false)
   const [allCoordinates, setAllCoordinates] = useState([])
-  // Helper Functions
-  // Function to preload an image
-  const preloadImage = (url: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image()
-      img.src = url
-      img.onload = () => resolve(url)
-      img.onerror = reject
-    })
-  }
 
   // Function to improve caption via API call
   const improveCaption = async (input: string, mode: string): Promise<string> => {
@@ -142,52 +149,21 @@ const ImageWorkshop: React.FC = () => {
   // Event Handlers
   // Handle passing the final generated image as a file
   const convertToBase64 = async (url: string): Promise<string> => {
-    try {
-        console.log('Converting to base64:', url);
-        const response = await fetch(getApiUrl(`api/proxy-image?url=${encodeURIComponent(url)}`));
-        console.log('Converted to base 64')
-        
-        if (!response.ok) {
-            throw new Error(`Failed to fetch image: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log({ data })
-        if (!data.success || !data.base64) {
-            throw new Error('Invalid response from proxy server');
-        }
-
-       
-        
-        return data.base64;
-    } catch (error) {
-        console.error('Error converting to base64:', error);
-        throw error;
-    }
-};
+    console.log('Converting to base64:', url)
+    const response = await fetch(url)
+    const blob = await response.blob()
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+  }
 
   // Handle sending the prompt to generate an image
   const handleProcessPrompt = async () => {
     console.log('handleProcessPrompt invoked')
     setLoading(true)
-
-    let originalImageBlob;
-    console.log({ test: images[currentImageIndex] })
-    try {
-        if (images[currentImageIndex].src.startsWith('data:')) {
-            originalImageBlob = await fetch(images[currentImageIndex].src).then(r => r.blob());
-        } else {
-            const originalImageBase64 = await convertToBase64(images[currentImageIndex].src);
-            console.log('success')
-            console.log('Original Image Base64:', originalImageBase64)
-            originalImageBlob = await fetch(originalImageBase64).then(r => r.blob());
-            console.log('turned to blob')
-        }
-    } catch (error) {
-        console.error('Error preparing image:', error)
-        setLoading(false)
-        return
-    }
 
     const callImpactAPI = async (imageUrl: string) => {
       setImpactLoading(true)
@@ -231,11 +207,15 @@ const ImageWorkshop: React.FC = () => {
     if (!maskedImageData && promptText) {
       try {
         console.log('Using img2img endpoint')
+        // console.log('images', images)
         const improvedPrompt = await improveCaption(promptText, "img2img");
         setUpscaledPrompt(improvedPrompt)
-        console.log('Upscaled prompt:', improvedPrompt)
-        
+        console.log('Original Image Response')
+        const originalImageResponse = await fetch(images[currentImageIndex].src)
+        const originalImageBlob = await originalImageResponse.blob()
+        console.log('Original Image Response Blob')
         const formData = new FormData()
+        console.log('Upscaled prompt:', improvedPrompt)
         formData.append('image', originalImageBlob, 'original.png')
         formData.append('prompt', improvedPrompt)
         const response = await fetch(getApiUrl('api/img2img'), {
@@ -244,41 +224,45 @@ const ImageWorkshop: React.FC = () => {
         })
 
         const data = await response.json()
+
         if (!response.ok) {
+          console.log('images', images)
           throw new Error(data.error || 'Failed to generate image')
         }
 
-        if (data.url && data.base64) {
+        if (data.url) {
           console.log('Generated image URL:', data.url)
-          const newImage: Image = { 
-              src: data.base64, 
-              tags: ['Generated'] 
-          }
+          const newImage: Image = { src: data.url, tags: ['Generated'] }
           const newIndex = images.length
-          setFinalImage({ src: data.base64 })  
+          // convert to base64 image
+          console.log('Converting to base64...')
+          const base64Image = await convertToBase64(data.url)
+          console.log('Converted to base64!')
+          setFinalImage({ src: base64Image })
           setImages((prevImages) => [...prevImages, newImage])
           setCurrentImageIndex(newIndex)
-          setGeneratedImage(data.url) 
+          setGeneratedImage(data.url)
           setIsGeneratedModalOpen(true)
           console.log('Getting character impact...')
-          
-          await callImpactAPI(data.url)
-      
+          callImpactAPI(data.url)
+
+          // vision. I think this is whats causing the CORS error
           try {
-              const analysisResponse = await fetch(getApiUrl('api/analyze-image'), {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({ image_url: data.url })
-              })
-              if (analysisResponse.ok) {
-                  const analysisData = await analysisResponse.json()
-                  setCategory(analysisData.category)
-                  console.log('Image Category:', analysisData.category)
-              }
+            const analysisResponse = await fetch(getApiUrl('api/analyze-image'), {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ image_url: data.url })
+            })
+
+            if (analysisResponse.ok) {
+              const analysisData = await analysisResponse.json()
+              setCategory(analysisData.category)
+              console.log('Image Category:', analysisData.category)
+            }
           } catch (analysisError) {
-              console.error('Error analyzing image:', analysisError)
+            console.error('Error analyzing image:', analysisError)
           }
         }
       } catch (error) {
@@ -301,6 +285,11 @@ const ImageWorkshop: React.FC = () => {
           `data:image/png;base64,${maskBase64}`
         ).then((r) => r.blob())
         formData.append('mask', maskBlob, 'mask.png')
+        console.log('Original Image response')
+        const originalImageResponse = await fetch(images[currentImageIndex].src)
+        const originalImageBlob = await originalImageResponse.blob()
+        console.log('Original Image Blob Created')
+        console.log('Original image size:', originalImageBlob.size, 'bytes')
         formData.append('image', originalImageBlob, 'original.png')
 
         formData.append('prompt', improvedPrompt)
@@ -322,25 +311,23 @@ const ImageWorkshop: React.FC = () => {
 
         const data = await response.json()
         console.log('API call successful!', data)
+        setIsImageEdited(false)
+        setMaskedImageData(null)
+        const newImage: Image = { src: data.url, tags: ['Generated'] }
+        const newIndex = images.length
+        setImages((prevImages) => [...prevImages, newImage])
+        setCurrentImageIndex(newIndex)
+        setEditMode(false)
 
-        if (data.url && data.base64) {
+        if (data.url) {
           console.log('Generated image URL:', data.url)
-          const newImage: Image = { 
-              src: data.base64,
-              tags: ['Generated'] 
-          }
-          const newIndex = images.length
-          setFinalImage({ src: data.base64 })
-          setImages((prevImages) => [...prevImages, newImage])
-          setCurrentImageIndex(newIndex)
           setGeneratedImage(data.url)
           setIsGeneratedModalOpen(true)
-          setIsImageEdited(false)
-          setMaskedImageData(null)
-          setEditMode(false)
-
           await callImpactAPI(data.url)
+          const base64Image = await convertToBase64(data.url)
+          setFinalImage({ src: base64Image })
 
+          //VISION
           try {
             const analysisResponse = await fetch(getApiUrl('api/analyze-image'), {
               method: 'POST',
@@ -368,7 +355,8 @@ const ImageWorkshop: React.FC = () => {
       console.warn('Image or prompt missing!')
       setLoading(false)
     }
-}
+  }
+
   const handleRedoInpainting = () => {
     // Add your redo inpainting logic here
   }
@@ -424,15 +412,20 @@ const ImageWorkshop: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
+        height: '100vh',
         boxSizing: 'border-box',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        position: 'fixed',
+        top: 0,
+        left: 0
       }}
     >
       <Box
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          width: '100%'
+          width: '100%',
+          height: '100%'
         }}
       >
         {/* Image Carousel */}
