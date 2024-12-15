@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse
 from image_segmentation import ImageSegmentationService, PointCoordinates, SegmentationResponse
 from topic_modelling import GenerateTopics
 from openai import OpenAI
@@ -33,13 +33,6 @@ app.add_middleware(
     expose_headers=["*"]
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["https://weetimo.github.io"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 client = OpenAI(api_key="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")
 
@@ -113,7 +106,7 @@ def generate_prompt(prompt: str, mode: str) -> str:
     return completion.choices[0].message.content
 
 
-# caption improvement
+# prompt upscale
 @app.post("/improve-caption/")
 async def improve_caption(request: Request):
     try:
@@ -136,6 +129,40 @@ async def improve_caption(request: Request):
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 
+@app.get("/api/proxy-image")
+async def proxy_image(url: str):
+    try:
+        logger.info(f"Proxying image from URL: {url}")
+        
+        if url.startswith('data:'):
+            logger.info("URL is already a base64 data URI, returning as is")
+            return JSONResponse({
+                "success": True,
+                "base64": url,
+                "content_type": url.split(';')[0].split(':')[1]
+            })
+            
+        response = requests.get(url)
+        if response.status_code != 200:
+            raise HTTPException(status_code=response.status_code, detail="Failed to fetch image")
+        
+        content_type = response.headers.get('content-type', 'image/jpeg')
+        base64_image = base64.b64encode(response.content).decode('utf-8') # Convert to base64
+        data_uri = f"data:{content_type};base64,{base64_image}"
+        
+        return JSONResponse({
+            "success": True,
+            "base64": data_uri,
+            "content_type": content_type
+        })
+        
+    except requests.RequestException as e:
+        logger.error(f"Error fetching image: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.error(f"Unexpected error in proxy_image: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    
 # inpainting image
 @app.post("/api/edit-image")
 async def edit_image(
@@ -192,7 +219,18 @@ async def edit_image(
             raise HTTPException(status_code=response.status_code, detail="Image generation failed")
             
         result = response.json()
-        return JSONResponse({"success": True, "url": result["url"]})
+        generated_image_response = requests.get(result["url"], timeout=30)
+        if generated_image_response.status_code != 200:
+            raise HTTPException(status_code=502, detail="Failed to fetch generated image")
+        
+        generated_base64 = base64.b64encode(generated_image_response.content).decode('utf-8')
+        content_type = generated_image_response.headers.get('content-type', 'image/jpeg')
+
+        return JSONResponse({
+            "success": True,
+            "url": result["url"],
+            "base64": f"data:{content_type};base64,{generated_base64}"
+        })
 
     except Exception as e:
         logger.error(f"Error processing image: {str(e)}")
@@ -209,20 +247,25 @@ async def img2img(
         logger.info("Starting img2img processing...")
         logger.info(f"Received image: {image.filename}, content_type: {image.content_type}")
         logger.info(f"Prompt: {prompt}")
+        
+        api_key = os.getenv('GETIMG_API_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="API key not configured")
+
         contents = await image.read()
         img = Image.open(io.BytesIO(contents))
         logger.info(f"Original image size: {img.size}, mode: {img.mode}")
+        
         width, height = 512, 512
         img = ImageOps.fit(img, (width, height), method=Image.Resampling.LANCZOS)
         if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
             img = img.convert('RGB')
+        
         buffer = io.BytesIO()
         img.save(buffer, format="JPEG", quality=95)
         buffer.seek(0)
         base64_image = base64.b64encode(buffer.getvalue()).decode('utf-8')
-        api_key = os.getenv('GETIMG_API_KEY')
-        if not api_key:
-            raise HTTPException(status_code=500, detail="API key not configured")
+
         payload = {
             "model": "realvis-xl-v4",
             "prompt": prompt,
@@ -259,8 +302,19 @@ async def img2img(
         if "url" not in response_json:
             raise HTTPException(status_code=502, detail="Invalid response from image service")
 
-        logger.info("Successfully generated image")
-        return JSONResponse({"success": True, "url": response_json["url"]})
+        generated_image_response = requests.get(response_json["url"], timeout=30)
+        if generated_image_response.status_code != 200:
+            raise HTTPException(status_code=502, detail="Failed to fetch generated image")
+        
+        generated_base64 = base64.b64encode(generated_image_response.content).decode('utf-8')
+        content_type = generated_image_response.headers.get('content-type', 'image/jpeg')
+
+        logger.info("Successfully generated and processed image")
+        return JSONResponse({
+            "success": True,
+            "url": response_json["url"],
+            "base64": f"data:{content_type};base64,{generated_base64}"
+        })
 
     except HTTPException as he:
         raise he
@@ -310,12 +364,11 @@ async def analyze_image(request: Request):
             content={"error": f"Analysis failed: {str(e)}"}
         )
 
-# changes here
 # berttopic with representation model
 def initialize_topic_model():
     try:
         representation_model = BertOpenAI(
-            client=client,  
+            # client=client,  
             model="gpt-4o-mini",
             chat=True
         )
@@ -435,7 +488,7 @@ async def generate_words(request: Request):
             }
         )
 
-# community image
+# community image  
 @app.post("/api/community-image")
 async def generate_community_image(request: Request):
     try:
@@ -468,15 +521,13 @@ async def generate_community_image(request: Request):
             ],
             max_tokens=100
         )
-    
+        
         generated_prompt = response.choices[0].message.content.strip()
         print(f"Generated prompt: {generated_prompt}")
 
-        if image_path.startswith("http"):
-            response = requests.get(image_path)
-            if response.status_code != 200:
-                raise HTTPException(status_code=400, detail="Failed to fetch image from URL")
-            contents = response.content # should work here
+        if image_path:
+            with open(image_path, "rb") as img_file:
+                contents = img_file.read()
         elif base64_image:
             if "base64," in base64_image:
                 base64_image = base64_image.split("base64,")[1]
@@ -512,6 +563,7 @@ async def generate_community_image(request: Request):
     except Exception as e:
         print(f"Error in community image: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Community image generation failed: {str(e)}")
+    
     
 # impact
 CHARACTERS = {
@@ -642,7 +694,7 @@ async def categorize_responses(request: Request):
                 model="gpt-4o-mini",
                 messages=[
                     {
-                        "role": "system",   
+                        "role": "system",
                         "content": "Based on these key words, provide a concise 1-2 word category name. The category name should be broad enough to encompass similar responses."
                     },
                     {
@@ -721,20 +773,5 @@ def save_image_locally(image_data: bytes, session_id: str = None) -> str:
         f.write(image_data)
     
     return str(file_path)
-
-@app.get("/proxy-image")
-async def proxy_image(url: str):
-    try:
-        response = requests.get(url)
-        return Response(
-            content=response.content,
-            media_type=response.headers.get('content-type', 'image/jpeg'),
-            headers={
-                'Cache-Control': 'public, max-age=31536000',
-                'Access-Control-Allow-Origin': '*'
-            }
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 # uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4 --reload
