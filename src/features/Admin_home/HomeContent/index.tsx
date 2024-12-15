@@ -168,7 +168,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
 
       const payload = {
         prompts,
-        image: "base64",
+        image: engagementData?.imageUrl,
         image_path: ""
       }
   
