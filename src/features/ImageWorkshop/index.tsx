@@ -175,7 +175,10 @@ const ImageWorkshop: React.FC = () => {
             originalImageBlob = await fetch(images[currentImageIndex].src).then(r => r.blob());
         } else {
             const originalImageBase64 = await convertToBase64(images[currentImageIndex].src);
+            console.log('success')
+            console.log('Original Image Base64:', originalImageBase64)
             originalImageBlob = await fetch(originalImageBase64).then(r => r.blob());
+            console.log('turned to blob')
         }
     } catch (error) {
         console.error('Error preparing image:', error)
