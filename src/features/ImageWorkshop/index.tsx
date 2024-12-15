@@ -212,7 +212,7 @@ const ImageWorkshop: React.FC = () => {
     if (!maskedImageData && promptText) {
       try {
         console.log('Using img2img endpoint')
-        console.log('images', images)
+        // console.log('images', images)
         const improvedPrompt = await improveCaption(promptText, "img2img");
         setUpscaledPrompt(improvedPrompt)
         console.log('Original Image Response')
@@ -231,6 +231,7 @@ const ImageWorkshop: React.FC = () => {
         const data = await response.json()
 
         if (!response.ok) {
+          console.log('images', images)
           throw new Error(data.error || 'Failed to generate image')
         }
 
