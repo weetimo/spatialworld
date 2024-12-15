@@ -150,7 +150,7 @@ const ImageWorkshop: React.FC = () => {
   // Handle passing the final generated image as a file
   const convertToBase64 = async (url: string): Promise<string> => {
     console.log('Converting to base64:', url)
-    const response = await fetch(url, { mode: 'no-cors', headers: { 'Access-Control-Allow-Origin': '*' } })
+    const response = await fetch(url)
     const blob = await response.blob()
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -211,7 +211,7 @@ const ImageWorkshop: React.FC = () => {
         const improvedPrompt = await improveCaption(promptText, "img2img");
         setUpscaledPrompt(improvedPrompt)
         console.log('Original Image Response')
-        const originalImageResponse = await fetch(images[currentImageIndex].src, { mode: 'no-cors', headers: { 'Access-Control-Allow-Origin': '*' } })
+        const originalImageResponse = await fetch(images[currentImageIndex].src)
         const originalImageBlob = await originalImageResponse.blob()
         console.log('Original Image Response Blob')
         const formData = new FormData()
