@@ -314,7 +314,7 @@ async def analyze_image(request: Request):
 def initialize_topic_model():
     try:
         representation_model = BertOpenAI(
-            client=client,  
+            # client=client,  
             model="gpt-4o-mini",
             chat=True
         )
@@ -467,13 +467,15 @@ async def generate_community_image(request: Request):
             ],
             max_tokens=100
         )
-        
+    
         generated_prompt = response.choices[0].message.content.strip()
         print(f"Generated prompt: {generated_prompt}")
 
-        if image_path:
-            with open(image_path, "rb") as img_file:
-                contents = img_file.read()
+        if image_path.startswith("http"):
+            response = requests.get(image_path)
+            if response.status_code != 200:
+                raise HTTPException(status_code=400, detail="Failed to fetch image from URL")
+            contents = response.content # should work here
         elif base64_image:
             if "base64," in base64_image:
                 base64_image = base64_image.split("base64,")[1]
@@ -639,7 +641,7 @@ async def categorize_responses(request: Request):
                 model="gpt-4o-mini",
                 messages=[
                     {
-                        "role": "system",
+                        "role": "system",   
                         "content": "Based on these key words, provide a concise 1-2 word category name. The category name should be broad enough to encompass similar responses."
                     },
                     {
