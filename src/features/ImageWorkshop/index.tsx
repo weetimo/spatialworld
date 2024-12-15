@@ -150,15 +150,7 @@ const ImageWorkshop: React.FC = () => {
   // Handle passing the final generated image as a file
   const convertToBase64 = async (url: string): Promise<string> => {
     console.log('Converting to base64:', url)
-    const response = await fetch(url,
-      {
-          headers:
-          {
-              "Access-Control-Allow-Origin":"*",
-              "Access-Control-Allow-Methods": "HEAD, GET, POST, PUT, PATCH, DELETE",
-              "Access-Control-Allow-Headers": "Origin, Content-Type, X-Auth-Token"
-          }
-      })
+    const response = await fetch(url, { mode: 'no-cors', headers: { 'Access-Control-Allow-Origin': '*' } })
     const blob = await response.blob()
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -219,15 +211,7 @@ const ImageWorkshop: React.FC = () => {
         const improvedPrompt = await improveCaption(promptText, "img2img");
         setUpscaledPrompt(improvedPrompt)
         console.log('Original Image Response')
-        const originalImageResponse = await fetch(images[currentImageIndex].src,
-          {
-              headers:
-              {
-                  "Access-Control-Allow-Origin":"*",
-                  "Access-Control-Allow-Methods": "HEAD, GET, POST, PUT, PATCH, DELETE",
-                  "Access-Control-Allow-Headers": "Origin, Content-Type, X-Auth-Token"
-              }
-          })
+        const originalImageResponse = await fetch(images[currentImageIndex].src, { mode: 'no-cors', headers: { 'Access-Control-Allow-Origin': '*' } })
         const originalImageBlob = await originalImageResponse.blob()
         console.log('Original Image Response Blob')
         const formData = new FormData()
