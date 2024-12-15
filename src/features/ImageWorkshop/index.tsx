@@ -212,6 +212,7 @@ const ImageWorkshop: React.FC = () => {
     if (!maskedImageData && promptText) {
       try {
         console.log('Using img2img endpoint')
+        console.log('images', images)
         const improvedPrompt = await improveCaption(promptText, "img2img");
         setUpscaledPrompt(improvedPrompt)
         console.log('Original Image Response')
@@ -244,7 +245,7 @@ const ImageWorkshop: React.FC = () => {
           setFinalImage({ src: base64Image })
           setImages((prevImages) => [...prevImages, newImage])
           setCurrentImageIndex(newIndex)
-          setGeneratedImage(data.url)
+          setGeneratedImage(proxyImageUrl(data.url))
           setIsGeneratedModalOpen(true)
           console.log('Getting character impact...')
           callImpactAPI(data.url)
