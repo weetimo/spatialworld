@@ -42,6 +42,7 @@ const ImageWorkshop: React.FC = () => {
   const stableReadData = useCallback(readData, [])
 
   const proxyImageUrl = (url: string) => {
+    console.log('reached proxy function')
     return `${getApiUrl('proxy-image')}?url=${encodeURIComponent(url)}`
   }
 
