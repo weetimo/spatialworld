@@ -146,10 +146,17 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
   }, [engagementId, stableReadData])
 
   const generateHeatMap = () => {
+    const coordinates = generations.flatMap((generation) => generation?.coordinates || [])
+    const coordinatesArr = generations.flatMap(generation => 
+      Object.values(generation?.coordinates || {}).flat()
+    )
+
+    console.log({ coordinatesArr, coordinates })
+
     try {
       // Generate heat map data URL
       const heatmapDataUrl = generateHeatMapData(
-        highlightCoordinates,
+        coordinates,
         800, // width of your image
         600 // height of your image
       )
