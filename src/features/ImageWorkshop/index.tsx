@@ -247,7 +247,7 @@ const ImageWorkshop: React.FC = () => {
           console.log('Getting character impact...')
           callImpactAPI(data.url)
 
-          // vision
+          // vision. I think this is whats causing the CORS error
           try {
             const analysisResponse = await fetch(getApiUrl('api/analyze-image'), {
               method: 'POST',
