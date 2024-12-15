@@ -44,9 +44,9 @@ const ImageWorkshop: React.FC = () => {
   const proxyImageUrl = (url: string) => {
     console.log('reached proxy function')
     console.log('url:', url)
-    
-    if (url.includes('cloudflarestorage.com')) {
-      return `${getApiUrl('proxy-image')}?url=${encodeURIComponent(url)}`
+
+    if (!url.includes(getApiUrl('proxy-image'))) {
+      return `${getApiUrl('proxy-image')}?url=${encodeURIComponent(url)}`;
     }
     return url
   }
