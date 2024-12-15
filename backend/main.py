@@ -33,14 +33,6 @@ app.add_middleware(
     expose_headers=["*"]
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["https://weetimo.github.io"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 client = OpenAI(api_key="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")
 
 topic_model = BERTopic()
@@ -176,7 +168,7 @@ async def edit_image(
             json={
                 "model": "realistic-vision-v5-1-inpainting",
                 "prompt": prompt,
-                "image": base64_image,#
+                "image": base64_image,
                 "mask_image": base64_mask,
                 "width": width,
                 "height": height,
@@ -192,11 +184,24 @@ async def edit_image(
             raise HTTPException(status_code=response.status_code, detail="Image generation failed")
             
         result = response.json()
-        return JSONResponse({"success": True, "url": result["url"]})
+        
+        # Download the image from getimg.ai
+        img_response = requests.get(result["url"])
+        if img_response.status_code != 200:
+            raise HTTPException(status_code=img_response.status_code, detail="Failed to download generated image")
+        
+        # Save the image locally and get the path
+        session_id = str(uuid.uuid4())
+        saved_path = await save_image_locally(img_response.content, session_id)
+        
+        # Return a URL pointing to our local endpoint
+        local_url = f"/api/images/{session_id}"
+        return JSONResponse({"success": True, "url": local_url})
 
     except Exception as e:
         logger.error(f"Error processing image: {str(e)}")
         raise HTTPException(status_code=500, detail="Image processing failed.")
+
 
 # image to image
 @app.post("/api/img2img")
@@ -721,6 +726,32 @@ def save_image_locally(image_data: bytes, session_id: str = None) -> str:
         f.write(image_data)
     
     return str(file_path)
+
+@app.get("/api/images/{session_id}")
+async def get_image(session_id: str):
+    try:
+        # Get today's date for the directory structure
+        today = datetime.now().strftime("%Y-%m-%d")
+        image_dir = os.path.join(os.path.expanduser("~"), "spatialworld_data", "images", today)
+        image_path = os.path.join(image_dir, f"{session_id}.png")
+        
+        if not os.path.exists(image_path):
+            raise HTTPException(status_code=404, detail="Image not found")
+            
+        with open(image_path, "rb") as f:
+            image_data = f.read()
+            
+        return Response(
+            content=image_data,
+            media_type="image/png",
+            headers={
+                'Cache-Control': 'public, max-age=31536000',
+                'Access-Control-Allow-Origin': '*'
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error serving image: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to serve image")
 
 @app.get("/proxy-image")
 async def proxy_image(url: str):
