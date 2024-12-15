@@ -284,7 +284,8 @@ const ImageWorkshop: React.FC = () => {
         ).then((r) => r.blob())
         formData.append('mask', maskBlob, 'mask.png')
 
-        const originalImageResponse = await fetch(images[currentImageIndex].src)
+        // const originalImageResponse = await fetch(images[currentImageIndex].src)
+        const originalImageResponse = await fetch(proxyImageUrl(images[currentImageIndex].src));
         const originalImageBlob = await originalImageResponse.blob()
         console.log('Original image size:', originalImageBlob.size, 'bytes')
         formData.append('image', originalImageBlob, 'original.png')
