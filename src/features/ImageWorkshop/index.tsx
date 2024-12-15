@@ -155,6 +155,8 @@ const ImageWorkshop: React.FC = () => {
         if (!data.success || !data.base64) {
             throw new Error('Invalid response from proxy server');
         }
+
+        console.log({ data })
         
         return data.base64;
     } catch (error) {
