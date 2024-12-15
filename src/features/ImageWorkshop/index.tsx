@@ -53,7 +53,7 @@ const ImageWorkshop: React.FC = () => {
         setEngagementData(data);
         if (data?.imageUrl) {
           setImages([{ 
-            src: data.imageUrl, 
+            src: proxyImageUrl(data.imageUrl), 
             tags: [data?.imageCaption] 
           }]);
         }
@@ -234,7 +234,7 @@ const ImageWorkshop: React.FC = () => {
 
         if (data.url) {
           console.log('Generated image URL:', data.url)
-          const newImage: Image = { src: proxyImageUrl(data.url), tags: ['Generated'] }
+          const newImage: Image = { src: data.url, tags: ['Generated'] }
           const newIndex = images.length
           // convert to base64 image
           console.log('Converting to base64...')
@@ -243,7 +243,7 @@ const ImageWorkshop: React.FC = () => {
           setFinalImage({ src: base64Image })
           setImages((prevImages) => [...prevImages, newImage])
           setCurrentImageIndex(newIndex)
-          setGeneratedImage(proxyImageUrl(data.url))
+          setGeneratedImage(data.url)
           setIsGeneratedModalOpen(true)
           console.log('Getting character impact...')
           callImpactAPI(data.url)
@@ -315,7 +315,7 @@ const ImageWorkshop: React.FC = () => {
         console.log('API call successful!', data)
         setIsImageEdited(false)
         setMaskedImageData(null)
-        const newImage: Image = { src: proxyImageUrl(data.url), tags: ['Generated'] }
+        const newImage: Image = { src: data.url, tags: ['Generated'] }
         const newIndex = images.length
         setImages((prevImages) => [...prevImages, newImage])
         setCurrentImageIndex(newIndex)
@@ -323,7 +323,7 @@ const ImageWorkshop: React.FC = () => {
 
         if (data.url) {
           console.log('Generated image URL:', data.url)
-          setGeneratedImage(proxyImageUrl(data.url))
+          setGeneratedImage(data.url)
           setIsGeneratedModalOpen(true)
           await callImpactAPI(data.url)
           const base64Image = await convertToBase64(data.url)
