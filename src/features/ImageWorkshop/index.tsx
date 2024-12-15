@@ -211,7 +211,15 @@ const ImageWorkshop: React.FC = () => {
         const improvedPrompt = await improveCaption(promptText, "img2img");
         setUpscaledPrompt(improvedPrompt)
         console.log('Original Image Response')
-        const originalImageResponse = await fetch(images[currentImageIndex].src)
+        const originalImageResponse = await fetch(images[currentImageIndex].src,
+          {
+              headers:
+              {
+                  "Access-Control-Allow-Origin":"*",
+                  "Access-Control-Allow-Methods": "HEAD, GET, POST, PUT, PATCH, DELETE",
+                  "Access-Control-Allow-Headers": "Origin, Content-Type, X-Auth-Token"
+              }
+          })
         const originalImageBlob = await originalImageResponse.blob()
         console.log('Original Image Response Blob')
         const formData = new FormData()
