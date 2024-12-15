@@ -42,8 +42,11 @@ const ImageWorkshop: React.FC = () => {
   const stableReadData = useCallback(readData, [])
 
   const proxyImageUrl = (url: string) => {
-    // If the URL is from Cloudflare R2, proxy it
-    if (url.includes('cloudflarestorage.com')) {
+    // Proxy URLs from Cloudflare R2, GetImg.ai, or other problematic sources
+    if (url.includes('cloudflarestorage.com') || 
+        url.includes('cloudflarestore') || 
+        url.includes('getimg') ||
+        url.includes('api-images-getimg')) {
       return `${getApiUrl()}/proxy-image?url=${encodeURIComponent(url)}`;
     }
     return url;
