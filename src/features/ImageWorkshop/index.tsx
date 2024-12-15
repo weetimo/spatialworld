@@ -239,7 +239,7 @@ const ImageWorkshop: React.FC = () => {
           setFinalImage({ src: base64Image })
           setImages((prevImages) => [...prevImages, newImage])
           setCurrentImageIndex(newIndex)
-          setGeneratedImage(data.url)
+          setGeneratedImage(proxyImageUrl(data.url))
           setIsGeneratedModalOpen(true)
           console.log('Getting character impact...')
           callImpactAPI(data.url)
