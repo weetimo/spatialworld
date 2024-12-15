@@ -42,12 +42,8 @@ const ImageWorkshop: React.FC = () => {
   const stableReadData = useCallback(readData, [])
 
   const proxyImageUrl = (url: string) => {
-    // If the URL is from Cloudflare R2, proxy it
-    if (url.includes('cloudflarestorage.com')) {
-      return `${getApiUrl('proxy-image')}?url=${encodeURIComponent(url)}`;
-    }
-    return url;
-  };
+    return `${getApiUrl('proxy-image')}?url=${encodeURIComponent(url)}`
+  }
 
   useEffect(() => {
     const fetchEngagement = async () => {
