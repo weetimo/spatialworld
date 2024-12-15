@@ -154,7 +154,7 @@ const ImageWorkshop: React.FC = () => {
   // Event Handlers
   // Handle passing the final generated image as a file
   const convertToBase64 = async (url: string): Promise<string> => {
-    const response = await fetch(url)
+    const response = await fetch(proxyImageUrl(url))
     const blob = await response.blob()
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
