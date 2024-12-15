@@ -45,7 +45,7 @@ const ImageWorkshop: React.FC = () => {
     console.log('reached proxy function')
     console.log('url:', url)
 
-    if (!url.includes(getApiUrl('proxy-image'))) {
+    if (url.includes('cloudflarestorage.com')) {
       return `${getApiUrl('proxy-image')}?url=${encodeURIComponent(url)}`;
     }
     return url
@@ -103,16 +103,6 @@ const ImageWorkshop: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState(0)
   const [impactLoading, setImpactLoading] = useState(false)
   const [allCoordinates, setAllCoordinates] = useState([])
-  // Helper Functions
-  // Function to preload an image
-  const preloadImage = (url: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image()
-      img.src = url
-      img.onload = () => resolve(url)
-      img.onerror = reject
-    })
-  }
 
   // Function to improve caption via API call
   const improveCaption = async (input: string, mode: string): Promise<string> => {
@@ -221,7 +211,7 @@ const ImageWorkshop: React.FC = () => {
         const improvedPrompt = await improveCaption(promptText, "img2img");
         setUpscaledPrompt(improvedPrompt)
         console.log('Original Image Response')
-        const originalImageResponse = await fetch(proxyImageUrl(images[currentImageIndex].src))
+        const originalImageResponse = await fetch(images[currentImageIndex].src)
         const originalImageBlob = await originalImageResponse.blob()
         console.log('Original Image Response Blob')
         const formData = new FormData()
@@ -242,7 +232,7 @@ const ImageWorkshop: React.FC = () => {
 
         if (data.url) {
           console.log('Generated image URL:', data.url)
-          const newImage: Image = { src: data.url, tags: ['Generated'] }
+          const newImage: Image = { src: proxyImageUrl(data.url), tags: ['Generated'] }
           const newIndex = images.length
           // convert to base64 image
           console.log('Converting to base64...')
@@ -251,7 +241,7 @@ const ImageWorkshop: React.FC = () => {
           setFinalImage({ src: base64Image })
           setImages((prevImages) => [...prevImages, newImage])
           setCurrentImageIndex(newIndex)
-          setGeneratedImage(data.url)
+          setGeneratedImage(proxyImageUrl(data.url))
           setIsGeneratedModalOpen(true)
           console.log('Getting character impact...')
           callImpactAPI(data.url)
