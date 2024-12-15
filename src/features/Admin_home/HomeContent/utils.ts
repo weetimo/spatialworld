@@ -199,7 +199,7 @@ export const generateHeatMapData = (
   ctx.clearRect(0, 0, width, height);
 
   coordinates.forEach(point => {
-    const radius = 30; // You can adjust this value
+    const radius = 20; // You can adjust this value
     const gradient = ctx.createRadialGradient(
       point.x, point.y, 0,
       point.x, point.y, radius
