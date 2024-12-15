@@ -213,7 +213,7 @@ const ImageWorkshop: React.FC = () => {
         console.log('Using img2img endpoint')
         const improvedPrompt = await improveCaption(promptText, "img2img");
         setUpscaledPrompt(improvedPrompt)
-        const originalImageResponse = await fetch(images[currentImageIndex].src)
+        const originalImageResponse = await fetch(proxyImageUrl(images[currentImageIndex].src))
         const originalImageBlob = await originalImageResponse.blob()
         const formData = new FormData()
         console.log('Upscaled prompt:', improvedPrompt)
