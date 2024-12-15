@@ -314,7 +314,7 @@ async def analyze_image(request: Request):
 def initialize_topic_model():
     try:
         representation_model = BertOpenAI(
-            # client=client,  
+            client=client,  
             model="gpt-4o-mini",
             chat=True
         )
