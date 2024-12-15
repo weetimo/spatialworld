@@ -43,7 +43,12 @@ const ImageWorkshop: React.FC = () => {
 
   const proxyImageUrl = (url: string) => {
     console.log('reached proxy function')
-    return `${getApiUrl('proxy-image')}?url=${encodeURIComponent(url)}`
+    console.log('url:', url)
+    
+    if (url.includes('cloudflarestorage.com')) {
+      return `${getApiUrl('proxy-image')}?url=${encodeURIComponent(url)}`
+    }
+    return url
   }
 
   useEffect(() => {
@@ -216,7 +221,7 @@ const ImageWorkshop: React.FC = () => {
         const improvedPrompt = await improveCaption(promptText, "img2img");
         setUpscaledPrompt(improvedPrompt)
         console.log('Original Image Response')
-        const originalImageResponse = await fetch(images[currentImageIndex].src)
+        const originalImageResponse = await fetch(proxyImageUrl(images[currentImageIndex].src))
         const originalImageBlob = await originalImageResponse.blob()
         console.log('Original Image Response Blob')
         const formData = new FormData()
