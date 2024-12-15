@@ -168,8 +168,8 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
 
       const payload = {
         prompts,
-        image: engagementData?.imageUrl,
-        image_path: ""
+        image: "",
+        image_path: engagementData?.imageUrl
       }
   
       const response = await fetch(getApiUrl('api/community-image'), {
