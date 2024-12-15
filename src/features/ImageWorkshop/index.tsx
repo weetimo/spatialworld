@@ -235,7 +235,7 @@ const ImageWorkshop: React.FC = () => {
 
         if (data.url) {
           console.log('Generated image URL:', data.url)
-          const newImage: Image = { src: data.url, tags: ['Generated'] }
+          const newImage: Image = { src: proxyImageUrl(data.url), tags: ['Generated'] }
           const newIndex = images.length
           // convert to base64 image
           const base64Image = await convertToBase64(data.url)
