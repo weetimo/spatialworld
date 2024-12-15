@@ -309,8 +309,6 @@ const ImageWorkshop: React.FC = () => {
 
         const data = await response.json()
         console.log('API call successful!', data)
-        const preloadedImageUrl = await preloadImage(data.url)
-
         setIsImageEdited(false)
         setMaskedImageData(null)
         const newImage: Image = { src: proxyImageUrl(data.url), tags: ['Generated'] }
@@ -321,12 +319,9 @@ const ImageWorkshop: React.FC = () => {
 
         if (data.url) {
           console.log('Generated image URL:', data.url)
-          setGeneratedImage(data.url)
+          setGeneratedImage(proxyImageUrl(data.url))
           setIsGeneratedModalOpen(true)
           await callImpactAPI(data.url)
-          const newImage: Image = { src: proxyImageUrl(data.url), tags: ['Generated'] }
-          const newIndex = images.length
-          // convert to base64 image
           const base64Image = await convertToBase64(data.url)
           setFinalImage({ src: base64Image })
 
