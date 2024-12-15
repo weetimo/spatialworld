@@ -182,26 +182,15 @@ export const word_cloud = (generations: Generation[]): WordCloudData[] => {
   }));
 };
 
-// function that takes in highlighted coordinates, and output heatmap data
 export const generateHeatMapData = (
-  coordinates: Array<{
-    userId: string;
-    coordinates: {
-      x1: number;
-      y1: number;
-      x2: number;
-      y2: number;
-    };
-  }>,
+  coordinates: Array<{ x: number; y: number }>,
   width: number,
   height: number
 ): string => {
-  // Create an off-screen canvas
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
-
   if (!ctx) {
     throw new Error('Could not get canvas context');
   }
@@ -209,19 +198,11 @@ export const generateHeatMapData = (
   // Clear canvas
   ctx.clearRect(0, 0, width, height);
 
-  // Draw heat map
-  coordinates.forEach(highlight => {
-    const centerX = (highlight.coordinates.x1 + highlight.coordinates.x2) / 2;
-    const centerY = (highlight.coordinates.y1 + highlight.coordinates.y2) / 2;
-
-    const highlightWidth = Math.abs(highlight.coordinates.x2 - highlight.coordinates.x1);
-    const highlightHeight = Math.abs(highlight.coordinates.y2 - highlight.coordinates.y1);
-    const size = Math.sqrt(highlightWidth * highlightHeight);
+  coordinates.forEach(point => {
     const radius = 30; // You can adjust this value
-
     const gradient = ctx.createRadialGradient(
-      centerX, centerY, 0,
-      centerX, centerY, radius + (size / 4)
+      point.x, point.y, 0,
+      point.x, point.y, radius
     );
 
     gradient.addColorStop(0, 'rgba(255, 0, 0, 0.2)');
@@ -229,14 +210,13 @@ export const generateHeatMapData = (
 
     ctx.fillStyle = gradient;
     ctx.beginPath();
-    ctx.arc(centerX, centerY, radius + (size / 4), 0, Math.PI * 2);
+    ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
     ctx.fill();
   });
 
   // Apply color transformation
   const imageData = ctx.getImageData(0, 0, width, height);
   const data = imageData.data;
-
   for (let i = 0; i < data.length; i += 4) {
     const alpha = data[i + 3];
     if (alpha > 0) {
@@ -246,9 +226,7 @@ export const generateHeatMapData = (
       data[i + 3] = Math.min(255, alpha * 2);
     }
   }
-
   ctx.putImageData(imageData, 0, 0);
 
-  // Convert canvas to data URL
   return canvas.toDataURL('image/png');
 };

@@ -202,59 +202,33 @@ export const regionData = [
   ]
 
 
+
   export const highlightCoordinates = [
-    // User highlighting a small region in top-left
-    {
-      userId: "user_001",
-      coordinates: { x1: 100, y1: 150, x2: 200, y2: 250 }
-      // coordinates: [{ x: 100, y: 100 }, { x: 200, y: 100 }, { x: 200, y: 200 }, { x: 100, y: 200 }]
-    },
-    // User highlighting a larger central region
-    {
-      userId: "user_002",
-      coordinates: { x1: 300, y1: 200, x2: 600, y2: 450 }
-    },
-    // User highlighting multiple smaller regions
-    {
-      userId: "user_003",
-      coordinates: { x1: 450, y1: 100, x2: 550, y2: 200 }
-    },
-    {
-      userId: "user_003",
-      coordinates: { x1: 600, y1: 300, x2: 700, y2: 400 }
-    },
-    // User highlighting a region in bottom-right
-    {
-      userId: "user_004",
-      coordinates: { x1: 800, y1: 500, x2: 900, y2: 600 }
-    },
-    // User highlighting overlapping region with user_002
-    {
-      userId: "user_005",
-      coordinates: { x1: 350, y1: 250, x2: 550, y2: 400 }
-    },
-    // User highlighting a thin horizontal region
-    {
-      userId: "user_006",
-      coordinates: { x1: 200, y1: 350, x2: 800, y2: 380 }
-    },
-    // User highlighting a thin vertical region
-    {
-      userId: "user_007",
-      coordinates: { x1: 400, y1: 100, x2: 430, y2: 500 }
-    },
-    // User highlighting near edges
-    {
-      userId: "user_008",
-      coordinates: { x1: 0, y1: 0, x2: 100, y2: 100 }
-    },
-    {
-      userId: "user_009",
-      coordinates: { x1: 900, y1: 550, x2: 1000, y2: 600 }
-    },
-    // User highlighting very small region
-    {
-      userId: "user_010",
-      coordinates: { x1: 275, y1: 275, x2: 325, y2: 325 }
-    }
+    { x: 500, y: 300 },
+    { x: 510, y: 305 },
+    { x: 490, y: 295 },
+    { x: 495, y: 310 },
+    { x: 505, y: 290 },
+    { x: 485, y: 300 },
+    { x: 515, y: 300 },
+    { x: 500, y: 285 },
+    { x: 500, y: 315 },
+    { x: 700, y: 200 },
+    { x: 720, y: 210 },
+    { x: 710, y: 190 },
+    { x: 730, y: 200 },
+    { x: 705, y: 215 },
+    { x: 300, y: 400 },
+    { x: 320, y: 410 },
+    { x: 310, y: 390 },
+    { x: 290, y: 405 },
+    { x: 305, y: 395 },
+    { x: 200, y: 200 },
+    { x: 800, y: 400 },
+    { x: 600, y: 500 },
+    { x: 400, y: 100 },
+    { x: 420, y: 120 },
+    { x: 440, y: 140 },
+    { x: 460, y: 160 },
+    { x: 480, y: 180 }
   ];
