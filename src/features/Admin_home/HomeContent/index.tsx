@@ -42,6 +42,7 @@ import {
 import { highlightCoordinates } from './data'
 import { useDatabase } from '../../../hooks'
 import { Generation, User } from '../../../types'
+import { getApiUrl } from '../../../config/api'
 
 const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
   const { readData } = useDatabase()
@@ -171,7 +172,7 @@ const HomeContent: React.FC<{ engagementId: string }> = ({ engagementId }) => {
         image_path: ""
       }
   
-      const response = await fetch('/api/community-image', {
+      const response = await fetch(getApiUrl('api/community-image'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

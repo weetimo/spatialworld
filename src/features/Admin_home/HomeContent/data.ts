@@ -207,6 +207,7 @@ export const regionData = [
     {
       userId: "user_001",
       coordinates: { x1: 100, y1: 150, x2: 200, y2: 250 }
+      // coordinates: [{ x: 100, y: 100 }, { x: 200, y: 100 }, { x: 200, y: 200 }, { x: 100, y: 200 }]
     },
     // User highlighting a larger central region
     {

@@ -1,3 +1,5 @@
+import { getApiUrl } from '../../../config/api'
+
 const aggregateMultipleChoice = (users: any[], questions: any[]): any[] => {
   const multipleChoiceData: any[] = []
 
@@ -53,7 +55,7 @@ const aggregateMultipleChoice = (users: any[], questions: any[]): any[] => {
 const apiProcessResponses = async (responses: string[]): Promise<any[]> => {
   const apiUrl = "/api/categorize-responses" 
 
-  const response = await fetch(apiUrl, {
+  const response = await fetch(getApiUrl(apiUrl), {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
