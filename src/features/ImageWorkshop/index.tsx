@@ -53,7 +53,7 @@ const ImageWorkshop: React.FC = () => {
         setEngagementData(data);
         if (data?.imageUrl) {
           setImages([{ 
-            src: proxyImageUrl(data.imageUrl), 
+            src: data.imageUrl, 
             tags: [data?.imageCaption] 
           }]);
         }
@@ -154,6 +154,7 @@ const ImageWorkshop: React.FC = () => {
   // Event Handlers
   // Handle passing the final generated image as a file
   const convertToBase64 = async (url: string): Promise<string> => {
+    console.log('Converting to base64:', url)
     const response = await fetch(proxyImageUrl(url))
     const blob = await response.blob()
     return new Promise((resolve, reject) => {
