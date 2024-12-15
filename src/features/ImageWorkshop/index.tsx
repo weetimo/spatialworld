@@ -315,7 +315,7 @@ const ImageWorkshop: React.FC = () => {
 
         setIsImageEdited(false)
         setMaskedImageData(null)
-        const newImage: Image = { src: data.url, tags: ['Generated'] }
+        const newImage: Image = { src: proxyImageUrl(data.url), tags: ['Generated'] }
         const newIndex = images.length
         setImages((prevImages) => [...prevImages, newImage])
         setCurrentImageIndex(newIndex)
@@ -326,7 +326,7 @@ const ImageWorkshop: React.FC = () => {
           setGeneratedImage(data.url)
           setIsGeneratedModalOpen(true)
           await callImpactAPI(data.url)
-          const newImage: Image = { src: data.url, tags: ['Generated'] }
+          const newImage: Image = { src: proxyImageUrl(data.url), tags: ['Generated'] }
           const newIndex = images.length
           // convert to base64 image
           const base64Image = await convertToBase64(data.url)
