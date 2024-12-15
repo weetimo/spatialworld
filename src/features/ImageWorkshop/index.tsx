@@ -150,7 +150,15 @@ const ImageWorkshop: React.FC = () => {
   // Handle passing the final generated image as a file
   const convertToBase64 = async (url: string): Promise<string> => {
     console.log('Converting to base64:', url)
-    const response = await fetch(proxyImageUrl(url))
+    const response = await fetch(url,
+      {
+          headers:
+          {
+              "Access-Control-Allow-Origin":"*",
+              "Access-Control-Allow-Methods": "HEAD, GET, POST, PUT, PATCH, DELETE",
+              "Access-Control-Allow-Headers": "Origin, Content-Type, X-Auth-Token"
+          }
+      })
     const blob = await response.blob()
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
